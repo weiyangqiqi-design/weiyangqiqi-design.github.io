@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>刘佶松·腾讯资深交互设计师</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- ============ 左侧固定黑底区域 ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__avatar">
+        <video
+          src="assets/avatar-video.mp4"
+          autoplay
+          muted
+          loop
+          playsinline
+          poster="assets/avatar.png"
+          aria-label="刘佶松"
+        ></video>
+      </div>
+
+      <!-- 竖排信息切图区(从上至下:ABOUT ME → 简介 → 工作/荣誉/教育经历) -->
+      <div class="side-blocks">
+        <img class="side-about-title" src="assets/side-about-title.png" alt="ABOUT ME" />
+        <!-- 名字块仍是切图(从 side-about-text-v2.png 裁出上半段);下半段简介改为实时文本 -->
+        <img class="side-name" src="assets/side-name.png" alt="刘佶松 / 腾讯D9交互设计 · Ai商业化交互设计" />
+        <!-- 简介正文:2026-10-10 第 49 项由切图改为实时文本(字号 = --side-fs)。
+             ★ 2026-10-12 第 52 项:由「<br> 硬断成 4 行」改为**一个自然段**,
+               按语义用 。/ ;/ , 断句,由浏览器按栏宽自动折行(见 css 的 .side-bio)。
+               「0-1」是整体,用 .side-nowrap 包住,避免被拦腰断成 "0-" / "1"。 -->
+        <p class="side-bio">目前独立负责搜狗输入法商业化交互。擅长<span class="side-nowrap">0-1</span>系统化设计；善于洞察增长&amp;变现机创新会点；对用户体验品质敏感，对创新体验保持好奇。</p>
+        <!-- 第 70 项:原「简介 → 工作经历」之间的横向分隔线(品牌紫渐隐)已按用户要求移除。
+             两段之间的留白改由 .side-work-title 的 margin-top 统一走板块距(2.15em)。 -->
+        <img class="side-work-title" src="assets/side-work-title.png" alt="工作经历" />
+        <!-- 工作经历正文 + 标签胶囊:原 side-work-body.png,改为实时文本 -->
+        <p class="side-work-text">腾讯10年 | 涉猎输入法、技术工具、浏览器、地图等C+B端商业化和工具交互</p>
+        <div class="side-tags">
+          <span class="side-tag">#AI应用场景挖掘</span>
+          <span class="side-tag">#AI商业化</span>
+          <span class="side-tag">#生态建设</span>
+          <span class="side-tag">#亿级活动</span>
+          <span class="side-tag">#专利创新</span>
+        </div>
+        <img class="side-honor-title" src="assets/side-honor-title.png" alt="个人荣誉" />
+        <!-- 荣誉 4 行:原 side-honor-body.png,改为实时文本。
+             ★ 2026-10-12 第 54 项:第 3 行文案精简为「23年 两次获用户体验设计部优秀个人」,
+               去掉 Q2、Q4 与 <br />,4 行全部单行不折行。 -->
+        <ul class="side-honor-list">
+          <li>25年 H1获优秀员工（五星）</li>
+          <li>24年 H1、H2 两次获腾讯可持续价值奖</li>
+          <li>23年 两次获用户体验设计部优秀个人</li>
+          <li>21年 H2获优秀员工（四星）</li>
+        </ul>
+        <img class="side-edu-title" src="assets/side-edu-title.png" alt="教育经历" />
+        <!-- 教育经历单行:原 side-edu-body.png,改为实时文本 -->
+        <p class="side-edu-text">湖南大学｜工业设计专业</p>
+
+        <!-- ===== 联系方式(第 69 项:方案 C「竖轴索引」)=====
+             ★ 从 .side-blocks **外面**移进来了(原来是 .sidebar 的直接子项)。
+               两个原因:
+               ① 字号:它是 .side-blocks 的后代后,直接吃同一个容器算出来的 --side-fs,
+                  与「湖南大学｜工业设计专业」**严格同值**。留在外面就得自己写 cqw,
+                  而 cqw 按容器内容盒算 —— .side-blocks 比 .sidebar 窄 4px(那条正文缩进),
+                  同一系数折算出来的字号会随栏宽漂 ±0.6%。
+               ② 间距:留在外面时到「教育经历」的距离 = margin-top + .side-blocks 的
+                  margin-bottom(4px) + .sidebar 的 gap(6px),凭空多 10px;移进来之后
+                  margin-top 就是全部,能和其他板块距(2.15em)精确对齐。
+             副作用:① .side-blocks 的 margin-bottom 4px 变成"到侧栏底部"的留白;
+                     ② .sidebar 的 gap 6px 不再作用于它(好,正是上面说的第 ② 条)。
+             ⚠️ 它是 <div> 不是 <p>,不受 .side-blocks :where(p, ul) 的 margin 归零影响;
+                内部间距全部由 .info-card--contact 自己的规则管。 -->
+        <div class="info-card info-card--contact">
+          <div class="info-card__row copyable" data-copy="北京市 | 海淀区" tabindex="0" role="button" aria-label="复制地址">
+            <span class="info-icon info-icon--location" aria-hidden="true">
+              <img src="data:image/png;base64,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" alt="" />
+            </span>
+            <span class="info-text">北京市 | 海淀区</span>
+            <span class="copy-tip">点击复制</span>
+          </div>
+
+          <div class="info-card__row copyable" data-copy="186 1276 6944" tabindex="0" role="button" aria-label="复制电话">
+            <span class="info-icon info-icon--phone" aria-hidden="true">
+              <img src="data:image/png;base64,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" alt="" />
+            </span>
+            <span class="info-text">186 1276 6944</span>
+            <span class="copy-tip">点击复制</span>
+          </div>
+
+          <div class="info-card__row copyable" data-copy="757853462@qq.com" tabindex="0" role="button" aria-label="复制邮箱">
+            <span class="info-icon info-icon--email" aria-hidden="true">
+              <img src="data:image/png;base64,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" alt="" />
+            </span>
+            <span class="info-text">757853462@qq.com</span>
+            <span class="copy-tip">点击复制</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ 右侧可滚动区域 ============ -->
+    <main class="content" id="content">
+      <!-- Tab 容器(用「页签.png」作为背景,选中态用「页签选中态.png」) -->
+      <nav class="tabs" aria-label="内容导航">
+        <div class="tabs__items">
+          <!-- 选中态的液态玻璃"水滴":独立元素,由 JS 定位,切换页签时会在 tab 之间平滑滑动 -->
+          <span class="tab-drop" aria-hidden="true"><span class="tab-drop__body"></span></span>
+          <a href="#tl-career" class="tab active" data-target="tl-career">个人简介</a>
+          <a href="#tl-company" class="tab" data-target="tl-company">AI智能体应用</a>
+          <a href="#tl-revenue" class="tab" data-target="tl-revenue">0-1复杂系统</a>
+          <a href="#tl-views" class="tab" data-target="tl-views">数据驱动增长</a>
+          <a href="#tl-patents" class="tab" data-target="tl-patents">我的荣誉</a>
+        </div>
+      </nav>
+
+      <div class="content__scroll">
+        <!-- ============================================================
+             全局两列时间轴布局:
+             左列 = 数据标签(右对齐) + 竖线
+             右列 = 详情模块(纵向分类,横向可滑动)
+             ============================================================ -->
+        <div class="tl-layout" id="section-intro">
+
+          <!-- ===== Row 1: 10年鹅厂经历 ===== -->
+          <div class="tl-row" id="tl-career">
+            <div class="tl-label">
+              <img src="assets/data-10-career-v2.png" alt="10 年鹅厂经历" />
+            </div>
+            <div class="tl-line" aria-hidden="true"></div>
+            <div class="tl-content">
+              <!-- 横向可滑动:公司卡片(Row1) → 分割线(Row2) → 年份时间轴(Row3) -->
+              <div class="module-scroll">
+                <div class="career-grid">
+                  <!-- Row 1: 公司卡片(置顶) -->
+                  <img class="cg-card" src="assets/career-card-d9-v5.png" alt="腾讯CSIG-D9 搜狗输入法 商业化交互设计" />
+                  <img class="cg-card" src="assets/career-card-d8-v5.png" alt="腾讯PCG-D8 PCG大数据中台 DE/DS工具交互设计" />
+                  <img class="cg-card" src="assets/career-card-d7-v5.png" alt="腾讯PCG-D7(并入QQ浏览器) 搜狗浏览器 PC/移动双端交互设计" />
+                  <img class="cg-card" src="assets/career-card-d6-v5.png" alt="腾讯CSIG-D6(并入腾讯地图) 搜狗地图 公共出行/综搜交互设计" />
+                  <!-- Row 2: 分割线(中间) + 时间节点(零尺寸锚点,由 ::after 垂出细引导线,逐个对齐列左缘) -->
+                  <div class="cg-divider" aria-hidden="true"></div>
+                  <span class="cg-node is-now" style="--dur: 4" aria-hidden="true"></span>
+                  <span class="cg-node" style="--dur: 1" aria-hidden="true"></span>
+                  <span class="cg-node" style="--dur: 3" aria-hidden="true"></span>
+                  <span class="cg-node" style="--dur: 2" aria-hidden="true"></span>
+                  <!-- Row 3: 年份标记(纯文本,挂在轴线下方,由节点引导线指向) -->
+                  <div class="cg-marker" style="--dur: 4">
+                    <b class="tl-mark__span">至今<i>→</i>22年</b>
+                    <span class="tl-mark__dur">4年</span>
+                  </div>
+                  <div class="cg-marker" style="--dur: 1">
+                    <b class="tl-mark__span">22年<i>→</i>21年</b>
+                    <span class="tl-mark__dur">1年</span>
+                  </div>
+                  <div class="cg-marker" style="--dur: 3">
+                    <b class="tl-mark__span">21年<i>→</i>18年</b>
+                    <span class="tl-mark__dur">3年</span>
+                  </div>
+                  <div class="cg-marker" style="--dur: 2">
+                    <b class="tl-mark__span">18年<i>→</i>16年</b>
+                    <span class="tl-mark__dur">2年</span>
+                  </div>
+                  <!-- 像素小人:沿轨道左右来回走,走到时间节点就跳起把上方卡片顶一下
+                       几何/帧号由 js/main.js 写内联样式,外观见 css/style.css 的 .tl-walker -->
+                  <div class="tl-walker" aria-hidden="true"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Row 2: 3 公司荣誉 (AI智能体应用) ===== -->
+          <div class="tl-row" id="tl-company">
+            <div class="tl-label">
+              <img src="assets/data-3-company-v2.png" alt="3 公司荣誉" />
+            </div>
+            <div class="tl-line" aria-hidden="true"></div>
+            <div class="tl-content">
+              <!-- 主标题:两段介绍,strong 内联加粗关键词 -->
+              <div class="module-title">
+                <p class="module-title__row">
+                  收获成绩：25年获得<strong>【BG产品突破奖·输入法AI突破奖】</strong>；24年H1和H2连续两次获得<strong>【腾讯可持续社会价值奖】</strong>
+                </p>
+                <p class="module-title__row">
+                  我的优势：具备敏锐的<strong>用户嗅觉</strong>，善于从用户行为和用户数据中<strong>洞察机会点</strong>，扭转颓势助力业务增长&amp;变现。
+                </p>
+              </div>
+
+              <!-- Group 1: AI 应用场景 / 商业模式 / AIGC工具 -->
+              <div class="module-group">
+                <!-- 组标题:原为左侧竖排切图(assets/group-title-ai-scene.png),已改为
+                     卡片组前的纯文本标题,样式与「装扮生态建设」(.mt-caption) 完全一致 -->
+                <p class="group-caption">AI应用场景挖掘</p>
+                <div class="module-group__tags">
+                  <span class="module-tag"># AI应用场景挖掘</span>
+                  <span class="module-tag"># AI商业模式探索</span>
+                  <span class="module-tag"># AIGC工具落地</span>
+                </div>
+                <div class="module-group__cards">
+                  <article class="module-card" data-modal="modal-cifa" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看词服务详情">
+                    <h3 class="module-card__title module-card__title--star">输入即搜索-AI搜索</h3>
+                    <div class="module-card__img module-card__img--spiral" aria-label="输入即搜索-AI搜索 展示卡片">
+                      <div class="card-spiral">
+                        <div class="card-spiral-track">
+                          <img class="card-item" src="assets/card-01.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-02.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-03.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-04.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-05.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-06.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-07.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-08.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-09.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-10.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-11.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-12.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-13.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-14.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-15.png" alt="" loading="lazy" />
+                        </div>
+                      </div>
+                    </div>
+                    <p class="module-card__desc">洞察"边输入边搜索"的隐性需求，用AI将搜索行为转化为表达辅助</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#腾讯可持续社会价值奖</span>
+                      <span class="module-card__tag">#pony点赞</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>流量广告</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>键盘端</span>
+                    </div>
+                  </article>
+
+                  <article class="module-card" data-modal="modal-ai" role="button" tabindex="0">
+                    <h3 class="module-card__title">AI陪伴</h3>
+                    <div class="module-card__img module-card__img--gif"><img src="assets/ai-companion.gif" alt="AI陪伴" /></div>
+                    <p class="module-card__desc">将输入法装扮资产引入AI陪伴场景，开辟情感化付费新生态</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#PC桌宠</span>
+                      <span class="module-card__tag">#AI对话</span>
+                      <span class="module-card__tag">#数字人</span>
+                      <span class="module-card__tag">#语音对话</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>内容付费</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>Windows端</span>
+                    </div>
+                  </article>
+
+                  <article class="module-card">
+                    <h3 class="module-card__title">AI生成皮肤+表情+壁纸头像</h3>
+                    <div class="module-card__img"><img src="" alt="AI生成皮肤+表情+壁纸头像" /></div>
+                    <p class="module-card__desc">以低门槛高上限的交互，让AI生成从"能用"到"想用"</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#AIGC</span>
+                      <span class="module-card__tag">#文生图</span>
+                      <span class="module-card__tag">#图生图</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>分享解锁</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+
+              <!-- Group 2: Agent 商业化 / 工作流 -->
+              <div class="module-group">
+                <!-- 组标题:原为切图 assets/group-title-agent.png,已改为文本 -->
+                <p class="group-caption">Agent商业化探索</p>
+                <div class="module-group__tags">
+                  <span class="module-tag"># Agent商业化探索</span>
+                  <span class="module-tag"># Agent工作流搭建</span>
+                </div>
+                <div class="module-group__cards">
+                  <article class="module-card" data-modal="modal-agent-dist" role="button" tabindex="0">
+                    <h3 class="module-card__title module-card__title--star">Agent服务找人</h3>
+                    <div class="module-card__img"><img src="assets/card-agent-dist.gif" alt="Word 中 Agent 插入流程演示" /></div>
+                    <p class="module-card__desc">让Agent在用户任务卡点处主动介入，开辟"需求即分发"的新场景</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#利用Agent分发APP</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>应用分发</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>Windows端</span>
+                    </div>
+                  </article>
+
+                  <article class="module-card">
+                    <h3 class="module-card__title">自动化生产皮肤Agent</h3>
+                    <div class="module-card__img"><img src="" alt="自动化生产皮肤Agent" /></div>
+                    <p class="module-card__desc">构建皮肤生产工作流、建立质量评估体系，驱动工作流从"能出图"到"出好图"</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#agent工作流</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>内容生成</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>后台工具</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+
+              <!-- Group 3: 元宝分发机会点挖掘 -->
+              <div class="module-group">
+                <!-- 组标题:原为切图 assets/group-title-yuanbao.png,已改为文本 -->
+                <p class="group-caption">元宝分发机会点挖掘</p>
+                <div class="module-group__tags">
+                  <span class="module-tag"># 元宝分发机会点挖掘</span>
+                </div>
+                <div class="module-group__cards">
+                  <article class="module-card">
+                    <h3 class="module-card__title module-card__title--star">元宝导流-创新分发</h3>
+                    <div class="module-card__img"><img src="" alt="元宝导流-创新分发" /></div>
+                    <p class="module-card__desc">拆解分发全链路关键触点，洞察更有需求的导流场景与创新承接形式</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#给元宝导流</span>
+                      <span class="module-card__tag">#给workbuddy导流</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>应用分发</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端、Windows端</span>
+                    </div>
+                  </article>
+
+                  <article class="module-card">
+                    <h3 class="module-card__title">元宝导流-皮肤带增</h3>
+                    <div class="module-card__img"><img src="" alt="元宝导流-皮肤带增" /></div>
+                    <p class="module-card__desc">以皮肤权益为核心钩子，构建输入法向元宝持续导流的长效转化闭环</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#激励任务</span>
+                      <span class="module-card__tag">#给元宝导流</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>激励任务</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端、Windows端</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Row 3: 3 亿营收 (0-1复杂系统) ===== -->
+          <div class="tl-row" id="tl-revenue">
+            <div class="tl-label">
+              <img src="assets/data-3-revenue-v2.png" alt="3 亿营收" />
+            </div>
+            <div class="tl-line" aria-hidden="true"></div>
+            <div class="tl-content">
+              <div class="module-title">
+                <p class="module-title__row">
+                  收获成绩：输入法23年至25年从0增长到<strong>3亿营收</strong>，作为唯一交互<strong>从0-1设计</strong>内容、广告生态助力输入法成功上岸。
+                </p>
+                <p class="module-title__row">
+                  我的优势：有<strong>产品sense</strong>，985理科生<strong>善长系统性&amp;结构化思维</strong>，主导10余次跨设备、跨场景、跨平台从0-1项目建设。
+                </p>
+              </div>
+
+              <!-- 「装扮生态建设」组:横向 3 张 -->
+              <div class="module-group">
+                <!-- 组标题:★ 2026-10-10 从卡片组下方的 <p class="mt-caption"> 移到这里 ——
+                     与前面几组(Group 1/2/3 的 .group-caption)完全同一套规范:
+                     同一个 class、同一个位置(卡片组开头)、同一套声明
+                     (css 里 .group-caption 与 .mt-caption 本就是共用的一处声明)。 -->
+                <p class="group-caption">装扮生态建设</p>
+                <div class="module-group__tags">
+                  <span class="module-tag module-tag--placeholder"># 待提供标签</span>
+                </div>
+                <div class="module-group__cards">
+                  <article class="module-card">
+                    <h3 class="module-card__title module-card__title--star">B端皮肤编辑器</h3>
+                    <div class="module-card__img"><img src="" alt="B端皮肤编辑器" /></div>
+                    <p class="module-card__desc">待提供描述</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag"># 0-1创作者工具</span>
+                      <span class="module-card__tag">#bpo降本增效</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>内容生产</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>Windows端、MAC端</span>
+                    </div>
+                  </article>
+                  <!-- ★ 2026-10-13:「输入法会员体系」卡 —— 展示区用正稿封面图(深色版「输入法会员框架」),
+                       并挂上二级页面(data-modal="modal-member":会员一期 / 会员二期 两个页签)。
+                       封面 1920×974(长宽比 1.971)≈ 展示区 2:1,且底色是均匀深色 #222,
+                       故沿用默认 object-fit:cover 通铺、裁切仅约 1.4%,与同排其他卡片一致。
+                       (上一版是白底浅色图 1920×1514(1.268),比例差太多、cover 会裁掉 37%,
+                        当时才加的 --contain 修饰类;现已随封面替换一并移除。)
+                       ★ 2026-10-14:静态封面 PNG/JPG 换成**动图** assets/card-membership.gif
+                       (1080×550,比例 1.964,与展示区 2:1 基本一致 → cover 仅裁约 1.8%,
+                        与旧深色封面观感一致;循环播放「开会员环顺时针旋转 / 用会员自上而下流动」两组动效)。
+                        旧图 card-membership.jpg 仍保留在 assets 内以备回退。 -->
+                  <article class="module-card" data-modal="modal-member" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看输入法会员体系详情">
+                    <h3 class="module-card__title module-card__title--star">输入法会员体系</h3>
+                    <div class="module-card__img"><img src="assets/card-membership.gif" alt="输入法会员框架动图 — 开会员环旋转 / 会员中心 / 用会员自上而下流动 / 支付板块 / 基建" /></div>
+                    <p class="module-card__desc">待提供描述</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#0-1会员生态</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>商城会员</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端</span>
+                    </div>
+                  </article>
+                  <article class="module-card">
+                    <h3 class="module-card__title">移动/PC商城</h3>
+                    <div class="module-card__img"><img src="" alt="移动/PC商城" /></div>
+                    <p class="module-card__desc">待提供描述</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag">#0-1商城生态</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>内容售卖</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端、Windows/MAC端</span>
+                    </div>
+                  </article>
+                </div>
+                <!-- 像素小人:沿三张卡片轮廓【左缘上爬 → 顶边右走 → 跳过间隙 → 右缘失足掉落 → 底部向左返回】循环 -->
+                <div class="mg-walker" aria-hidden="true"></div>
+              </div>
+
+              <!-- 时间轴:位于卡片组下方;轴线在上,节点 + 纯文本年份标记挂在轴线下方
+                   ★ 2026-10-10:「装扮生态建设」那行标题已上移为卡片组的 .group-caption,
+                     这里不再重复(轴线本身的位置几乎不变,卡片组整体下移一点)。 -->
+              <div class="module-timeline">
+                <div class="mt-grid">
+                  <div class="mt-divider" aria-hidden="true"></div>
+                  <span class="mt-node is-now" style="--dur: 3" aria-hidden="true"></span>
+                  <span class="mt-node" style="--dur: 1" aria-hidden="true"></span>
+                  <span class="mt-node" style="--dur: 2" aria-hidden="true"></span>
+                  <div class="mt-marker" style="--dur: 3">
+                    <b class="tl-mark__span">项目进行ing</b>
+                  </div>
+                  <div class="mt-marker" style="--dur: 1">
+                    <b class="tl-mark__span">25年</b>
+                  </div>
+                  <div class="mt-marker" style="--dur: 2">
+                    <b class="tl-mark__span">24-23年</b>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ===== Row 4: 8.9 亿浏览 (数据驱动增长) ===== -->
+          <div class="tl-row" id="tl-views">
+            <div class="tl-label">
+              <img src="assets/data-89-views-v2.png" alt="8.9 亿浏览" />
+            </div>
+            <div class="tl-line" aria-hidden="true"></div>
+            <div class="tl-content">
+              <div class="module-title">
+                <p class="module-title__row">
+                  收获成绩：主导CNY系列活动，其中最大一次活动获<strong>8.9亿浏览量</strong>。
+                </p>
+                <p class="module-title__row">
+                  我的优势：具备亿级流量活动从参与策划到落地的<strong>全链路设计</strong>，把流量做到极致。
+                </p>
+              </div>
+
+              <!-- 共 1 组,横向 3 张 -->
+              <div class="module-group">
+                <div class="module-group__tags">
+                  <span class="module-tag module-tag--placeholder"># 待提供标签</span>
+                </div>
+                <div class="module-group__cards">
+                  <article class="module-card">
+                    <h3 class="module-card__title">待提供标题</h3>
+                    <div class="module-card__img"><img src="" alt="待提供" /></div>
+                    <p class="module-card__desc">待提供描述</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag"># 待提供</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>待提供分类</span>
+                    </div>
+                  </article>
+                  <article class="module-card">
+                    <h3 class="module-card__title">待提供标题</h3>
+                    <div class="module-card__img"><img src="" alt="待提供" /></div>
+                    <p class="module-card__desc">待提供描述</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag"># 待提供</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>待提供分类</span>
+                    </div>
+                  </article>
+                  <article class="module-card">
+                    <h3 class="module-card__title">待提供标题</h3>
+                    <div class="module-card__img"><img src="" alt="待提供" /></div>
+                    <p class="module-card__desc">待提供描述</p>
+                    <div class="module-card__tags">
+                      <span class="module-card__tag"># 待提供</span>
+                    </div>
+                    <div class="module-card__meta">
+                      <span>待提供分类</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Row 5: 17 个专利 ===== -->
+          <div class="tl-row" id="tl-patents">
+            <div class="tl-label">
+              <img src="assets/data-17-patents-v2.png" alt="17 个专利" />
+            </div>
+            <div class="tl-line" aria-hidden="true"></div>
+            <div class="tl-content">
+              <!-- 描述文字条:改为系统字体 + 关键词加粗 -->
+              <p class="module-desc-text">
+                从2021-11至今获得 <strong>17个</strong> 专利授权。26年H1获得 <strong>季度专利质量评分最高分</strong>，25年H2获得 <strong>季度专利数量最多</strong>
+              </p>
+
+              <!-- 卡片区: [3枚奖牌纵向堆叠] + [H1紫卡] + [Q2紫卡] -->
+              <div class="patent-cards">
+                <div class="patent-medals">
+                  <div class="patent-medal"><img src="assets/medal-king.png" alt="专利大师 2024-07-01" /></div>
+                  <div class="patent-medal"><img src="assets/medal-master.png" alt="专利高手 2022-09-10" /></div>
+                  <div class="patent-medal"><img src="assets/medal-rookie.png" alt="专利新秀 2022-01-14" /></div>
+                </div>
+                <div class="patent-card patent-card--purple">
+                  <img src="assets/card-patent-h1.png" alt="H1 专利荣誉 - 季度专利质量评分最高" data-gallery="honors" />
+                </div>
+                <div class="patent-card patent-card--purple">
+                  <img src="assets/card-patent-q2.png" alt="Q2 专利荣誉 - 季度专利数量最多" data-gallery="honors" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Row 6: 5 项荣誉 ===== -->
+          <div class="tl-row" id="tl-honors">
+            <div class="tl-label">
+              <img src="assets/data-5-honors-v2.png" alt="5 项荣誉" />
+            </div>
+            <div class="tl-line" aria-hidden="true"></div>
+            <div class="tl-content">
+              <!-- 描述文字条:改为系统字体 + 关键词加粗 -->
+              <p class="module-desc-text">
+                25年H1获<strong>优秀员工</strong>，24年2次获<strong>公司级荣誉</strong>，23年获2次<strong>优秀个人</strong>
+              </p>
+
+              <!-- 卡片区: [优秀员工] + [公司荣誉] + [FXD-Q2] + [FXD-Q4] -->
+              <div class="honor-cards">
+                <div class="honor-card honor-card--dark">
+                  <img src="assets/card-honor-employee.png" alt="优秀员工 - 2025年上半年 OUTSTANDING CONTRIBUTOR" data-gallery="honors" />
+                </div>
+                <div class="honor-card honor-card--dark">
+                  <img src="assets/card-honor-company.png" alt="公司荣誉 x2 - 腾讯可持续社会价值奖" data-gallery="honors" />
+                </div>
+                <div class="honor-card honor-card--blue">
+                  <img src="assets/fxd-poster-q2.png" alt="FXD 用户体验设计部 2023Q2 嘉奖令 优秀个人奖" data-gallery="honors" />
+                </div>
+                <div class="honor-card honor-card--blue">
+                  <img src="assets/fxd-poster-q4.png" alt="FXD 用户体验设计部 2023Q4 嘉奖令 优秀个人奖" data-gallery="honors" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /.tl-layout -->
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" fill="#22C55E"/>
+      <path d="M7.5 12.5l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>已复制到剪贴板</span>
+  </div>
+
+  <!-- ===== Detail Modal: 词服务 (id="modal-cifa") ===== -->
+  <div id="modal-cifa" class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-cifa-title">
+    <button class="detail-modal__close" aria-label="关闭详情">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="detail-modal__panel">
+      <div class="detail-modal__body">
+        <div class="detail-modal__content">
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title" id="modal-cifa-title">输入即搜索 — AI搜索词服务</h2>
+            <p class="detail-modal__subtitle">刘佶松 · 2024.10.29 · Keynote 方案演示</p>
+          </div>
+
+          <!-- 幻灯片:11 页高清,保持 Keynote 原始顺序;视频叠加在各自原位 -->
+          <div class="detail-modal__slides">
+            <!-- 01 -->
+            <div class="slide-item">
+              <img class="slide-full" src="assets/modal-cifa/slide-01.jpg" alt="幻灯片 1" loading="lazy" />
+            </div>
+            <!-- 02:右侧竖屏手机录屏(外扩盖住整个手机,不露底图) -->
+            <div class="slide-item">
+              <img class="slide-full" src="assets/modal-cifa/slide-02.jpg" alt="幻灯片 2" loading="lazy" />
+              <video class="slide-video" style="left:67.0%;top:9.0%;width:22.0%;height:89.0%"
+                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s02.png">
+                <source src="assets/modal-cifa/vid-s02.mov" type="video/mp4" />
+              </video>
+            </div>
+            <!-- 03:底部 ICON 横条动画 -->
+            <div class="slide-item">
+              <img class="slide-full" src="assets/modal-cifa/slide-03.jpg" alt="幻灯片 3" loading="lazy" />
+              <video class="slide-video" style="left:25.8%;top:74.7%;width:47.9%;height:17.5%"
+                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s03.png">
+                <source src="assets/modal-cifa/vid-s03.mov" type="video/mp4" />
+              </video>
+            </div>
+            <!-- 04:左右两个竖屏手机录屏(外扩盖住整个手机,不露底图) -->
+            <div class="slide-item">
+              <img class="slide-full" src="assets/modal-cifa/slide-04.jpg" alt="幻灯片 4" loading="lazy" />
+              <video class="slide-video" style="left:25.8%;top:13.0%;width:19.6%;height:79.0%"
+                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s04a.png">
+                <source src="assets/modal-cifa/vid-s04a.mov" type="video/mp4" />
+              </video>
+              <video class="slide-video" style="left:56.8%;top:13.0%;width:19.6%;height:79.0%"
+                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s04b.png">
+                <source src="assets/modal-cifa/vid-s04b.mp4" type="video/mp4" />
+              </video>
+            </div>
+            <!-- 05-11:纯静态页 -->
+            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-05.jpg" alt="幻灯片 5" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-06.jpg" alt="幻灯片 6" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-07.jpg" alt="幻灯片 7" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-08.jpg" alt="幻灯片 8" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-09.jpg" alt="幻灯片 9" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-10.jpg" alt="幻灯片 10" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-11.jpg" alt="幻灯片 11" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Modal: AI陪伴 (id="modal-ai") 带 3 个页签 ===== -->
+  <div id="modal-ai" class="detail-modal detail-modal--tabbed" role="dialog" aria-modal="true" aria-labelledby="modal-ai-title">
+    <button class="detail-modal__close" aria-label="关闭详情">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="detail-modal__panel">
+      <!-- 顶部页签栏(固定,不随内容滚动) -->
+      <div class="detail-modal__tabs" role="tablist" aria-label="AI陪伴内容分类">
+        <button class="detail-modal__tab is-active" role="tab" aria-selected="true" data-tab="ai-p1">AI陪伴一期</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="ai-p2">AI陪伴二期</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="ai-comp">AI陪伴竞品分析</button>
+      </div>
+
+      <div class="detail-modal__body">
+        <!-- Tab 1: AI陪伴一期 -->
+        <div class="detail-modal__content detail-modal__tabpanel is-active" id="ai-p1" role="tabpanel">
+          <div class="detail-modal__slides" data-src="智能陪伴20240927.key">
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-01.jpg" alt="AI陪伴一期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-02.jpg" alt="AI陪伴一期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-03.jpg" alt="AI陪伴一期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-04.jpg" alt="AI陪伴一期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-05.jpg" alt="AI陪伴一期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-06.jpg" alt="AI陪伴一期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-07.jpg" alt="AI陪伴一期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-08.jpg" alt="AI陪伴一期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-09.jpg" alt="AI陪伴一期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-10.jpg" alt="AI陪伴一期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-11.jpg" alt="AI陪伴一期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-12.jpg" alt="AI陪伴一期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-13.jpg" alt="AI陪伴一期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-14.jpg" alt="AI陪伴一期 第14页" loading="lazy" /></div>
+          </div>
+        </div>
+        <!-- Tab 2: AI陪伴二期 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="ai-p2" role="tabpanel" hidden>
+          <div class="detail-modal__slides" data-src="AI陪伴-二期.deck">
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-01.jpg" alt="AI陪伴二期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-02.jpg" alt="AI陪伴二期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-03.jpg" alt="AI陪伴二期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-04.jpg" alt="AI陪伴二期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-05.jpg" alt="AI陪伴二期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-06.jpg" alt="AI陪伴二期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-07.jpg" alt="AI陪伴二期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-08.jpg" alt="AI陪伴二期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-09.jpg" alt="AI陪伴二期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-10.jpg" alt="AI陪伴二期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-11.jpg" alt="AI陪伴二期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-12.jpg" alt="AI陪伴二期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-13.jpg" alt="AI陪伴二期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-14.jpg" alt="AI陪伴二期 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-15.jpg" alt="AI陪伴二期 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-16.jpg" alt="AI陪伴二期 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-17.jpg" alt="AI陪伴二期 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-18.jpg" alt="AI陪伴二期 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-19.jpg" alt="AI陪伴二期 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-20.jpg" alt="AI陪伴二期 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-21.jpg" alt="AI陪伴二期 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-22.jpg" alt="AI陪伴二期 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-23.jpg" alt="AI陪伴二期 第23页" loading="lazy" /></div>
+          </div>
+        </div>
+        <!-- Tab 3: AI陪伴竞品分析 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="ai-comp" role="tabpanel" hidden>
+          <div class="detail-modal__slides" data-src="Q3AI陪伴竞品分享（松子）.deck">
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-01.jpg" alt="AI陪伴竞品分析 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-02.jpg" alt="AI陪伴竞品分析 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-03.jpg" alt="AI陪伴竞品分析 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-04.jpg" alt="AI陪伴竞品分析 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-05.jpg" alt="AI陪伴竞品分析 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-06.jpg" alt="AI陪伴竞品分析 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-07.jpg" alt="AI陪伴竞品分析 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-08.jpg" alt="AI陪伴竞品分析 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-09.jpg" alt="AI陪伴竞品分析 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-10.jpg" alt="AI陪伴竞品分析 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-11.jpg" alt="AI陪伴竞品分析 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-12.jpg" alt="AI陪伴竞品分析 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-13.jpg" alt="AI陪伴竞品分析 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-14.jpg" alt="AI陪伴竞品分析 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-15.jpg" alt="AI陪伴竞品分析 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-16.jpg" alt="AI陪伴竞品分析 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-17.jpg" alt="AI陪伴竞品分析 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-18.jpg" alt="AI陪伴竞品分析 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-19.jpg" alt="AI陪伴竞品分析 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-20.jpg" alt="AI陪伴竞品分析 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-21.jpg" alt="AI陪伴竞品分析 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-22.jpg" alt="AI陪伴竞品分析 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-23.jpg" alt="AI陪伴竞品分析 第23页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-24.jpg" alt="AI陪伴竞品分析 第24页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-25.jpg" alt="AI陪伴竞品分析 第25页" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Modal: Agent服务找人 (id="modal-agent-dist") 逐页展示 PDF ===== -->
+  <div id="modal-agent-dist" class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-agent-dist-title">
+    <button class="detail-modal__close" aria-label="关闭详情">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="detail-modal__panel">
+      <div class="detail-modal__body">
+        <div class="detail-modal__content">
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title" id="modal-agent-dist-title">Agent服务找人 — 利用Agent分发APP</h2>
+            <p class="detail-modal__subtitle">2026 输入法商业化项目 · PC Agent 分发 Design Work Report · UE 刘佶松 · 2026.3.31</p>
+          </div>
+
+          <!-- 幻灯片:16 页高清,源文件《2026 商业化-PC Agent 分发.pdf》 -->
+          <div class="detail-modal__slides" data-src="2026 商业化-PC Agent 分发.pdf">
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-01.jpg" alt="PC Agent 分发 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-02.jpg" alt="PC Agent 分发 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-03.jpg" alt="PC Agent 分发 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-04.jpg" alt="PC Agent 分发 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-05.jpg" alt="PC Agent 分发 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-06.jpg" alt="PC Agent 分发 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-07.jpg" alt="PC Agent 分发 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-08.jpg" alt="PC Agent 分发 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-09.jpg" alt="PC Agent 分发 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-10.jpg" alt="PC Agent 分发 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-11.jpg" alt="PC Agent 分发 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-12.jpg" alt="PC Agent 分发 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-13.jpg" alt="PC Agent 分发 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-14.jpg" alt="PC Agent 分发 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-15.jpg" alt="PC Agent 分发 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-16.jpg" alt="PC Agent 分发 第16页" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Modal: 输入法会员体系 (id="modal-member") 带 2 个页签 =====
+       源文件:《会员一期.pdf》(28 页) /《会员二期.pdf》(29 页),
+       ★ 2026-10-13:两份 PDF 已逐页渲染成 2400x1350 高清切片(A4 见 assets/modal-member-p1|p2),
+       与「AI陪伴」「PC Agent 分发」二级页面完全同一套规范 —— 打开即可纵向滚完整份汇报。 -->
+  <div id="modal-member" class="detail-modal detail-modal--tabbed" role="dialog" aria-modal="true" aria-label="输入法会员体系详情">
+    <button class="detail-modal__close" aria-label="关闭详情">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="detail-modal__panel">
+      <!-- 顶部页签栏(固定,不随内容滚动) -->
+      <div class="detail-modal__tabs" role="tablist" aria-label="输入法会员体系内容分类">
+        <button class="detail-modal__tab is-active" role="tab" aria-selected="true" data-tab="member-p1">会员一期</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="member-p2">会员二期</button>
+      </div>
+
+      <div class="detail-modal__body">
+        <!-- Tab 1: 会员一期 -->
+        <div class="detail-modal__content detail-modal__tabpanel is-active" id="member-p1" role="tabpanel">
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">输入法会员体系 — 会员一期</h2>
+            <p class="detail-modal__subtitle">2025 输入法商业化项目「输入法会员」设计工作汇报 · UE 刘佶松 / UI 何福林 · 2025.05.30</p>
+          </div>
+          <div class="detail-modal__slides" data-src="会员一期.pdf">
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-01.jpg" alt="会员一期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-02.jpg" alt="会员一期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-03.jpg" alt="会员一期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-04.jpg" alt="会员一期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-05.jpg" alt="会员一期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-06.jpg" alt="会员一期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-07.jpg" alt="会员一期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-08.jpg" alt="会员一期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-09.jpg" alt="会员一期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-10.jpg" alt="会员一期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-11.jpg" alt="会员一期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-12.jpg" alt="会员一期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-13.jpg" alt="会员一期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-14.jpg" alt="会员一期 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-15.jpg" alt="会员一期 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-16.jpg" alt="会员一期 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-17.jpg" alt="会员一期 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-18.jpg" alt="会员一期 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-19.jpg" alt="会员一期 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-20.jpg" alt="会员一期 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-21.jpg" alt="会员一期 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-22.jpg" alt="会员一期 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-23.jpg" alt="会员一期 第23页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-24.jpg" alt="会员一期 第24页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-25.jpg" alt="会员一期 第25页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-26.jpg" alt="会员一期 第26页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-27.jpg" alt="会员一期 第27页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-28.jpg" alt="会员一期 第28页" loading="lazy" /></div>
+          </div>
+        </div>
+        <!-- Tab 2: 会员二期 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="member-p2" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">输入法会员体系 — 会员二期</h2>
+            <p class="detail-modal__subtitle">2025 输入法商业化项目 设计工作汇报 · UE 刘佶松 · 2025.09.15</p>
+          </div>
+          <div class="detail-modal__slides" data-src="会员二期.pdf">
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-01.jpg" alt="会员二期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-02.jpg" alt="会员二期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-03.jpg" alt="会员二期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-04.jpg" alt="会员二期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-05.jpg" alt="会员二期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-06.jpg" alt="会员二期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-07.jpg" alt="会员二期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-08.jpg" alt="会员二期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-09.jpg" alt="会员二期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-10.jpg" alt="会员二期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-11.jpg" alt="会员二期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-12.jpg" alt="会员二期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-13.jpg" alt="会员二期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-14.jpg" alt="会员二期 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-15.jpg" alt="会员二期 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-16.jpg" alt="会员二期 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-17.jpg" alt="会员二期 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-18.jpg" alt="会员二期 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-19.jpg" alt="会员二期 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-20.jpg" alt="会员二期 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-21.jpg" alt="会员二期 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-22.jpg" alt="会员二期 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-23.jpg" alt="会员二期 第23页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-24.jpg" alt="会员二期 第24页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-25.jpg" alt="会员二期 第25页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-26.jpg" alt="会员二期 第26页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-27.jpg" alt="会员二期 第27页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-28.jpg" alt="会员二期 第28页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-29.jpg" alt="会员二期 第29页" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Lightbox:荣誉/专利大图查看(6 图联通,支持左右切换 + 缩略图跳转) ===== -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="大图查看" aria-hidden="true">
+    <button class="lightbox__close" type="button" aria-label="关闭大图">
+      <svg width="18" height="18" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button class="lightbox__nav lightbox__nav--prev" type="button" aria-label="上一张">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="lightbox__nav lightbox__nav--next" type="button" aria-label="下一张">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="lightbox__stage">
+      <img class="lightbox__img" src="" alt="" />
+    </div>
+    <div class="lightbox__caption">
+      <span class="lightbox__title"></span>
+      <span class="lightbox__counter"></span>
+    </div>
+    <div class="lightbox__thumbs" role="tablist" aria-label="缩略图导航"></div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

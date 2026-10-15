@@ -1,0 +1,3765 @@
+/* ========== Reset & Base ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== 圆角设计系统(全站统一 + 等比缩放) ==========
+   --radius-base 是主 clamp,其余全部基于 base 用 calc 派生,
+   确保所有圆角在视口缩放时"齐步"等比变化,不会一处大一处小。
+   ────────────────────────────────────
+   scale     min→max     用途
+   xs        4→6         滚动条 thumb、极小胶囊
+   sm        8.6→12      内嵌胶囊(选中态)、图标背板
+   md        10→14       卡片(default)、info-card、toast、职业卡
+   lg        12.8→18     主容器/玻璃条:tabs、module-desc、module-title
+   ──────────────────────────────────── */
+:root {
+  --radius-base: clamp(10px, 1.0vw, 14px);            /* 主基准 */
+  --radius-xs: calc(var(--radius-base) * 0.429);      /* ~4-6px */
+  --radius-sm: calc(var(--radius-base) * 0.857);      /* ~8.6-12px */
+  --radius-md: var(--radius-base);                     /* 10-14px */
+  --radius-lg: calc(var(--radius-base) * 1.286);      /* ~12.8-18px */
+  --radius-pill: 999px;                                /* 全胶囊(横向 nav) */
+
+  /* ========== 右侧内容区左右「版心留白」(两条边必须共用同一个值) ==========
+     同时被 .tabs(顶部 tab 玻璃条)与 .content__scroll(信息流滚动区)使用。
+     ★ 这两个值一旦不同,tab 栏的左缘就会和下方信息流内容的左缘错开一条细缝:
+       原来 .tabs 用 clamp(12px,2.8vw,40px)、.content__scroll 用固定 40px,
+       在视口 <1428px 时两者差最多 12px(tab 偏左)。
+     现在统一成一个变量:改一处,顶部 tab 与信息流永远左对齐。
+     移动端(≤900px 媒体查询)覆盖为 16px,两边同样同步。 */
+  --gutter-x: 40px;
+
+  /* ========== 信息流「大卡片」(.module-card)统一圆角 + 间距 ==========
+     规则:卡片统一圆角 = 22px;卡片之间的横向间距、换行后的行间距、
+     以及卡片组之间的纵向间距,三者都用 --card-gap(= 圆角值)。
+     这样"卡片间距"和"行间距"恒定一致,且节奏与圆角同频 —— 圆角多大的
+     圆弧,卡片之间就留多大的呼吸位。改一处即全链路同步。 */
+  --card-radius: 22px;
+  --card-gap: var(--card-radius); /* 卡片横向间距 = 行间距 = 组间距 = 圆角 */
+
+  /* ========== 配色取自参考图(Dribbble 暗色登录卡)==========
+     参考图实测:背景 #222222 纯色;卡片底色 #0F0F0F;卡片四周一圈 1px 细亮线
+     (顶边最亮 ≈ 灰 98、左右 ≈ 90、底边最暗 ≈ 50,换算白透明度约 0.3 / 0.24 / 0.07);
+     卡片外侧还有一圈很轻的暗晕(卡片外投影)。 */
+  --page-bg: #222222;
+  /* ========== 字体主体色调 ==========
+     全站白色/近白文字统一走这两个变量(用户指定 #BDBDBD):
+     · --text-main      给纯色文字
+     · --text-main-rgb  给需要保留透明度的次要文字(rgba(var(--text-main-rgb), a))
+     改这两个值 = 全站字体色调一次换掉。 */
+  --text-main: #bdbdbd;
+  --text-main-rgb: 189, 189, 189;                    /* 右侧页面背景(纯色,替代原极光图) */
+  --card-bg: #0f0f0f;                    /* 卡片底色(取参考图卡片下半部) */
+  --card-bg-hover: #161616;              /* 卡片 hover 底色:展示区要跟着一起提亮,否则会露出色差 */
+  --card-line: rgba(255, 255, 255, 0.34); /* 占位卡片的虚线边线(与实线卡片同一亮度) */
+
+  /* ========== 「两端渐隐、中间最亮」的细线 · 两个 token ==========
+     ── 沿革 ──
+     第 45 项(2026-10-10):竖线横线共用一支**品牌紫**。
+     第 58 项(2026-10-12):用户指出内容列那条竖线「不要用紫色了,以卡片边缘的颜色为基础做个渐变,
+       让页面配色整体一些,不然太花了」—— 只改竖向这一支,见 --brand-line-v 的注释。
+
+       · --brand-line-v  竖向 → .tl-line(右侧每个模块左侧那条竖线)**中性白**
+       · --brand-line-h  横向 → .side-divider(左侧栏的分隔线)**品牌紫,不变**
+
+     ── 为什么只改竖线、留横线是紫的 ──
+     竖线在内容列里周围全是中性物(卡片 #0F0F0F 底 + 白 .34 边线),
+     它是内容列里**唯一**的紫,读起来就成了"配色跑掉的一笔";
+     横线在左侧栏,正下方就是紫色的「工作经历 / 个人荣誉 / 教育经历」小标题,
+     紫是**成组**出现的,留着反而自洽。 */
+  /* ★ 中性白渐隐线:色标 = 卡片边线色 rgba(255,255,255,0.34) 的同一族,
+     峰值取 0.26(= 卡片边线 alpha 的 0.76 倍)。为什么不直接取 0.34:
+       · 卡片边线只有 1px,这条线有 2px 且贯穿整列,同 alpha 会显得更重;
+       · 同一取样窗口实测(1440×900)0.34 → 渲染亮度 89.6,比卡片边线本身(75.7)还亮;
+         0.26 → 75.9,与卡片边线 75.7 基本相等。
+     ★ 6 档视口终测:竖线峰值 65.9~80.7 / 卡片边线 64.1~80.4 —— 两者逐档同步,
+       视觉上读成"卡片边线的延伸"。B−G 恒为 0(完全中性,紫色成分归零)。
+     想调强弱只改 --line-neutral-peak 一个数(0.18 更轻 / 0.34 更实),
+     0% / 10% / 90% / 100% 四档按 0.20 / 0.75 倍自动跟随。 */
+  --line-neutral-peak: 0.26;
+  --brand-line-v: linear-gradient(180deg,
+    rgba(255, 255, 255, calc(var(--line-neutral-peak) * 0.20)) 0%,
+    rgba(255, 255, 255, calc(var(--line-neutral-peak) * 0.75)) 10%,
+    rgba(255, 255, 255, var(--line-neutral-peak)) 50%,
+    rgba(255, 255, 255, calc(var(--line-neutral-peak) * 0.75)) 90%,
+    rgba(255, 255, 255, calc(var(--line-neutral-peak) * 0.20)) 100%);
+  /* 左侧栏横向分隔线:仍是品牌紫(第 45 项配方,原样保留) */
+  --brand-line-h: linear-gradient(90deg,
+    rgba(155, 70, 255, 0.08) 0%,
+    rgba(176, 88, 255, 0.30) 10%,
+    rgba(190, 130, 255, 0.40) 50%,
+    rgba(176, 88, 255, 0.30) 90%,
+    rgba(155, 70, 255, 0.08) 100%);
+
+  /* ========== 品牌紫「水滴泛紫」配方(2026-10-10 第 48 项)==========
+     用户要求:导航上高亮的胶囊水滴「增加一点微微的紫色,泛点紫色呼应一下主题色」。
+     只改色相、不改通透感 —— 在原来的白色液态玻璃之上叠一层极低透明度的紫。
+     颜色取自 --brand-line-* 同一支品牌紫(155,70,255 ~ 190,130,255),全站同源:
+       · --drop-purple     155, 70,255  主色(深色端,用于底部雾光 / 外发光)
+       · --drop-purple-lt  202,160,255  亮端(玻璃高光侧,避免高光发灰)
+     ★ 强度只调 --drop-purple-k 一个数:
+         0    = 完全还原成原来的纯白玻璃(去掉泛紫)
+         0.6  = 若隐若现
+         1    = 现在这档「微微的紫」(默认,实测:玻璃本体 B−G ≈ +15 / 外发光 ≈ +18)
+         1.8  = 明显的紫玻璃(紫到能当品牌色块用)
+       下面所有紫的 alpha 都写成 calc(基准 × k),所以一处改、整颗水滴同步变。 */
+  --drop-purple: 155, 70, 255;
+  --drop-purple-lt: 202, 160, 255;
+  --drop-purple-k: 1;
+
+  /* ========== 字号规范(--fs-*)= 2026-10-10 重新梳理 ==========
+     全站字号只在 :root 这里定义一遍,组件一律 var(--fs-*) 引用 ——
+     改字号 = 改这一块,不用去组件里翻硬编码。
+     clamp(min, 视口联动, max):≥1512 视口取 max,≤1024 取 min,中间线性缩放。
+
+     token          min→max       用途                         1512 实测
+     ─────────────────────────────────────────────────────────────────
+     --fs-2xs       9.5→12        时间轴「时长」(4年/1年,紫色)    12px  500
+     --fs-xs        10→12         卡片 #话题标签、卡片 meta 分类   12px  400/500
+     --fs-caption   10→12.5       组标题 / 时间轴标题(装扮生态建设) 12.5px 600
+     --fs-tl-span   10.5→13.5     时间轴「年份区间」(至今→22年)    13.5px 600
+     --fs-sm        11→13         tab、模块主标题、模块描述、占位   13px  400
+     --fs-body      11→13         卡片描述正文                    13px  400
+     --fs-md        13→16         组 #大标签(当前 display:none)    16px  700
+     --fs-title     12.5→15       卡片主标题 ★                    15px  600
+     ─────────────────────────────────────────────────────────────────
+     ★ 本次调整(用户反馈「卡标题上的主标题字号有点大」):
+       卡片主标题  18px → 15px(--fs-title)
+       卡片描述    16px → 13px(--fs-body)
+       原 18/16 只差 2px 且都偏大,与模块主标题(13px)严重层级倒挂;
+       收到 15/13 后:标题仍明显重于描述(600 vs 400),且最长描述
+       在 1280 视口也能 2 行放完(见 .module-card__desc 的注释)。
+       旧值 --fs-lg(14→18)/--fs-xl/--fs-base 三个 token 全局无引用,已移除。
+     ───────────────────────────────────────────────────────────────── */
+  /* 2xs 只用于时间轴那颗紫色的「时长」:强调色 + 比同级灰字更小的下限 → 视觉更轻。
+     值与改造前完全一致(clamp(9.5px,0.9vw,12px)),收编为变量只为统一管理。 */
+  --fs-2xs:      clamp(9.5px, 0.9vw, 12px);
+  --fs-xs:       clamp(10px, 0.85vw, 12px);
+  --fs-caption:  clamp(10px, 0.95vw, 12.5px);
+  --fs-tl-span:  clamp(10.5px, 1.02vw, 13.5px);
+  --fs-sm:       clamp(11px, 0.92vw, 13px);
+  --fs-body:     clamp(11px, 0.88vw, 13px);
+  --fs-md:       clamp(13px, 1.14vw, 16px);
+  --fs-title:    clamp(12.5px, 1vw, 15px);
+
+  /* ========== 左侧栏信息区字号(2026-10-10 第 49 项)==========
+     简介正文 / 工作经历正文 / 4 行荣誉 / 教育经历 / 标签胶囊 原来是 4 张切图,
+     字号烤在 PNG 里;现在换成实时文本。
+     ★ 字号不在这里给固定 px —— 见下面 .side-blocks 一节:
+       侧栏宽度是由 JS 的 initSidebarFit() 按视口**高度**反推的(240~460),
+       原来切图时代「整栏一起缩放」,所以这里也必须跟着栏宽走,
+       否则 fit() 会因为文字不能缩而把侧栏一路压到 MIN=240。
+     调大 / 调小:改 .side-blocks 一节里的 5.4974cqw 一个数即可。
+     --side-text 是正文色,直接取自切图实测色(220,216,216),与 --text-main 不同。 */
+  --side-text:    #dcd8d8;
+
+  /* ========== 星星 / 卡片标签「渐变文字」配方(2026-10-12 第 50 项)==========
+     用户反馈:卡片标题左侧的 ★ 与「#腾讯可持续社会价值奖 / #pony点赞」两个话题标签
+     在近黑卡片底上用的是实色 #6b3fe0,偏暗、看不清,要求改成渐变。
+     色值由用户指定:#B661FF(左,浅) → #560CF5(右,深)。
+     实现 = background-image 画渐变 + background-clip:text 裁进字形 +
+            -webkit-text-fill-color:transparent 让字身透明,把渐变透出来。
+     ★ 只改这两个色值即可全站同步(星星 + 所有卡片标签)。 */
+  --grad-text-from: #b661ff;
+  --grad-text-to:   #560cf5;
+
+  /* ========== 侧栏 # 标签:粉色渐变文字(2026-10-12 第 63 项)==========
+     用户:侧栏标签「改回只有字有颜色、没有底部背景的纯文字」,颜色取她圈出的那个粉
+     —— 即时间轴「4年」(.tl-mark__dur)的 rgba(190,130,255,.92) = #be82ff。
+     ★ 做法:把这张牌当作「卡片标签的粉色版」—— 技术完全照搬 .module-card__tag
+       (background-image 渐变 + background-clip:text + text-fill-color:transparent),
+       只是把渐变换成粉色系:
+        · --side-tag-from  浅粉(渐变左端,给字一点"起笔"的亮)
+        · --side-tag-to    用户指定的粉(渐变右端 = 主色)
+      为什么不用卡片标签那支 #b661FF → #560CF5:它的深端 #560CF5 在第 59 项被用户
+      否过("这个颜色的不太好"),在侧栏 #0a0a0a 底上会重新变回"太重的一笔"。
+     ★ 想改成纯色:把 --side-tag-from 也设成 #be82ff 即可(渐变依然存在但两端同色)。
+       想更亮 / 更收:整支同比例调这两个值,别只动一端,否则会渐变出"脏"。 */
+  --side-tag-from: #edb8ff;
+  --side-tag-to:   #be82ff;
+
+  /* ========== 间距规范(--space-*)==========
+     8 级递进,全部硬编码固定值,避免各处随意 clamp
+     ────────────────────────────────────
+     token     px      用途
+     1         4       原子级:分隔符 padding
+     2         8       小间距:卡片内元素纵向、图标 gap
+     3         12      标准间距:卡片列 gap、标签→卡片
+     4         16      中间距:主容器 padding、标签行内部 gap
+     5         20      组标签行 gap
+     6         30      组间距 (module-group 之间)
+     7         40      大间距
+     8         60      模块间距 (tl-row 之间,即章节级)
+     ──────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 30px;
+  --space-7: 40px;
+  --space-8: 60px;
+
+  /* ========== 蒙层规范(--scrim-*)==========
+     全站所有二级页面(详情弹窗 / 大图 Lightbox)共用同一套蒙层参数,
+     保证「半透」观感一致。改这里 = 全站二级页面一起改。
+     ────────────────────────────────────
+     色值  rgba(10, 8, 20, .72)  带蓝调的深色,比纯黑更贴合页面冷灰底
+     模糊  6px                   背景虚化,保留轮廓但去掉细节干扰
+     ──────────────────────────────────── */
+  --scrim-bg: rgba(10, 8, 20, 0.72);
+  --scrim-blur: 6px;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-family: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* ========== Layout ========== */
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #0a0a0a;
+  position: relative;
+}
+
+/* ========== Sidebar (左侧固定) ========== */
+.sidebar {
+  /* 这里的 350px 只是"兜底值":真实宽度由 JS 的 initSidebarFit() 按视口高度
+     反推后写成内联样式(区间见 js/main.js 的 MIN/MAX),CSS 改动只在 JS 失效时生效。 */
+  width: 350px;
+  flex: 0 0 350px;
+  background: #0a0a0a;
+  color: var(--text-main);
+  /* ★ 第 51 项:底部内边距 32 → 14。侧栏是定高 100vh 的 flex 列,内容一旦超高,
+     底部 padding 会原样计入 scrollHeight —— 所以压它等于直接减溢出量(-18px)。 */
+  padding: 22px 22px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* ★ 第 51 项:模块间隙 10 → 6(两处 gap 合计 -8px)。
+     两块 = 头像 / 信息区(联系方式卡第 69 项起已移进 .side-blocks,不再参与这里的 gap)。
+     间隙收一点不影响信息分组。 */
+  gap: 6px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* 不显示滑杆:侧栏内容偶尔差几像素时,也不要那条会"割裂"整页的滚动条。
+     注意只是隐藏视觉,滚轮/触控板依然可以滚动(fit() 已在尽力压到一屏内)。 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  z-index: 10;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.sidebar__logo {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 6px;
+  margin-bottom: 4px;
+}
+.sidebar__logo img {
+  width: 168px;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+.sidebar__avatar {
+  /* 负 margin 吃掉 .sidebar 的顶部 + 左右 22px padding,视频整块贴边铺满全宽 */
+  width: calc(100% + 44px);
+  margin: -22px -22px 0;
+  display: block;
+}
+.sidebar__avatar img,
+.sidebar__avatar video {
+  width: 100%;
+  height: auto;             /* 高度由 aspect-ratio 决定(裁到胸前) */
+  /* 裁切高度沿革(改的一直只有"底沿在哪",横向永远铺满 100%,所以三版都是同一张脸同一构图):
+       ① 原版   1 / 1.18 —— 裁到胸前
+       ② 某次   1 / 1.12 —— 裁到锁骨,底沿上提到肩线,给 ABOUT ME 腾位置
+       ③ 第 62 项(★ 现在)1 / 1.04 —— 用户指认"只保留蓝框内",底沿再上提一档
+    ★ 第 62 项:用户拿截图圈了保留区,量出蓝框内比例 h/w = 1.0395 → 取整 1.04。
+      换算:原视频 832×1110(h/w 1.3341),改前保留 83.9%、改后 77.9%,**再裁掉 7.2% 高度**;
+      1440×900 下头像块 276.6 → 256.8px,给下方个人信息多让出约 20px。
+      横向不动(仍是 width:100%),所以脸部构图、水平位置完全不变 —— 只是底沿往上收。
+      ⚠️ 素材如果换了(视频/封面图比例变了),这个数要重算:
+        目标值 = 想要的保留高度 / 原视频高度 × 原视频 h/w,再手写成分数。 */
+  aspect-ratio: 1 / 1.04;
+  object-fit: cover;
+  object-position: center top; /* 锚定顶部:头部永不被切,只裁画面最下方 */
+  display: block;
+}
+
+.sidebar__name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: 1px;
+  align-self: flex-start;
+  padding-left: 6px;
+  margin-top: 12px;
+  line-height: 0; /* 消除 h1 行盒多余高度,让图片高度=占位高度 */
+}
+.sidebar__name img {
+  height: 22px;    /* 锁定高度=原文字视觉占位(18px 字号 + 行高),位置与所占高度不变 */
+  width: auto;     /* 宽度按 2907:432≈6.73 比例自适应,不拉伸变形 */
+  display: block;
+}
+
+/* ========== 竖排信息切图区(ABOUT ME / 简介 / 工作·荣誉·教育经历 / 分割线) ==========
+   参考画布 540px,内容左边距 49px(≈9%),满栏宽 442px 对应切图 4000px。
+   各切图已 trim 到内容边界,宽度按 (trim宽/4000) 取内容宽百分比,统一左对齐。 */
+.side-blocks {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 全部左对齐 */
+  gap: 0;                   /* 间距用各元素 margin-top 单独控制 */
+  /* ★ 2026-10-10 第 49 项:把这一栏声明成「容器」,让下面的实时文本能用 cqw
+     按「本栏宽度」定字号 —— 原来切图时代的字号就是跟着栏宽缩放的,
+     这样 initSidebarFit() 的「内容高 = 视口高」反推逻辑才继续成立
+     (换成固定 px 的话文字不再能缩,fit() 会把侧栏一路压到 MIN=240px)。
+     · container-type: inline-size 只影响行内尺寸containment,本元素 width:100%,不受影响。 */
+  container-type: inline-size;
+  padding-left: 4px;       /* 与联系方式卡左内边距视觉对齐 */
+  /* 这个 margin-bottom 原本是「教育经历 → 联系方式卡」的间距。
+     ★ 第 69 项:联系方式卡已移进 .side-blocks 内部(见 index.html 的注释),
+       所以它现在只等于「信息区 → 侧栏底部」的留白,不再参与板块间距的叠加 ——
+       联系卡到教育经历的距离改由 .info-card--contact 自己的 margin-top(2.15em)决定,
+       这也正是把它移进来的目的之一(外面那版会凭空多叠 4 + 6 = 10px)。
+     沿用第 51 项的 4px(教育经历是实时文本,行盒底部比 ink 多出约 6px)。 */
+  margin-bottom: 4px;
+}
+.side-blocks img {
+  display: block;
+  height: auto;
+}
+/* ========== 侧栏正文的字号(2026-10-10 第 49 项)==========
+   ★ 只在这一个地方定义,改这一个数 = 简介 / 工作正文 / 荣誉 / 教育 / 标签胶囊 全部同步。
+     · 5.4974cqw = 本栏宽度的 5.4974%。在侧栏 240px(本栏内容宽 191px)时 = 10.5px。
+     · 系数怎么来的:改前切图时代正文的实际字号 = 5.4974% × 栏宽 × (1/1.11),
+       即 ≈9.46px;这一次「加大一号」乘了 1.11。
+       换算回设计单位:切图里正文/荣誉/胶囊的字身宽比是 200 : 180 : 162,
+       而 CSS 的 width% 已经把这个比例抵消掉了(屏上三者都是 ≈9.4px),
+       所以现在统一成一档 10.5px,标签胶囊按实测的 162/200 = 0.81 单独给一档。
+     · 想再大 / 再小:只改 5.4974 这个数(6.0 ≈ 11.5px、5.0 ≈ 9.5px)。
+       ⚠ 栏宽 191px 时,简介第 4 行(19 字身)与荣誉第 3 行(20.56 字身)的折行阈值是 ≈10.1px,
+         再往上这两行就必然折行(现在是按语义折的,见下面各块的注释)。
+     用 cqw 而不是 vw:侧栏宽度由 JS 按视口**高度**反推,和视口宽度不同步。 */
+/* ★★ 第 68 项:把 --side-fs 从「6 个正文选择器」上提到「.side-blocks 的每一个直接子元素」,
+   并且**同时写成 font-size**。这一步是后面整套间距阶梯的地基,原因:
+     · 本项的间距全部改用 em 表达(要的是「节奏随栏宽等比缩放」,见下面的间距阶梯)。
+     · 但标题是 <img>、分隔线是 <div>,它们的 font-size 是继承来的 14px ——
+       在这些元素上写 2.15em 会算成 30.1px 而不是 24px,整条阶梯就崩了。
+     · 让每个子元素的 font-size 都 = --side-fs 之后,任意元素上的
+       `margin-top: 2.15em` 都精确等于「2.15 个正文字号」。
+     · 对 <img>/<div> 设 font-size 不影响它们的渲染(宽高由 width% + aspect-ratio 定)。
+   ⚠️ 不能把 --side-fs 写在 .side-blocks 自己身上:cqw 只对**容器的后代**生效,
+      元素查不到自己当容器,写在自己身上会掉到「小视口宽度」那个兜底值。 */
+.side-blocks > * {
+  --side-fs: 5.4974cqw;
+  font-size: var(--side-fs);
+}
+/* ★ 第 53 项:原来的 --side-fs-tag(正文 × 0.81,只给标签胶囊用)已取消 ——
+   标签字号现在与正文一致,直接吃 --side-fs,少一个变量。 */
+/* ========== ★★ 第 68 项:间距阶梯(spacing scale)—— 本次排版优化的核心 ==========
+   用户:"这里字号太密了,请你再按标准的杂志排版,好好地优化一下这部分的展示效果,有一些节奏感"
+
+   【病根:分组间距比行距还小】
+     改前实测(1440×900,正文字号 11.645px):
+       正文行距 = 18.6px   ← 同一段内换一行
+       板块间距 = 11~14px  ← 从「简介」换到「工作经历」这种跨板块的间隔
+     也就是说:**眼睛读到一个新板块开始时,空隙比同一段里换行还窄。**
+     所有内容被压成一块均匀的灰面 —— 这就是"密"和"没有节奏"的物理来源,不是字号大小的问题。
+
+   【处方:三级阶梯,全部用 em(随栏宽等比缩放,节奏恒定)】
+     参照物 = 正文行高 1.6em。三级间距必须依次明显拉开:
+       ① 0.38em (≈0.24 行) 标题 ↔ 它自己的正文      —— 紧,让标题归属于下方内容(proximity)
+       ② 0.60em (≈0.38 行) 段 ↔ 段(名字→简介)
+       ③ 2.15em (≈1.34 行) **板块 ↔ 板块**          ← 全项最关键的一个数
+     再加一条「分隔线」当主分隔,它的上下留白(1.40 / 1.30em)是最高一级 ——
+     于是全栏形成四级节奏:行距 < 段距 < 板块距 < 分隔线。有层级才有节奏。
+     ⚠️ em 能成立的前提见上面 .side-blocks > * 那段注释(每个子元素 font-size = --side-fs)。
+
+   【代价,以及为什么接受】
+     侧栏是「内容高 = 视口高」反推栏宽的(initSidebarFit),加高就会压窄栏宽、字号跟着掉。
+     实测 h(栏宽) = 129.5 + 2.601 × 栏宽,本次净增约 28px → 栏宽 261 → 249,字号 11.65 → 11.21px(**-3.7%**)。
+     用 3.7% 的字号换来板块间距 +75%(13 → 24px),这笔账是划算的:
+     用户要的是"不密、有节奏",而"密"的物理来源正是间距层级,不是字号本身。
+     若之后想把字号换回来:要么把 2.15em 收到 1.8em,要么收一点头像的裁切比例(它占了整栏 33% 的高度)。
+
+   【标题层级:21% → 24.5%】
+     三个紫色小标题原来只有正文的 ≈1.21 倍(14.1px vs 11.6px),层级"密"——跳一档看不出来。
+     放宽到 24.5% 后 ≈1.40 倍,和正文的层级差才够"一眼分级"。
+     标题是 trim 过 ink 的等比切图(948×294 / 3.224),放大只是重新缩放,不会糊。 */
+.side-about-title { width: 60.3%; margin-top: 0.70em; aspect-ratio: 2413 / 370; }   /* ABOUT ME(未换,保留) */
+/* 名字块:从 side-about-text-v2.png 裁出的上半段(刘佶松 + 职位行),下半段简介已改实时文本。
+   裁切 y=0..407(名字块 ink 在 1..406),所以宽高比由 3794/1831 变成 3794/407,
+   渲染高度不变(原来 406/1831 份,现在整张就是 406)。
+   ★ 第 68 项:13px → 1.00em —— ABOUT ME 是 kicker、名字是 headline,这一对应当抱紧。
+   ★★ 第 71 项:1.00em → **1.60em**。用户反馈「这个区域纵向空间太紧凑了」。
+      实测(1440×900,字号 12.37px)原值下:ABOUT ME → 名字 的 ink 间隙只有 **14.0px**,
+      而简介的**行距 ink 间隙是 9.5px** —— 两者接近到几乎分不出层级;再叠上
+      .side-about-title / .side-name / .side-bio 三处都是小间距(0.70 / 1.00 / 0.60em),
+      整块看起来就是被"均匀压紧"的一条。现在拉到 14.0 → **21.4px**(≈2.2 倍行距间隙)。 */
+.side-name        { width: 94.0%; margin-top: 1.60em; aspect-ratio: 3794 / 407; }
+/* 紫色渐变标题(独立切图,替代旧图片内部暗色标题) - 948x294 (ratio 3.22:1)
+   ★ 第 68 项:宽度 21% → 24.5%(见上面「标题层级」段),字号相对正文 ≈1.40 倍。 */
+.side-work-title  { width: 24.5%; margin-top: 2.15em; aspect-ratio: 948 / 294; }  /* ★ 第 70 项:分隔线已移除,改为板块距 2.15em(与荣誉/教育标题同档) */
+.side-honor-title { width: 24.5%; margin-top: 2.15em; aspect-ratio: 948 / 294; }  /* ← ★ 板块距 */
+.side-edu-title   { width: 24.5%; margin-top: 2.15em; aspect-ratio: 948 / 294; }  /* ← ★ 板块距 */
+
+/* ========== 侧栏正文:实时文本(2026-10-10 第 49 项)==========
+   【改了什么】这 5 处原来是 4 张切图,字号烤在 PNG 里,「加大一号」改不了:
+     side-work-body.png   → .side-work-text + .side-tags / .side-tag
+     side-honor-body.png  → .side-honor-list > li
+     side-edu-body.png    → .side-edu-text
+     side-about-text-v2.png 的下半段 → .side-bio(上半段裁成 side-name.png,仍是切图)
+   改成实时文本后,字号由 .side-blocks 一节里的 --side-fs 控制(第 53 项起标签也吃同一个值),一处改全栏同步。
+
+   【字号怎么定的】改前在 side=240px(.side-blocks 内容宽 192px)下,按「切图像素宽 ÷
+     设计字身宽」反推的实际渲染字号:简介 9.46 / 工作 9.41 / 荣誉 9.37 / 教育 9.46 / 胶囊 7.52。
+     现在统一 → 正文 10.5px(+11%)、胶囊 8.5px(+13%)。
+   ⚠ 再往上会折行:简介第 4 行(19 字身)和荣誉第 3 行(20.56 字身)在 192px 栏里原本正好
+     占满 99.6%,字号 >≈10.1px 就必须折。这里按语义折在逗号 / 「获」之后,不留单字孤行。
+     想恢复成原来的 4 行:把 --side-fs 降到 10px(这是「不折行」的上限)。
+
+   【行高与间距怎么定的】全部按切图实测的设计比例换算,不做自由发挥:
+     · 行高 简介/工作 320/200 = 1.60;荣誉 317.7/180 = 1.765(荣誉本来就松一档)
+     · 胶囊 高 1.78em(288/162)、左右内边距 0.5em、行间距 0.5em、圆角 0.10em(16/162)
+     · 胶囊底色 = rgba(255,255,255,0.20) 纯填充,**没有边线**(切图实测 alpha 恒为 51,
+       用户截图同位置也是 10 → 59 的直接跳变,确认无描边);文字 #fcfcfc
+     · 段间距沿用原来的 margin-top(8px / 22px / 24px),只补掉行盒的半行距,
+       保证文字 ink 落在切图时代的位置上(半行距 =(行高−字号)/2,10.5px/1.6 时 ≈3.8px)。
+   【字体】切图里的拉丁字母/数字与中文同族(Inter 没有中文字身),所以这几块把
+     PingFang SC 提到字体栈最前,实文本的 "H1 / Q2 / C+B / AI" 与切图同形。 */
+/* 用 :where() 让这条重置的选择器权重降到 (0,1,0) —— 否则 `.side-blocks p`(0,1,1)
+   会盖掉下面 `.side-bio`(0,1,0) 的 margin-top。放在前面 + 权重相等 = 各段自己的
+   margin-top 生效,左右/下边距仍归零。 */
+.side-blocks :where(p, ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.side-bio,
+.side-work-text,
+.side-edu-text,
+.side-honor-list li {
+  color: var(--side-text);
+  font-family: "PingFang SC", "Inter", "Microsoft YaHei", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 400;
+  width: 100%;
+}
+/* 简介:★ 2026-10-12 第 52 项:从「<br> 硬断 4 行」改回**一个自然段**。
+   用户给的文案本身已经用 。/ ;/ , 断好句了,所以交给浏览器按栏宽自动折行即可 ——
+   好处是行数会随栏宽自适应(宽栏少一行、窄栏多一行),不再被写死的行数绑住。
+   · 行数参考:字号 10.5px、栏宽 191px 时约 17~18 字/行,全段 62 个字身 → 4 行
+     (改前是 5 行,因为有两处是「加大字号后被折出来的」空行)。
+   · 中文标点避头尾由浏览器默认处理(line-break: auto),不会把 。，； 甩到行首;
+     「0-1」用 .side-nowrap 兜住,避免被当作两个词拦腰折断。 */
+.side-bio {
+  margin-top: 1.20em;   /* ★ 第 68 项:7px → 0.60em(段距档;第 51 项曾 10 → 7)
+                           ★★ 第 71 项:0.60 → **1.20em** —— 与 .side-name 一起加松,
+                           名字块 → 简介 的 ink 间隙 13.5 → **20.9px**。
+                           行高仍是 1.6 不动(它是按切图实测 320/200 换算来的设计比例)。 */
+  font-size: var(--side-fs);
+  line-height: 1.6;
+}
+/* 整段里不该被拆开的短片段(数字区间、英文缩写等) */
+.side-nowrap {
+  white-space: nowrap;
+}
+/* 工作经历正文:一个自然段,在 192px 栏里正好按切图的方式折成 2 行 */
+.side-work-text {
+  margin-top: 0.38em;   /* ★ 第 68 项:5px → 0.38em(标题↔正文档的最紧一档) */
+  font-size: var(--side-fs);
+  line-height: 1.6;
+}
+/* 标签:5 个,弹性换行
+   ★ 2026-10-12 第 63 项:**回到纯文字**(无底色块),但这次是「粉色渐变文字」——
+     技术**完全照搬卡片标签** .module-card__tag,只是把渐变色换成粉色系。
+   形态沿革(六代 —— 注意"形态"和"颜色"是两条线,别混):
+     ① 原始    = 「灰底浅字胶囊」:background rgba(255,255,255,.2) + border-radius + padding,
+                 字色 #fcfcfc,字号 --side-fs-tag(正文 × 0.81 ≈ 8.5px)
+     ② 第 53 项 = 「渐变文字」:照搬卡片标签配方(--grad-text-from → --grad-text-to),
+                 去底色块/圆角/内边距,字号提到 --side-fs
+     ③ 第 56 项 = 「纯色 #9F9F9F」:用户要求退到中性灰,当"次要信息"
+     ④ 第 59 项 = 「纯色深紫 #560CF5」:用户要求回品牌紫深色端
+     ⑤ 第 61 项 = 「胶囊 + 浅色字」:用户反馈"纯色不好看",回底部色块
+     ⑥ 第 63 项(★ 现在)= 「纯文字 + 粉色渐变」:用户反馈胶囊"还是改回纯文字",
+                 颜色改为她圈出的时间轴「4年」那个粉 #be82ff,
+                 **展示效果向卡片标签看齐**(同为渐变文字、同样无底、同样 inline 流式)。
+   · 三条要求的落点:
+       - "只有字有颜色、没有底部背景" → 删 background / border-radius / padding
+       - "效果和卡片标签保持一致"     → 同款 background-clip:text 渐变文字
+       - "字号同工作经历描述文案"     → font-size: var(--side-fs)(与 .side-work-text 同值)
+   · 行距 gap:0.62em → 0.42em(第 61 项加大是为了胶囊的呼吸,纯文字不需要那么多)。
+   · font-weight 500 / letter-spacing .02em 沿用第 53 项,几次改动都没动过。
+   · 仍然保留 flex-wrap:「5 个 # 标签」总宽超过栏宽,必须允许换行(卡片那行是 nowrap+ellipsis,
+     因为卡片列宽够放,侧栏 195px 放不下)。 */
+.side-tags {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34em 0.5em;               /* ★ 第 68 项:行距 0.42 → 0.34em(5 个标签是一个整体,行要抱紧;
+                                      第 63 项曾 0.62 → 0.42,纯文字不需要胶囊时代的呼吸) */
+  margin-top: 0.38em;              /* ★ 第 68 项:4px → 0.38em(标签属于「工作经历」这一块,跟正文同档) */
+  font-size: var(--side-fs);       /* 第 53 项起与正文一致(原 --side-fs-tag ×0.81) */
+}
+.side-tag {
+  display: inline-block;
+  font-family: "PingFang SC", "Inter", "Microsoft YaHei", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: var(--side-fs);       /* ★ 与 .side-work-text 完全同值(工作经历描述文案) */
+  font-weight: 500;                 /* 同卡片标签 */
+  letter-spacing: 0.02em;           /* 同卡片标签 */
+  line-height: 1.18;                /* ★ 第 68 项:1.25 → 1.18(第 63 项曾 1 → 1.25,没有 padding 撑高了交回行高;
+                                       这里再收一点,配合 .side-tags 的 gap 把 5 个标签压成一个紧凑的整体) */
+  /* ★ 第 63 项:粉色渐变文字 —— 与 .module-card__tag 同一套技术,只是色值换成粉色。
+     · color 是**兜底色**:万一 background-clip:text 不被支持(极老的浏览器),
+       字还能是这个粉,不会变成看不见。
+     · 渐变两端见 :root 的 --side-tag-from / --side-tag-to(想改色去那里改)。 */
+  color: var(--side-tag-to);
+  background-image: linear-gradient(90deg, var(--side-tag-from), var(--side-tag-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+/* 荣誉:4 行一条一条的「条目」,不是一段连续的散文。
+   ★ 第 68 项:行高 1.765 → 1.58
+     · 改前 1.765 比正文(1.6)还松 —— 结果这一块看起来像"被拉开的散文",
+       而它下面紧跟着的「教育经历」标题只有 11px 间距,整块黏成一片。
+     · 1.58 略紧于正文,4 行读起来是一条条等距的列表(年份天然左对齐成第二列),
+       层级上就与「散文」区分开了:散文松、列表紧,这也是一种节奏。
+     · 顺带省下 4 × 字号 × 0.185 ≈ 8px 高度,拿来补给板块间距。 */
+.side-honor-list {
+  width: 100%;
+  margin-top: 0.38em;   /* ★ 第 68 项:4px → 0.38em(标题↔列表,最紧一档) */
+}
+.side-honor-list li {
+  font-size: var(--side-fs);
+  line-height: 1.58;
+}
+/* 荣誉最后一行行高松(1.765),行盒底部比 ink 多出约 4.5px(正文行高 1.6 时只有约 1.5px);
+   实测「荣誉最后一行 ink → 教育经历 ink」比切图时代松 5px,所以把标题的 24px 收到 19px,
+   收完两者 ink 间距一致(均为 46px)。
+ ★ 第 51 项:19 → 11 —— 定高一屏需要,再收 8px;ink 间距由 46 → 38px,
+   仍明显大于行距,「荣誉 / 教育经历」两个模块的分组关系没有糊在一起。
+ ★ 第 68 项:11px → **2.15em(板块距)** —— 这是本次最关键的一处。
+   用户说的"密",在这一对相邻元素上最明显:荣誉最后一行 ink 到「教育经历」标题只有 38px,
+   只比行距(18.6px)大一点点,两个板块几乎连体。现在拉到 2.15 × 字号(≈24px 行盒距)。
+   ⚠️ 第 51 项那次「为定高一屏而收 8px」的方向,本次被明确推翻了 ——
+      用户看过成品后要求的是"有节奏",而不是"塞得更满";以本次为准。 */
+.side-honor-list + .side-edu-title {
+  margin-top: 2.15em;
+}
+/* 教育经历:单行 */
+.side-edu-text {
+  margin-top: 0.38em;   /* ★ 第 68 项:5px → 0.38em(最紧一档) */
+  font-size: var(--side-fs);
+  line-height: 1.6;
+}
+
+/* ========== 矮屏兜底:视口高 ≤720px 时再压一轮(2026-10-12 第 51 项)==========
+   用户要求:「左侧区域定高,尽量在极限情况下也不支持上下滑动」。
+   · 常规屏(视口 ≥760)靠上面那轮间距压缩就已经能塞进一屏,不进这个媒体查询。
+   · 但 1366×768 / 1280×800 / 1024×768 这类屏可视高只有 660~710px,按常规值
+     还差 130px 左右。此时若只靠 initSidebarFit() 收窄侧栏,要收到 ~193px 才装得下,
+     正文字号会掉到 7.9px(比加大之前还小),得不偿失。
+     → 所以改在「矮屏才生效」的一组紧凑值上再压一档,**字号保持不变**。
+   ────────────────────────────────────────────────────────
+    项目            常规        矮屏      省(@240px 侧栏)
+    头像裁切比例    1 / 1.12    1 / 0.78  81.6px
+    侧栏底部留白    14          8         6
+    联系卡内边距    上6 / 行2   4 / 0     16
+    各段间距        —           见下      ~18
+    简介/工作行高   1.60        1.50      ~5
+    荣誉行高        1.765       1.60      ~17
+   ────────────────────────────────────────────────────────
+   头像只是把 aspect-ratio 调扁(object-position 已锚定 top,只多裁掉画面下沿,
+   头部完整),等价于「更近一点的特写」,不换图、不缩放。
+
+   ★ 第 68 项:下面的间距全部跟着主阶梯换成了 em,并**保持主阶梯的形状**
+     (0.32 紧 / 0.50 段 / 1.55 板块 / 1.00+1.05 分隔线档 —— 相对关系与常规态一致,
+      只是整体各收≈28%)。这样矮屏也只是"更紧凑的同一套排版",不会退化成没有层级的糊面。
+     ⚠️ 数值按 max-height:720px 这一档标定:此时侧栏已收到 MIN=232(字号 ≈10.06px),
+        常规态的 2.15em 板块距在这里会顶不住一屏,所以收 28%。 */
+@media (max-height: 720px) {
+  .sidebar {
+    padding-bottom: 8px;
+  }
+  .sidebar__avatar img,
+  .sidebar__avatar video {
+    aspect-ratio: 1 / 0.78;
+  }
+  /* ★ 第 68 项(二次校准):这一档最初按"整体各收 28%"给成 1.55em 板块距,
+     实测结果是 17.6px,而这一档的正文行高是 1.5em = 17.0px —— **比值只有 1.03**,
+     等于把常规档刚修好的"板块距 > 行距"又压没了(常规档是 2.15 / 1.6 = 1.34)。
+     矮屏已经靠头像裁切省下 81px,不该再拿间距去换,所以这里按**比值**重新标定:
+       板块距 2.00em / 行高 1.5em = 1.33   分隔线档 (1.25+1.15) / 1.5 = 1.60
+     与常规档的 1.34 / 1.69 基本对齐 —— 矮屏看到的是"更紧凑的同一套节奏",不是糊面。 */
+  .side-about-title { margin-top: 0.50em; }
+  /* ★ 第 71 项:跟着常规档一起加松,但**只加一半** ——
+     矮屏的空间是从头像裁切(省 81px)里挤出来的,全量加(+0.60em ×2 ≈ +12px)会顶掉一屏。
+     这里各 +0.30em(字号 ≈10.06px,合计约 +6px),相对关系与常规档一致。 */
+  .side-name        { margin-top: 1.10em; }
+  .side-bio         { margin-top: 0.80em; line-height: 1.5; }
+  /* 第 70 项:分隔线已移除,原「.side-bio + .side-divider」1.25em 一档取消 */
+  .side-work-title  { margin-top: 2.00em; }  /* ★ 板块距(与 .side-honor-title 同档) */
+  .side-work-text   { margin-top: 0.32em; line-height: 1.5; }
+  .side-tags        { margin-top: 0.32em; }
+  .side-honor-title { margin-top: 2.00em; }
+  .side-honor-list  { margin-top: 0.32em; }
+  .side-honor-list li { line-height: 1.50; }
+  .side-honor-list + .side-edu-title { margin-top: 2.00em; }
+  .side-edu-text    { margin-top: 0.32em; line-height: 1.5; }
+  .side-edu-text + .side-divider { margin-top: 1.25em; }
+  /* ★ 第 69 项:方案 C 已经没有容器了,原来那两条 padding 覆写(4px 14px / 0)
+     不再适用 —— 矮屏只把板块距与行距各收一档,形态保持不变。
+     板块距与矮屏档的 .side-honor-title / .side-edu-title 同档(2.00em),
+     行距 0.42 → 0.34em。 */
+  .info-card--contact {
+    margin-top: 2.00em;
+    gap: 0.34em;
+  }
+}
+
+/* --- 左侧栏横向分隔线 ---
+   (DOM 里目前只挂了一条 —— 简介与「工作经历」之间那条;下面 .side-edu + .side-divider
+    是留给「教育经历之后」的备用位,当前 HTML 没有该元素,留着不影响渲染。)
+   ★ 原来是一张切图 assets/side-divider-v2.png(紫色,左端最亮、向右渐暗)。
+   用户看到右侧 .tl-line 那条「两端渐隐、中间最亮」的紫线后认可这个效果,
+   要求左侧栏的横向分隔线也用它 —— 现在改用 CSS 画,配方见 :root 的
+   --brand-line-h(横向),与 --brand-line-v(竖向)同样只差 90° 方向。
+   ⚠ 第 58 项起两者**颜色已不同**:竖线改成了中性白(理由见 :root 注释),
+     这条横线**仍是品牌紫** —— 因为它正下方就是紫色的「工作经历 / 个人荣誉 /
+     教育经历」小标题,紫在这里是成组出现的;想一起改成中性白,
+     把这里的 background 换成 var(--brand-line-v) 再把方向改回 90deg 即可。
+   · 几何完全沿用 aspect-ratio(4420/22 ≈ 1.89px 高)+ width:100%(满栏),
+     高度/占位与切图时代逐像素一致 —— 这样 initSidebarFit 按「内容高=视口高」
+     反推侧栏宽的结果不会漂。
+   · HTML 同步从 <img> 换成 <div>:它不是内容,不该是一张图;顺带不进灯箱图组。
+   · 老切图 assets/side-divider-v2.png 保留未删。想还原:
+     把下面的 background 换成 url("../assets/side-divider-v2.png") center / 100% 100% no-repeat,
+     再把标签换回 <img class="side-divider" src="assets/side-divider-v2.png" alt="" aria-hidden="true">。 */
+/* ⚠️ 第 70 项:DOM 中的 .side-divider(「简介 → 工作经历」那条紫线)已按用户要求移除,
+   下面这三条规则(含 .side-bio + .side-divider / .side-edu-text + .side-divider)
+   当前均**无匹配元素**,保留仅为便于日后还原;要整段删除可直接删到本段末尾。 */
+.side-divider {
+  width: 100%;
+  margin-top: 1.40em;               /* ★ 第 68 项:22px → 1.40em(分隔线档,全栏最高一级留白) */
+  aspect-ratio: 4420 / 22;          /* 满栏时 ≈ 1.89px 的细线 */
+  background: var(--brand-line-h);  /* 两端渐隐、中间最亮的品牌紫(与紫色小标题成组,第 58 项起与 .tl-line 不同色) */
+  display: block;
+}
+/* ★ 第 68 项:这一条是「简介 → 履历」的主分隔,上下留白走最高一档 ——
+   线之上 1.40em(本规则),线之下 1.30em(.side-work-title 的 margin-top),
+   合计 2.70em + 1.89px 的实线,**大于任何一处板块距 2.15em**。
+   于是全栏的间距是四级递进(从小到大):
+       0.38em 标题↔内容   <   0.60em 段↔段   <   2.15em 板块↔板块   <   2.70em+线 主分隔
+   有递进才叫节奏;改前这一串是 4~5 / 7 / 11~14 / 11 —— 后两级几乎一样,所以"看不出分组"。
+   ⚠️ 原来写法是 22px / 11px(简介后单独收窄,理由是"补掉行盒多出的 5px"),
+      那是切图时代按 ink 对齐的做法;整条阶梯改用行盒间距后不再需要,统一 1.40em。 */
+.side-bio + .side-divider { margin-top: 1.40em; }  /* 简介后的第一条分割线(第 49 项:原 .side-about-text) */
+.side-edu-text + .side-divider   { margin-top: 1.40em; }  /* 教育经历后的第二条分割线(备用位,见上) */
+
+
+/* ========== Info Company Bar (公司信息条 - 切图) ========== */
+.info-company {
+  /* 胶囊背景与 .info-card 通用卡片保持完全一致,不做特殊化处理。
+     当前切图为纯文字条(1820×400,无胶囊),背景由容器统一提供。 */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(35, 40, 60, 0.65) 0%,
+    rgba(20, 24, 40, 0.85) 100%
+  );
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.info-company img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ========== Info Card (通用) ========== */
+.info-card {
+  width: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(35, 40, 60, 0.65) 0%,
+    rgba(20, 24, 40, 0.85) 100%
+  );
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(6px);
+}
+
+.info-card__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  border-radius: var(--radius-xs);
+  padding: 4px 0;
+  transition: background 0.2s ease;
+}
+
+.info-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 18px;
+}
+.info-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* 白底切图 → 用 filter 转成单色适配深色卡 */
+  filter: brightness(0) invert(1);
+  opacity: 0.78;
+}
+
+.info-text {
+  font-size: 13.5px;
+  color: rgba(var(--text-main-rgb), 0.92);
+  letter-spacing: 0.3px;
+  line-height: 1.5;
+  font-weight: 400; /* 显式重置,确保所有行字重一致 */
+}
+
+/* Skills card - 所有 5 行字重/字号/颜色一致 */
+.info-card--skills {
+  text-align: left;
+  align-items: flex-start;
+  padding: 14px 16px;
+  gap: 8px;
+}
+.info-card--skills .info-text {
+  font-size: 13.5px;
+  color: rgba(var(--text-main-rgb), 0.9);
+  line-height: 1.4;
+  font-weight: 400;
+}
+/* 显式覆盖之前的加粗规则,「深耕商业化」与其它行完全一致 */
+.info-card--skills .info-text:nth-child(2) {
+  font-weight: 400;
+  font-size: 13.5px;
+}
+
+/* ========== Tools Row (4 个单图标横排,无白底,hover 上方 toast 提示) ========== */
+.tools-row {
+  width: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(35, 40, 60, 0.65) 0%,
+    rgba(20, 24, 40, 0.85) 100%
+  );
+  border-radius: var(--radius-md);
+  padding: 14px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 4px;
+}
+.tool-icon {
+  /* 去白底:只保留定位,让 icon 自身轮廓直接显示在深色卡上 */
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible; /* 让 toast 提示可以超出 icon 显示 */
+  transition: transform 0.2s ease;
+  position: relative; /* toast 定位锚点 */
+  cursor: pointer;
+}
+.tool-icon:hover {
+  transform: translateY(-3px);
+}
+
+/* hover 上方 toast 提示 - 纯 CSS,用 ::after 读 data-name */
+.tool-icon::after {
+  content: attr(data-name);
+  position: absolute;
+  bottom: calc(100% + 6px); /* icon 上方 6px */
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(20, 24, 40, 0.96);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 10;
+}
+.tool-icon::before {
+  /* 提示下方小三角 */
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border: 5px solid transparent;
+  border-top-color: rgba(20, 24, 40, 0.96);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 10;
+}
+.tool-icon:hover::after,
+.tool-icon:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tool-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+/* ========== Contact card ==========
+   ★★ 2026-10-14 第 69 项:整块重做为「竖轴索引」(三选一里用户选的方案 C)。
+
+   ── 为什么要重做 ──
+   用户:"这个区域的设计效果和整个左侧区域的设计风格不太一致"。实测出的四处不一致:
+     1. 【结构性】字号写死 11.5px,而侧栏正文是 5.4974cqw(随栏宽)。栏宽由
+        initSidebarFit() 按**视口高**反推(232~460px),实测正文
+        232/296/380/460px 时 = 10.06/13.58/18.20/22.59px,与 11.5px 的偏差
+        = −13% / +18% / +58% / **+96%** —— 宽栏下联系卡的字只有正文一半。
+     2. 全栏唯一的容器:左侧栏其它内容(简介/荣誉/教育/标签)一个盒子都没有。
+     3. hover 用 rgba(79,124,255,*)—— 全站唯一一支蓝;复制提示是实心 #560CF5
+        —— 全站唯一的实心品牌色块。
+     4. 字色 rgba(189,189,189,.92)(#bdbdbd 系)≠ 侧栏正文 --side-text #dcd8d8;
+        文字左缘 43px vs 正文 4px(右移 39px);图标被 brightness(0) invert(1)
+        压成纯白(切图原始 ink 实测 = #dedada,本来就是正文色)。
+
+   ── 方案 C 的形态 ──
+     · 去掉容器,改成「左侧一条竖轴 + 三个圆形节点 + 文字挂在右侧」。
+     · 融入点在**语言同源**,不是配色:竖轴吃 --line-neutral-peak(与右侧时间轴
+       .tl-line 同一支),节点圆底 + 内嵌图标沿用 .cg-node / .tool-icon 那套
+       「图标坐在圆形底上」的做法。
+
+   ── 三个必须记住的实现细节 ──
+     ⒜ --side-fs 与 .side-blocks 那一档**完全同源**:联系卡这一版已经移进
+        .side-blocks(index.html),是它的直接子元素,所以直接命中
+        `.side-blocks > * { --side-fs: 5.4974cqw }` —— 同一个容器、同一个系数,
+        与「湖南大学｜工业设计专业」严格同值(不再有系数折算带来的 ±0.6% 漂移)。
+        下面这两行是**显式复写**,只为可读性与防御(万一将来又被移出 .side-blocks,
+        它也能自己取到值);数值必须与 `.side-blocks > *` 保持一致。
+     ⒝ 图标改 mask + 渐变,但 **mask-size 必须和 mask-image 成对写**。
+        只写 mask-image 时 mask-size 默认 auto = 按切图原始 200×200px 取样,
+        在 .84em 的框里只截到画布正中 → 渲染成一个方块。
+        且三张图 ink 只占画布 55~77%,contain 会显得很小,按各自 ink 补偿:
+        medal 128% / phone 132% / email 140%(信封是宽图,按 ink 宽度补)。
+     ⒞ 竖轴**不能**直接用 --brand-line-v。那是为整列高度设计的,两端衰减到 5%,
+        在这段 ~46px 的短线里整条都看不见;按同一支颜色另配「短距渐变」
+        (两端 0.18 倍、中间满峰值 0.26)。 */
+.info-card--contact {
+  --side-fs: 5.4974cqw;          /* ⒜ 与 `.side-blocks > *` 同源同值 */
+  font-size: var(--side-fs);
+  background: none;              /* 撤掉容器:底/边/投影/圆角/毛玻璃全部去掉 */
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  border-radius: 0;
+  /* 左内边距 0:它是 .side-blocks 的子元素,那 4px 缩进已经由父元素提供。
+     再写 4px 就会变成 8px,与上方正文错开。 */
+  padding: 0;
+  gap: 0.42em;
+  /* 板块距:与 .side-honor-title / .side-edu-title 完全同档(2.15em)。
+     移进 .side-blocks 之后这里不再叠加父级的 margin-bottom 与 .sidebar 的 gap,
+     所以用满档而不是像第一版那样收成 2.00em。 */
+  margin-top: 2.15em;
+  width: 100%;
+  position: relative;            /* 竖轴的定位锚点 */
+}
+/* 竖轴:只在首末节点之间(两端各留 0.875em = 半个行盒,正好停在节点圆心) */
+.info-card--contact::before {
+  content: "";
+  position: absolute;
+  left: calc(0.875em - 0.5px);   /* 节点半径(1.75em / 2)− 半像素;4px 缩进由 .side-blocks 提供 */
+  top: 0.875em;
+  bottom: 0.875em;
+  width: 1px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, calc(var(--line-neutral-peak) * 0.18)) 0%,
+    rgba(255, 255, 255, var(--line-neutral-peak)) 50%,
+    rgba(255, 255, 255, calc(var(--line-neutral-peak) * 0.18)) 100%);
+}
+.info-card--contact .info-card__row {
+  padding: 0;
+  gap: 0.58em;
+}
+/* 节点:圆底 + 1px 内圈。**不透明** —— 竖轴从它背后穿过时被截断,形成"串珠" */
+.info-card--contact .info-icon {
+  -webkit-mask-image: none; mask-image: none;   /* 圆底是实心,不套 mask */
+  width: 1.75em;
+  height: 1.75em;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #15151a;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+/* ★ 第 69 项二次调整 —— 用户反馈「icon 怎么没了?而且这 3 个小 icon 稍微有点小」。
+   诊断:图标其实**画出来了**,只是读不出来。第一版节点 1.45em、图标框 0.60em,
+   而 mask-size 128~140% 会把 ink 再放大约 1.3 倍 —— 实际 ink ≈ 0.78em,
+   在 1440×900 下只有 ≈9.6px,比旁边的正文(12.37px)还矮一截;
+   渐变右端又用了偏灰的 #ada3bd。两者叠加,正常缩放下基本看不见。
+   现在:节点 1.45 → **1.75em**(≈21.6px),图标框 0.60 → **0.82em**
+   (ink ≈ 1.07em ≈ 13.2px,与正文等高),占节点直径 61%;
+   渐变同时提亮为 #f2eef8 → #cec5de。 */
+/* 原 <img>:**默认可见** —— 这是兜底。万一浏览器不支持 mask(见本节末尾的 @supports),
+   它就以切图原色显示,而切图 ink 实测 #dedada 正好等于侧栏正文色 ——
+   既不会像通用规则那样被 filter 压成纯白,也不会「图标消失」。 */
+.info-card--contact .info-icon img {
+  width: 0.82em;
+  height: 0.82em;
+  object-fit: contain;
+  filter: none;                  /* 顶掉通用规则那句 brightness(0) invert(1) */
+  opacity: 1;
+}
+/* 渐变图标画在 ::after 上(背景渐变 + mask 形状)。
+   ⚠ 这里**故意不写 content** —— 伪元素默认不生成。只有浏览器确认支持 mask 时,
+      才由本节末尾的 @supports 打开它、并同时把 <img> 隐藏。
+      否则在不支持 mask 的环境里会看到一个**没被裁成图标形状的实心渐变方块**,
+      那比「图标消失」更糟。 */
+.info-card--contact .info-icon::after {
+  position: absolute;
+  width: 0.82em;
+  height: 0.82em;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center;  mask-position: center;
+  background: linear-gradient(90deg, #f2eef8, #cec5de);
+}
+/* ⒝ mask-size 必须成对写,且按各自 ink 占比补偿 */
+/* ★★ 第 72 项修复:三处 mask 已改为**内联 data: URI**(见本仓库 2026-10-14 工作记忆)。
+      原因:file:// 下 mask 位图被 Chromium 的 CORS(origin "null")拦截 → 遮罩全透明 → 图标消失;
+      data: URI 属同源,file:// 与 http:// 下均正常。兜底 <img> 的 src 也已同步改成 data: URI。 */
+.info-card--contact .info-icon--location::after {
+  -webkit-mask-image: url("data:image/png;base64,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"); mask-image: url("data:image/png;base64,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");
+  -webkit-mask-size: 128%; mask-size: 128%;
+}
+.info-card--contact .info-icon--phone::after {
+  -webkit-mask-image: url("data:image/png;base64,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"); mask-image: url("data:image/png;base64,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");
+  -webkit-mask-size: 132%; mask-size: 132%;
+}
+.info-card--contact .info-icon--email::after {
+  -webkit-mask-image: url("data:image/png;base64,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"); mask-image: url("data:image/png;base64,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");
+  -webkit-mask-size: 140%; mask-size: 140%;
+}
+/* ★ 只有确认支持 mask 时,才让 ::after 顶替 <img>。
+   url("#x") 只是语法探测,不会真的去请求资源。
+   · 支持  → <img> 隐藏,::after 显示渐变图标(带 mask 形状;mask 已为内联 data: URI,不依赖外部位图)
+   · 不支持 → <img> 显示内联 data: URI 切图原色图标(#dedada = 侧栏正文色),::after 根本不生成 */
+@supports (mask-image: url("#x")) or (-webkit-mask-image: url("#x")) {
+  .info-card--contact .info-icon img { opacity: 0; }
+  .info-card--contact .info-icon::after { content: ""; }
+}
+.info-card--contact .info-text {
+  font-size: var(--side-fs);
+  color: var(--side-text);
+  font-family: "PingFang SC", "Inter", "Microsoft YaHei", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0.01em;
+  line-height: 1.58;             /* 与 .side-honor-list li 同值 */
+}
+
+/* 复制提示:紧跟在文字之后的深色小 chip。
+   · 不再用实心 #560CF5(全站唯一的实心品牌色块),改成与 .tool-icon::after 同族配色
+   · 不放节点上方(会压住上一行文字),放行右端又离文字太远 → 走静态内联,
+     靠 opacity 淡入淡出,hover 时不推动排版。 */
+.copy-tip {
+  position: static;
+  right: auto;
+  top: auto;
+  transform: none;
+  background: rgba(20, 22, 30, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--side-tag-to);
+  font-size: var(--side-fs);
+  padding: 0.24em 0.55em;
+  border-radius: var(--radius-xs);
+  margin-left: 0.1em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+/* 小三角不再需要(chip 是内联的,没有指向关系) */
+.copy-tip::after {
+  display: none;
+}
+
+/* 2026-10-14 第 74 项:复制成功反馈从「屏幕正中 toast」改为「chip 原地状态翻转」。
+   · 行 hover 时正常显示「点击复制」;
+   · 点击复制后 1.5s 内,同一个 chip 固定显示「✓ 已复制」(即使鼠标已移出也不消失),
+     用紫→绿的渐变边框 + 淡绿底色 + 轻微 pop 动画,与行节点内圈的 hover 粉紫形成呼应;
+   · 失败态 .copied.copied--err 走红色提示。
+   .copied 必须打赢 :hover .copy-tip 的 opacity:0→1 规则,所以独立赋 opacity:1。 */
+.copy-tip.copied {
+  opacity: 1 !important;
+  background: linear-gradient(135deg, rgba(94, 44, 180, 0.95) 0%, rgba(32, 160, 100, 0.92) 100%);
+  border-color: rgba(126, 231, 135, 0.55);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(32, 160, 100, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: copyChipPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) 1;
+}
+.copy-tip.copied.copied--err {
+  background: linear-gradient(135deg, rgba(180, 44, 72, 0.95) 0%, rgba(220, 92, 92, 0.92) 100%);
+  border-color: rgba(255, 155, 155, 0.55);
+  box-shadow: 0 6px 16px rgba(200, 60, 60, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+@keyframes copyChipPop {
+  0%   { transform: scale(0.86); }
+  55%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* hover / focus 反馈全部落在「节点」上:底色转紫 + 内圈转粉 + 图标转粉渐变。
+   文字不动 —— 三个节点已经足够显眼,再改字色会让这一块 hover 时整片发亮。 */
+.info-card__row.copyable:hover .info-icon,
+.info-card__row.copyable:focus-visible .info-icon {
+  background: #3b2a72;
+  box-shadow: inset 0 0 0 1px rgba(190, 130, 255, 0.45);
+}
+.info-card__row.copyable:hover .info-icon::after,
+.info-card__row.copyable:focus-visible .info-icon::after {
+  background: linear-gradient(90deg, var(--side-tag-from), var(--side-tag-to));
+}
+.info-card__row.copyable:hover .copy-tip,
+.info-card__row.copyable:focus-visible .copy-tip {
+  opacity: 1;
+}
+/* 行本身不再铺底色(原来那支 rgba(79,124,255,*) 是全站唯一的蓝) */
+.info-card__row.copyable:hover,
+.info-card__row.copyable:focus-visible,
+.info-card__row.copyable:active {
+  background: none;
+}
+
+/* ========== Content (右侧可滚动) ========== */
+.content {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* 右侧背景:按参考图吸色后的**纯色** #222222(原来的极光图已下线,文件仍保留在
+     assets/ 里;想换回图片背景:把下面这行换成
+     background: #222222 url("../assets/aurora-dark-1-calm-fade.jpg") center center / cover no-repeat; )
+     .content 自身不滚动(内部 .content__scroll 才滚),背景相对视口固定。 */
+  background: var(--page-bg);
+  color: var(--text-main); /* 右侧全局默认白字,覆盖 body 的深灰继承 */
+}
+
+/* 注:这里原本放"选中态水滴边缘的顺时针流光"(@property --tab-flow-a 注册角度 +
+   @keyframes tab-flow-spin + conic-gradient 光带)。按最新要求**整体移除**了:
+   现在水滴边缘只剩一圈静态棱边微光(见 .tab-drop__body::after),不再有绕行光带。
+   如需恢复:把 @property/@keyframes 加回,并在 ::after 的 background 里重新叠一层
+   conic-gradient,同时恢复 animation: tab-flow-spin。 */
+
+/* ========== Tabs(iOS 26 液态玻璃:玻璃条 + 四周边缘微光;选中态为"凸出容器的玻璃水滴") ========== */
+.tabs {
+  flex: 0 0 auto;
+  z-index: 5;
+  /* 上下留白:下 > 上。玻璃条下方要给足"呼吸位",不然会和紧跟着的时间轴内容糊在一起;
+     水滴比容器上下各凸 3px,所以最小值也不能低于 10px(否则凸出的部分会被裁)。
+     · 常规屏(1440):上 20px / 下 30px(+ 下方滚动区自带的上 padding,合计约 47px)
+     · 窄屏(≤900): 上 14px / 下 18px,仍明显大于原来的 6px
+     左右留白 = var(--gutter-x),与 .content__scroll 共用同一个值,
+     保证 tab 左缘与下方信息流内容左缘严格同列(原来这里是 clamp(12px,2.8vw,40px),
+     在 <1428px 视口会比内容左缘偏左最多 12px)。 */
+  padding: clamp(14px, 1.5vw, 20px) var(--gutter-x) clamp(18px, 2vw, 30px);
+  background: transparent;
+  /* 横向缩放时:tabs 容器支持横向滚动,保证所有 tab 始终可通过滑动访问,不被视口截断 */
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  /* 隐藏横向滚动条(视觉上跟随缩放,滑动手势仍可用) */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs__items {
+  /* 几何参数集中在这里:选中"水滴"的凸出量改 --tab-lift 一处即可 */
+  /* 纵向内边距 = 字号 × 0.5 − 1px(13px 文字 → 5.5px):
+     与下面的 height 联立后,「pill 内高」正好 = 字号 × φ —— 见 height 的注释 */
+  --tab-pad-y: calc(var(--fs-sm) * 0.5 - 1px);
+  --tab-pad-x: clamp(6px, 0.7vw, 10px);
+  /* 选中态水滴相对容器上下各凸出的高度(刻意做轻,只"冒一点点")
+     ★ 2026-10-10 第 48 项:原来写死 3px。压缩后的轨道矮了 8px,
+       凸出量若不动,凸出占比会从 7% 涨到 9%,看着"有点支棱"。
+       现在挂到字号上:13px 字号 → 2.99px(≈ 保持原来 3px 的手感),
+       窄屏字号变小时跟着收,和 height 一样任何视口比例都不走形。
+       ⚠ 注意 height 里的 100% 解析的是**内高**(外高 34 − 上下 1px 边线 = 32px),
+         所以水滴外高 = 32 + 2×2.99 + 2 = 39.98px(不是 42px)。
+       这个数几乎正好等于压缩**前**轨道的内高(40px)——
+       也就是说:整条轨道矮了 8px,水滴的"个头"基本还停在原来那一档。 */
+  --tab-lift: calc(var(--fs-sm) * 0.23);
+  /* tab 文字左右留白(横向 clamp,跟视口缩放) */
+  --tab-x-pad: clamp(8px, 1.1vw, 16px);
+  display: inline-flex;
+  align-items: stretch;
+  gap: clamp(4px, 0.42vw, 6px);
+  padding: var(--tab-pad-y) var(--tab-pad-x);
+  /* ★ 高度 = tab 字号(--fs-sm)× φ² ≈ 2.618 —— 一条真正的黄金比例链:
+       文字 13px → pill 内高 21px(× φ)→ 整条外高 34px(再 × φ)
+     ────────────────────────────────────────────────
+     ★ 2026-10-10 第 48 项(用户反馈「顶部导航 tab 高度……稍微有点高」):
+       原值 clamp(34px, 3.4vw, 42px) —— 42 / 13 = 3.23 倍字号,
+       比紧凑 pill 的常见区间(2.5~2.6 倍,如 iOS 分段控件 32pt/13pt ≈ 2.46)
+       松了整整一档,所以读起来"偏高、偏空"。
+       ⚠ 顺带修正旧注释的算术错误:原文写「13 × φ × 2 ≈ 42」,
+         但 13 × φ × φ = 34 —— 也就是说这里原本想要的黄金链指的其实是 34px。
+       现在直接挂到 --fs-sm 上:字号随视口缩放,高度按**同一个比例**跟着变,
+       任何视口的比例都不会走形(原来 height 走 3.4vw、字号走 0.92vw,两者速率不同,
+       比例在小屏/大屏之间会从 3.09 漂到 3.23)。
+     · 想再高 / 再矮:只改 2.618 这一个系数(2.9 ≈ 38px / 2.35 ≈ 30px);
+       改了记得同步校核上面的 --tab-pad-y(内高 = 字号×φ 才成立)。
+     · 下沿 clamp 兜底 30px:窄屏字号 11px 时纯比例只有 28.8px,过于贴手。 */
+  height: clamp(30px, calc(var(--fs-sm) * 2.618), 34px);
+  /* ★ 底色 = 卡片底色(--card-bg = #0f0f0f),与 .module-card 完全同一支颜色。
+     原来这里是「半透明白渐变 + backdrop-filter」的玻璃本体,和下方卡片是两套语言
+     (卡片是纯色深底),按"顶导航大胶囊与卡片保持一致"的要求换成卡片配方。
+     底色不透明后 backdrop-filter 已无视觉意义,一并去掉(和 .module-card 的处理一致,
+     顺带省一层合成开销)。
+     · 要恢复玻璃:把 background 换回 158deg 的白色渐变(0.13→0.065→0.03→0.015→0.05→0.095),
+       并加回 backdrop-filter: blur(22px) saturate(170%) brightness(1.07)。 */
+  background: var(--card-bg);
+  /* ★ 边线 = 卡片边线(--card-line = rgba(255,255,255,0.34)),与 .module-card 同一条。
+     原来是 0.06(几乎隐形),现在和卡片一样是一圈明确但不过分的亮线:
+     叠在 #0f0f0f 上实测 ≈ 灰 97,与截图 2 卡片边线实测峰值 97 完全一致。 */
+  border: 1px solid var(--card-line);
+  /* 全胶囊,横向 nav 主流审美 —— 形状是导航的识别点,刻意不跟卡片的 22px 圆角 */
+  border-radius: var(--radius-pill);
+  /* ★ 阴影 = 卡片投影,三层参数与 .module-card 逐条一致:
+     ① 主投影(远) ② 近距实影 ③ 底部 1px 内暗边。
+     原来是"玻璃厚度"六层(顶部亮线 / 底部内反射 / 上部雾光 / 下部暗部 / 两层外投影),
+     已整组替换成卡片的三层。 */
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.42),
+    0 2px 8px rgba(0, 0, 0, 0.30),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  position: relative;
+  isolation: isolate; /* 独立堆叠上下文,让 ::before 负 z-index 不穿透 */
+  /* inline-flex 内容宽度自然撑开,配合外层 overflow-x:auto 支持横向滚动 */
+  white-space: nowrap;
+  min-width: max-content;
+  /* 必须是 visible:选中态玻璃水滴比容器更大,要能凸出容器上下(外层 .tabs 的 padding 足够容纳) */
+  overflow: visible;
+}
+/* 顶部边线的"亮部":与 .module-card::before 同一支(白 0.10 → 0.03 → 0),
+   让胶囊和卡片一样「顶边略亮、向下很快渐隐」,而不是整圈发光的玻璃环。
+   ★ 原来这里是"四周边缘微光环"(上下一层 + 左右一层的 mask-composite 描边),
+     卡片没有这一层,为保持一致已移除;想恢复就用下面注释里那份配方。
+   · 原环状配方(备查):padding:1.5px + 上下 linear-gradient(0.15/0.03/0.02/0.10)
+     + 左右 linear-gradient(0.11/0.02/0.02/0.10) + mask-composite:exclude */
+.tabs__items::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.03) 4%,
+    rgba(255, 255, 255, 0) 14%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+/* ★「液态玻璃折射光斑」层(①左上高光 ②右下柔光 ③顶部渐隐光)已整体删除 ——
+   卡片内部是均匀纯色、没有任何光斑,保留它会让胶囊重新和卡片拉开差距。
+   · 想恢复就把这段加回来:
+     .tabs__items::after { content:""; position:absolute; inset:0; border-radius:inherit;
+       background: radial-gradient(ellipse 60% 80% at 15% 20%, rgba(255,255,255,.24) 0%, transparent 60%),
+                   radial-gradient(ellipse 40% 60% at 85% 80%, rgba(255,255,255,.12) 0%, transparent 60%),
+                   linear-gradient(to bottom, rgba(255,255,255,.11) 0%, transparent 42%);
+       pointer-events:none; z-index:1; } */
+
+.tab {
+  font-size: var(--fs-sm); /* 跟随视口横向缩放,极窄时最小 12px */
+  font-weight: 500;
+  color: rgba(var(--text-main-rgb), 0.66);
+  padding: 0 var(--tab-x-pad); /* 左右留白也一并微缩,匹配新高度 */
+  line-height: 1; /* 去掉行高多余间距,文字盒紧贴字形,消除偏下 */
+  position: relative;
+  z-index: 2;
+  border-radius: var(--radius-pill);
+  /* 玻璃上的文字:极轻投影,保证压在亮高光上仍可读 */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
+  transition: color 0.2s ease, background 0.24s ease, box-shadow 0.24s ease;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center; /* 文字在 tab 内垂直居中 */
+}
+
+/* 未选中"默认态" —— 不做任何气泡/底色,直接显示文字:
+   只有容器那条玻璃轨道本身 + 文字;选中态才浮出那颗"大气泡"。
+   hover 也只提亮文字(见下方 .tab:hover:not(.active))。 */
+.tab:not(.active) {
+  background: none;
+  box-shadow: none;
+}
+
+/* 选中态的文字(水滴本体见下方 .tab-drop,它是独立元素,不再挂在 tab 上)
+   ★ 颜色 = #FFFFFF 80% —— 不再跟 --text-main(#bdbdbd 纯色),
+     要高亮一档但又不做成纯白,和玻璃水滴的"透"呼应。 */
+.tab.active {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(20, 10, 40, 0.50);
+}
+
+/* ===== 会移动的液态玻璃水滴(iOS 26 选中态)=====
+   以前水滴是 .tab.active 的伪元素 —— 切换页签时旧的直接消失、新的直接出现,没有"过程"。
+   现在它是 .tabs__items 里的一个独立元素:
+   · 水平位置/宽度由 JS 写进 --drop-x / --drop-w(坐标基准 = 容器 padding box)
+   · 切换页签时靠 CSS 过渡从上一个 tab 平滑"游"到下一个(带一点点过冲,像被吸过去)
+   · 滑动中它压在 tab 文字下面,backdrop-filter 会实时折射扫过的文字 —— 这就是液态玻璃的观感 */
+.tab-drop {
+  position: absolute;
+  left: 0;
+  /* 高度 = 容器内高(= 外高 − 2×1px 边线)+ 上下各 (lift + 1px border):
+     外高 34px → 内高 32px → 32 + 2×2.99 + 2 = 39.98px,即上下各凸 2.99px */
+  top: calc(-1 * (var(--tab-lift) + 1px));
+  height: calc(100% + 2 * var(--tab-lift) + 2px);
+  width: var(--drop-w, 0px);
+  transform: translate3d(var(--drop-x, 0px), 0, 0);
+  /* 压在所有 tab 文字之下、容器玻璃条之上 */
+  z-index: 2;
+  pointer-events: none;
+  /* 位移节奏(过冲加大版 cubic-bezier(0.38,0.02,0.26,1.38)):
+     0.58s,前段慢"蓄力"、中段冲过去、约 70% 处冲到最远(实测 +6.5%),
+     再被"表面张力"拽回目标位 —— 原来的曲线只有 +2%,几乎看不出;
+     单格切换(相邻 tab 间距 ~106px)约过头 7px,跨两格约 13px。
+     · 想更晃:把最后一档 1.38 调大(1.5 ≈ +10%);想收:调到 1.2 左右。
+     宽度用略保守的曲线(过冲小),免得横向被拉得过胖。 */
+  transition:
+    transform 0.58s cubic-bezier(0.38, 0.02, 0.26, 1.38),
+    width 0.58s cubic-bezier(0.42, 0.13, 0.3, 1.18);
+  will-change: transform, width;
+}
+/* 玻璃本体单独一层:位移交给外层 .tab-drop(过渡),"甩动/挤压/回弹"交给本体(动画)。
+   同一个元素上 transform 只能整体过渡,分两层才能一边滑一边晃。 */
+.tab-drop__body {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  /* 液态玻璃本体:靠亮度(而不是颜色)与未选中区分 —— 亮度配方一行没动,
+     只在**上面**多叠了一层品牌紫薄雾(第 48 项),把色相往主题紫推一点点。
+     · ① 品牌紫薄雾:亮端 → 主色 → 主色 → 亮端(与玻璃高光同向 158deg),
+        alpha 只有 0.10~0.20,叠完仍是"透"的,不会出现色块感。
+     · ② 玻璃本体:原配方(白 0.30 → 0.15 → 0.08 → 0.07 → 0.18)。
+     · 想调紫的浓淡:改 :root 的 --drop-purple-k(0 = 退回纯白玻璃)。 */
+  background:
+    linear-gradient(
+      158deg,
+      rgba(var(--drop-purple-lt), calc(0.14 * var(--drop-purple-k))) 0%,
+      rgba(var(--drop-purple), calc(0.09 * var(--drop-purple-k))) 32%,
+      rgba(var(--drop-purple), calc(0.12 * var(--drop-purple-k))) 64%,
+      rgba(var(--drop-purple-lt), calc(0.17 * var(--drop-purple-k))) 100%
+    ),
+    linear-gradient(
+      158deg,
+      rgba(255, 255, 255, 0.30) 0%,
+      rgba(255, 255, 255, 0.15) 28%,
+      rgba(255, 255, 255, 0.08) 56%,
+      rgba(255, 255, 255, 0.07) 78%,
+      rgba(255, 255, 255, 0.18) 100%
+    );
+  backdrop-filter: blur(18px) saturate(190%) brightness(1.22);
+  -webkit-backdrop-filter: blur(18px) saturate(190%) brightness(1.22);
+  /* 边线:掺一点紫的冷白(原来 255,255,255 / 0.24),让轮廓也跟着泛紫,
+     但亮度基本不变(0.24 → 0.28 是为了补偿掺紫后视觉上的"变闷")。 */
+  border: 1px solid rgba(236, 220, 255, 0.28);
+  /* 玻璃厚度(轻量版):顶部亮线 + 底部回光 + 上部雾光 + 下部极浅暗部 + 很轻的浮起投影,
+     全部数值比上一版压掉约一半,避免"塑料凸块"的硬边。
+     ★ 第 48 项的两处泛紫(都在不破坏玻璃厚度的前提下):
+       · 底部内雾光 inset -18px:新增一层紫,取代原来"下部只有纯暗"的状态,
+         是水滴内部最明显的一处紫(从下往上晕)。
+       · 外发光 0 8px 22px:原来是 rgba(60,20,140,0.10) 的近黑紫(几乎看不出),
+         换成品牌紫本体 —— 这是"呼应主题色"最容易被看见的一处(光晕在水滴之外)。
+       其余三层保持纯白/近黑,玻璃的通透感不受影响。 */
+  box-shadow:
+    inset 0 1.5px 0 rgba(244, 234, 255, 0.64),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.20),
+    inset 0 14px 20px -14px rgba(255, 255, 255, 0.40),
+    inset 0 -18px 26px -16px rgba(var(--drop-purple), calc(0.19 * var(--drop-purple-k))),
+    inset 0 -16px 22px -16px rgba(30, 12, 58, 0.24),
+    0 3px 12px rgba(0, 0, 0, 0.22),
+    0 8px 22px rgba(var(--drop-purple), calc(0.18 * var(--drop-purple-k)));
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+/* 切换过程中的"晃动":起滑被拉长 → 途中被挤扁 → 到达时甩过头再回弹(垂直也轻微起伏)。
+   由 JS 在每次切换时挂上 .is-gliding,动画结束自动摘掉。 */
+.tab-drop__body.is-gliding {
+  animation: tab-drop-wobble 0.62s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes tab-drop-wobble {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+  14% {
+    transform: scale(1.11, 0.915) translateY(-1.4px); /* 起步:被拽长、略微上甩 */
+  }
+  30% {
+    transform: scale(1.14, 0.895) translateY(1.5px); /* 加速段:最瘦长,向下坠 */
+  }
+  48% {
+    transform: scale(1.02, 0.99) translateY(-0.7px);
+  }
+  66% {
+    transform: scale(0.905, 1.10) translateY(1.9px); /* 接近目标:惯性挤压变胖 */
+  }
+  80% {
+    transform: scale(1.085, 0.935) translateY(-1.9px); /* 冲过头,反向甩 */
+  }
+  91% {
+    transform: scale(0.965, 1.035) translateY(0.9px);
+  }
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+/* 首次定位 / 窗口尺寸变化:瞬间归位,不做"从上一个位置滑过来"的动画 */
+.tab-drop.is-instant {
+  transition: none;
+}
+/* 水滴边缘:一圈**静态**棱边微光(原来的顺时针绕行流光已按要求移除,不带动画) */
+.tab-drop__body::after {
+  content: "";
+  position: absolute;
+  inset: -1px; /* 与本体外缘对齐(本体本身有 1px border) */
+  border-radius: var(--radius-pill);
+  padding: 1.25px;
+  /* 第 48 项:整条棱边从纯白改成"掺紫的冷白"(232,214,255),alpha 全部不动 ——
+     亮度不变、只把边缘往主题紫推一点点,和本体/外发光是同一支紫。 */
+  background: linear-gradient(
+    150deg,
+    rgba(238, 226, 255, 0.90) 0%,
+    rgba(234, 218, 255, 0.34) 20%,
+    rgba(228, 208, 255, 0.08) 48%,
+    rgba(229, 210, 255, 0.12) 64%,
+    rgba(234, 220, 255, 0.46) 86%,
+    rgba(237, 224, 255, 0.72) 100%
+  );
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* hover 时水滴本体更亮一点点(只跟页面整体 hover 感一致,不做夸张变化) */
+.tabs:hover .tab-drop__body {
+  box-shadow:
+    inset 0 1.5px 0 rgba(248, 240, 255, 0.72),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.24),
+    inset 0 14px 20px -14px rgba(255, 255, 255, 0.46),
+    inset 0 -18px 26px -16px rgba(var(--drop-purple), calc(0.25 * var(--drop-purple-k))),
+    inset 0 -16px 22px -16px rgba(30, 12, 58, 0.24),
+    0 4px 14px rgba(0, 0, 0, 0.24),
+    0 9px 24px rgba(var(--drop-purple), calc(0.23 * var(--drop-purple-k)));
+}
+.tab.active:hover {
+  color: rgba(255, 255, 255, 0.8); /* 与 .tab.active 同色,避免 hover 时被压暗 */
+}
+
+/* 未选中 hover:只提亮文字,不改动任何背景/阴影 */
+.tab:hover:not(.active) {
+  color: var(--text-main);
+}
+
+/* 选中的 tab 文字抬到水滴之上(水滴是兄弟元素,补一句保险) */
+.tab.active {
+  z-index: 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 底部容器条本来就只有静态微光;这里关掉水滴的滑动过渡与切换晃动,
+     边缘只剩静态棱边微光(流光已整体移除,无需再停) */
+  .tab-drop {
+    transition: none;
+  }
+  .tab-drop__body.is-gliding {
+    animation: none;
+  }
+}
+
+.content__scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* 顶部 padding 也跟着加一点:与 tab 区下方留白叠加,形成明确的"导航 / 内容"分界
+     左右留白 = var(--gutter-x),与 .tabs 共用同一个值(左缘同列) */
+  padding: clamp(12px, 1.2vw, 18px) var(--gutter-x) 80px;
+  scroll-behavior: smooth;
+}
+.content__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.content__scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 3px;
+}
+.content__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ========== Section ========== */
+.section {
+  scroll-margin-top: 80px;
+}
+
+/* ========== Timeline Layout (两列:左数据标签 + 竖线 + 右模块) ========== */
+/* 整体容器 — 所有 tl-row 纵向堆叠 */
+.tl-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8); /* 模块间距(章节级) */
+  scroll-margin-top: 80px;
+}
+
+/* 每行 = [左标签] [竖线] [右内容] */
+.tl-row {
+  display: flex;
+  align-items: stretch; /* 竖线撑满行高 */
+  min-height: 120px;
+  scroll-margin-top: 0;
+}
+
+/* --- 左列:数据标签,★ 左对齐 ---
+   ★ 原来是 justify-content: flex-end(图片贴竖线)。
+     问题:标签切图本身宽度只有列的 79%,右对齐后左侧会空出 39px,
+     加上切图内部烘着的左侧透明留白,标签**文字可见左缘**落在 446~498px,
+     而顶部 tab 玻璃胶囊左缘在 384px —— 信息流内容的左缘比 tab 缩进 62~114px,
+     读起来像是"内容整体右移了一格"。
+     现在改成 flex-start:切图盒左缘 = .tl-label 左缘 = 384px,
+     文字可见左缘随之落到 407~459px,与 tab 左缘在同一列上。
+     ⚠ 竖线(584px)与右侧内容完全不受影响 —— 空出来的 39px 从"左侧"挪到了"右侧",
+       即标签与竖线之间的呼吸位变大。
+     若要进一步把文字左缘压到严格 384px,需要裁掉切图左侧的透明留白
+     (data-*-v2.png 左侧留白 361~1181px 不等),本次按最小改动未动切图。 */
+.tl-label {
+  flex: 0 0 14%;
+  min-width: 100px;
+  max-width: 200px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start; /* 图片左对齐 = 与顶部 tab 左缘同列 */
+  padding: 0 var(--space-4) 0 0; /* 右侧与竖线间距 16px */
+}
+/* 标签切图:原图 2900px 宽,右侧烘进了 608~622px 透明空白(约占 21%),
+   会把文字右缘与灰色竖线的间距撑大。已裁掉该透明空白另存 -v2.png(统一 2292px 宽),
+   这里用 79.034% (=2292/2900) 让字号/字重与原图完全一致,
+   右侧仅剩 tl-label 的 padding-right 留白 */
+.tl-label img {
+  width: 79.034%;
+  height: auto;
+  display: block;
+}
+
+/* --- 竖线:每个模块独立的左侧竖线 ---
+   ── 三代沿革 ──
+   ① 最初:rgba(0,0,0,0.06~0.12) 的**黑色**低透明度 —— 页面是深底(#222222 / 卡片 #0F0F0F),
+      黑叠黑等于隐身,实测几乎看不到(等于没有这条线)。
+   ② 第 45 项:改成品**牌紫**渐变 rgba(190,130,255,0.40)。能看见了,但它是内容列里
+      唯一的一笔紫 —— 周围全是中性物(卡片 #0F0F0F 底 + 白 .34 边线),
+      读起来像"配色跑掉的一笔",用户反馈「太花了」。
+   ③ 第 58 项(★ 现在):改成**卡片边线色(中性白 rgba(255,255,255,0.34))同族的渐隐线**,
+      见 :root 的 --brand-line-v。让这条线读成"卡片边线的延伸"而不是一个独立装饰,
+      页面里只留时间轴轴线/节点/卡片标签这几处有意的紫。
+   ── 不变的几何 ──
+   · 2px 宽,上下两端收到峰值的 0.20 倍渐隐 → 读成"一段分隔"而不是一根硬棍;
+   · 峰值渲染亮度 76.0,与卡片边线 75.7 基本相等(实测),远低于轴线(alpha .95)与长刻度(.78),
+     不会抢走时间轴/卡片的视觉焦点。
+   想调强弱只改 :root 的 --line-neutral-peak 一个数。
+   ⚠ 从第 58 项起**不再**和 --brand-line-h(左侧栏横线,仍是品牌紫)同色标 ——
+     分隔两类表面是有意的,理由写在 :root 那段注释里。 */
+.tl-line {
+  flex: 0 0 2px;
+  background: var(--brand-line-v);
+}
+
+/* --- 右列:模块内容 --- */
+/* max-width 与顶部 career-grid 保持一致:
+   - 常数 10.411 来自 v4 切图的比例和(1.676+2.286+3.261+3.189)
+   - v5 切图比例和降到 9.788(1936/1219+2547/1219+3773/1221+3689/1221),
+     **仍小于 10.411**,所以这个上界依然成立;刻意不改常数是为了保持
+     当前 tl-content 的宽度不变(改了会连带改变整页模块宽与列间距)。
+   - tl-content 还有 padding-left = var(--space-4) 16px
+   - 因此 tl-content 上限 = 常数 * clamp(...) + 192 + 16
+   - 用同一 clamp 公式随视口缩放,永远 ≥ career-grid,避免横向溢出 */
+.tl-content {
+  flex: 1;
+  min-width: 0;
+  padding: 0 0 0 var(--space-4);
+  /* overflow visible 让 module-group 内绝对定位的组标题能延伸到左侧栏区域 */
+  overflow: visible;
+  max-width: calc(clamp(38px, 6vw, 70px) * 10.411 + 192px + var(--space-4));
+}
+
+/* --- 占位模块(未提供切图的行) --- */
+.module-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  border: 2px dashed rgba(0,0,0,0.08);
+  border-radius: var(--radius-md);
+  margin-right: var(--space-4);
+}
+.module-placeholder__text {
+  font-size: var(--fs-sm);
+  color: rgba(var(--text-main-rgb), 0.32);
+  font-weight: 500;
+}
+
+/* ========== Module Title (通用主标题:两行,同字号,行1 常规 + 行2 加粗) ==========
+   规则:
+   - 两行字号相同(同 clamp)、左对齐
+   - 横向缩放先整体等比缩放(font-size 用 clamp 与视口宽度联动)
+   - 缩到最小时可换行(white-space: normal,允许自然换行)
+   - 宽度上下限跟随内容区(tl-content)
+   ────────────────────────────────────── */
+.module-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 左对齐 */
+  justify-content: flex-start; /* 顶对齐 */
+  width: 100%;
+  min-width: 0;
+  /* 去除底衬:直接铺在页面背景上,左上角对齐,不要玻璃、不要 padding */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 var(--space-4) var(--space-3) 0; /* 标题→首个组 收敛到 12px */
+  gap: var(--space-1); /* 两行标题间距 */
+}
+/* 关闭液态玻璃光斑 */
+.module-title::before {
+  content: none;
+}
+.module-title__row {
+  /* 与 .module-desc-text 保持一致的字号,统一视觉节奏 */
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--text-main);
+  letter-spacing: 0.02em;
+  white-space: normal;    /* 允许换行(缩到极窄时) */
+  word-break: keep-all;   /* 中文按词块保持,不逐字断裂 */
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  font-weight: 400;       /* 默认常规字重 */
+}
+/* 内联加粗关键词 */
+.module-title__row strong {
+  font-weight: 700;
+  color: var(--text-main);
+}
+/* 内联占位样式(em 用于"待提供文案"等占位说明) */
+.module-title__row em {
+  color: rgba(var(--text-main-rgb), 0.34);
+  font-style: normal;
+  font-weight: 400;
+}
+/* 兼容旧标记(允许 --regular/--bold 显式指定整行字重) */
+.module-title__row--regular { font-weight: 400; }
+.module-title__row--bold { font-weight: 700; }
+
+/* ========== Module Group (卡片分组:标签行 + 卡片行) ========== */
+.module-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);  /* 第 69 项:组标题→卡片 也统一成卡片圆角 22px,与组↔组(行间距)同频 → 一=二 对齐 */
+  margin-right: var(--space-4);
+  /* 组↔组纵向(即"行间距")= 卡片横向间距 = 卡片圆角 22px;组标题→卡片 gap 现在也=22,三者同频 */
+  margin-bottom: var(--card-gap);
+  position: relative; /* 保留:组内仍有绝对定位元素(轴/小人)的定位参考 */
+}
+
+/* ========== 组标题:纯文本(两条轴 / 三组卡片共用同一套样式) ==========
+   ★ 2026-10-10 改版:原来三组卡片用的是**左侧竖排切图**
+     (assets/group-title-{ai-scene,agent,yuanbao}.png,靠 .group-title-anchor
+      标尺 + .group-title-img 绝对定位挂到卡片左边,还要右缘对齐 tl-label 的右缘),
+     切图维护成本高、改字就得重导,且与「装扮生态建设」那行文本标题语言不统一。
+     现在统一成纯文本:直接放在 .module-group 开头的 <p class="group-caption">,
+     ★ 样式与 .mt-caption(「装扮生态建设」)是同一套声明,两处永远一致。
+     已下线的规则:.group-title-anchor / .group-title-img(连同移动端覆盖),
+     切图文件保留在 assets/ 里未删,需要回退时把 HTML 换回 <img> 即可。
+   ★ 2026-10-10 第 47 项:「装扮生态建设」也从卡片组**下方**的 .mt-caption
+     上移成了卡片组**顶部**的 .group-caption(四组标题从此同一位置同一规范)。
+     因此 .mt-caption 在当前 DOM 里已无引用 —— 选择器**故意保留**在这个列表里
+     (它俩永远共用同一套声明,谁要是再放一个 .mt-caption 回去,样式自动一致)。
+   ────────────────────────────────────── */
+/* ★ 颜色 = #FFFFFF 80%,与「高亮选中的 tab 文字」同一支颜色 ——
+   原来用 rgba(var(--text-main-rgb)=189,189,189, 0.72),
+   在 #222222 底上实际只有 (145,145,145),做小标题偏灰;
+   换成白 80% 后是 (211,211,211):抬头一行能立住,又不到纯白抢焦点。 */
+.group-caption,
+.mt-caption {
+  margin: 0; /* 第 69 项:去掉标题下方余量,让「组标题→卡片」= 组 gap(22px),与组↔组(行间距)对齐 */
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.8);
+}
+.module-group:last-child {
+  margin-bottom: 0;
+}
+
+/* --- 标签行 (# 紫色标签,可多个横排) ---
+   隐藏且不占高度,后续要恢复直接去掉 display:none 即可 */
+.module-group__tags {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+.module-tag {
+  font-size: var(--fs-md); /* 标签字号缩放 */
+  font-weight: 700;
+  color: #6b3fe0;                       /* 紫色 */
+  line-height: 1.3;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.module-tag--placeholder {
+  color: rgba(107, 63, 224, 0.35);      /* 未定标签,淡紫 */
+  font-weight: 500;
+}
+
+/* --- 卡片行 (每行最多 3 张,左对齐,可 2 可 3)
+   卡片间距:横 = 纵 = 12px,与专利/荣誉卡片间距、组间距全部对齐
+   align-items: flex-start 让每张卡按内容自适应高度,hover 时只有当前卡变高(向下展开) */
+.module-group__cards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  /* 单值 gap:列间距 = 行间距 = 卡片统一圆角(22px) */
+  gap: var(--card-gap);
+}
+
+/* ===== 模块像素小人(「3 亿营收」三张卡片轮廓路线动画) =====
+   挂在 .module-group(position:relative) 内绝对定位。
+   ★ 尺寸与「个人简介/鹅厂经历」时间轴小人(.tl-walker)严格一致:
+     JS 读取 .tl-walker 继承的 --tl-pix 后写入 --mg-pix(见 js/main.js),
+     那边改尺寸这边自动跟随,不需要改这里。 */
+.mg-walker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(32 * var(--mg-pix, 2px));
+  height: calc(40 * var(--mg-pix, 2px));
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  background: url("../assets/mg-walker-sprite.png") no-repeat 0 0;
+  background-size: calc(21 * 32 * var(--mg-pix, 2px)) calc(40 * var(--mg-pix, 2px));
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
+  will-change: transform;
+}
+.mg-walker.is-ready { opacity: 1; }
+
+/* ---- 受力反馈 ①:小人跳到卡片顶面,卡片被踩得一沉 ----
+   ⚠ 方向与 .cg-card 那套 tl-card-bump 相反 —— 那边小人在卡片**下方**跳起来顶卡片,
+     卡片是"被顶起"(translateY 负);这里小人在卡片**顶面**上走、跳过来落地,
+     卡片是"被踩下"(translateY 正 + 纵向压扁),然后阻尼回弹。
+     卡片自身有底色/描边/hover 位移,bump 走 animation 而不是 transition:
+     动画期间优先级更高,不会和 [data-modal]:hover 的 translateY(-2px) 打架。
+   transform-origin 取底边中点:纵向压扁时底边不动,像"脚踩在卡片顶面上"。 */
+.module-group__cards {
+  --mg-bump: clamp(3px, 0.36vw, 6px);
+}
+.module-card.is-bumped {
+  animation: mg-card-bump 620ms cubic-bezier(0.22, 0.9, 0.28, 1) both;
+}
+@keyframes mg-card-bump {
+  0%   { transform: translateY(0) scale(1, 1); }
+  12%  { transform: translateY(var(--mg-bump)) scale(1.008, 0.978); }
+  32%  { transform: translateY(calc(-0.34 * var(--mg-bump))) scale(0.997, 1.012); }
+  54%  { transform: translateY(calc(0.15 * var(--mg-bump))) scale(1.002, 0.995); }
+  74%  { transform: translateY(calc(-0.06 * var(--mg-bump))) scale(1, 1.003); }
+  88%  { transform: translateY(calc(0.02 * var(--mg-bump))) scale(1, 0.999); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+/* ---- 受力反馈 ②:小人从卡片右缘失重砸到时间线上,轴线被震一下 ----
+   物理上「砸下去 → 弹起 → 阻尼振荡」:位移为主(能直接看见轴在跳),
+   纵向形变只做轻微加减(0.72↔1.22),不做 1.9 那种夸张拉伸 —— 会像闪烁。
+   只震"物理对象"(轴线 + 刻度 + 圆点),不震 .mt-marker 的文字(文字抖会毁可读性)。
+   .mt-node 是 0×0 锚点,scaleY 对它无效,但 translateY 会带着圆点与引导线一起跳。 */
+.mt-grid.is-quaked .mt-divider,
+.mt-grid.is-quaked .mt-node {
+  animation: mt-line-quake 620ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+@keyframes mt-line-quake {
+  0%   { transform: translateY(0) scaleY(1); }
+  8%   { transform: translateY(2.1px) scaleY(0.72); }
+  22%  { transform: translateY(-1.45px) scaleY(1.22); }
+  38%  { transform: translateY(0.95px) scaleY(0.88); }
+  54%  { transform: translateY(-0.58px) scaleY(1.1); }
+  70%  { transform: translateY(0.33px) scaleY(0.96); }
+  85%  { transform: translateY(-0.15px) scaleY(1.02); }
+  100% { transform: translateY(0) scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-walker { display: none; }
+  .module-card.is-bumped { animation: none; }
+  .mt-grid.is-quaked .mt-divider,
+  .mt-grid.is-quaked .mt-node { animation: none; }
+}
+/* ========== 方案 B · 精致简约(Refined Minimal) ==========
+   - 玻璃更淡:白色 rgba 从 0.35→0.18,几乎透明
+   - 描边极细:0.5px + 更浅颜色
+   - 投影更轻:只保留一层 0 2px 8px
+   - 无 ::before 折射光斑,让内容说话
+   - hover:紫色描边渐现,替代位移 */
+.module-card {
+  /* flex-basis 匹配 column-gap(--card-gap = 22px):(100% - 2*22) / 3 */
+  flex: 0 1 calc((100% - var(--card-gap) * 2) / 3);
+  min-width: 200px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  /* 配色照参考图:卡片 = 纯色深黑底(#0F0F0F) + 一圈 1px 细亮边线。
+     纯色底下磨砂没有视觉意义,故去掉 backdrop-filter(顺带省一层合成开销)。 */
+  background: var(--card-bg);
+  /* 卡片边线(照参考图):1px 宽的细亮线。参考图实测在 #222 背景上峰值 ≈ 灰 88,
+     换算成白透明度 0.34 —— 实测 border 0.34 在截图上正好落在 82~88 这一档。 */
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: var(--card-radius); /* 卡片统一圆角 22px */
+  /* 边线细节照图:①卡片外侧一圈很轻的暗晕 ②紧贴内侧的 1px 暗线(图上卡片内侧那条更黑的线)
+     —— 顶边在图上最亮,由 border 与 ::before 的顶部微光一起给出 */
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.42),
+    0 2px 8px rgba(0, 0, 0, 0.30),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  /* ★ 2026-10-12 第 55 项:overflow hidden → visible。
+     hover 时卡片描述要浮到卡片**上方**变成气泡(配一只趴在卡片顶边的像素小人),
+     而 overflow:hidden 会把它整个裁掉。
+     原来靠这层裁圆角的是顶部展示区(.module-card__img / .card-spiral),
+     现在改成它们自己带顶部圆角(见 .module-card__img 一节)。 */
+  overflow: visible;
+  z-index: 0;
+  /* ===== 第 55 项:卡片 hover「小人 + 气泡」的尺寸令牌 =====
+     ── 素材五代换代,每次都要重算这几个值 ──
+     ① 第 55 项:card-helper-lie.png       37×19(横躺·侧脸)
+     ② 第 57 项:card-helper-sit.png       32×29(正脸·趴坐,纯 CSS 摇头)
+     ③ 第 60 项:card-helper-desk.gif      22×22(趴桌晃头,GIF 自带动画)
+     ④ 第 64 项:card-helper-point.gif     25×22(趴着 + 抬右手打招呼)
+     ⑤ 第 65 项(★ 现在):card-helper-turn.gif 20×22(转头:GIF 自带动画)
+     --ch-pix:像素小人的 1 个逻辑格 = 多少 CSS px
+     ★ 第 64 项:尺寸基准换成**「和走路的小人整体一样大」**。
+       · 走路小人 .tl-walker = 32 宽 × 40 高(元素框;--tl-pix: 1px 固定,不随视口变)
+       · 让 22 格 = 40px,即 --ch-pix = calc(40px/22)。
+       · 为什么从 vw 改成固定 px:走路小人是固定 40px(--tl-pix: 1px),
+         两者要"整体一样大"就必须同量纲;继续随视口缩放就又对不上了。
+         代价:极端窄屏下小人不再跟着缩,但它本来就是个点缀,固定尺寸反而更稳。
+     ★ 第 65 项的 ⑤ 恰好还是 22 格高,所以 --ch-pix 与 --ch-h 不用动。
+       ★★ 而且它的**并集包围盒中心正好 = 画布中心**(实测 15.92 格 vs 15.92 格)——
+          不像 ④ 那样右侧留了 2.5 格给挥手的手臂,所以第 64 项那个
+          --ch-nudge「视觉重心补偿」在这里**彻底不需要了**,已删除。
+          逐帧复核:墨迹中心 9.92~10.42 格(裁剪框中心 10.0),抖动 < 1px。 */
+  --ch-pix: calc(40px / 22);
+  --ch-w: calc(20 * var(--ch-pix));   /* 素材宽 20 逻辑格 → 36.36px */
+  --ch-h: calc(22 * var(--ch-pix));   /* 素材高 22 逻辑格 → 40px */
+  /* ===== 第 65 项:位置从「卡片顶边正中」搬到「卡片之上的左上角」=====
+     (用户:"之后在卡片之上,小人在左上角。气泡朝左指向小人。")
+     --ch-left: 小人左边缘距卡片左边 —— 取 var(--space-4) = 16px,
+                和卡片里标题/描述的文字栏**左对齐**,系统一致。
+                验算圆角:--card-radius = 22px,顶边曲线在 x=16 处只下沉 0.83px,
+                所以视觉上小人是"坐"在平的卡沿上,不会悬空在圆角外。
+     --ch-gap:  小人右边缘 → 气泡左边缘的间隙。取 6px ——
+                气泡尖角向外出 5px,尖端正好落在小人右边缘附近,
+                构成"气泡从左边的小人那头长出来"的读法。
+     气泡左边缘 = --ch-left + --ch-w + --ch-gap = 16 + 36.36 + 6 ≈ 58.4px */
+  --ch-left: 16px;
+  --ch-gap: 6px;
+  transition: background 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, transform 0.28s ease;
+}
+/* 卡片顶部那道"边线的亮部"(照图:顶边比左右两侧更亮) —— 只压在最上沿,极淡,
+   不铺满整张卡(参考图卡片内部是均匀的纯色) */
+.module-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.03) 4%,
+    rgba(255, 255, 255, 0) 14%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+/* hover:底色提一档 + 边线转成品牌紫(交互态保留原意) */
+.module-card:hover {
+  background: var(--card-bg-hover);
+  border-color: rgba(107, 63, 224, 0.5);
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.5),
+    0 3px 10px rgba(0, 0, 0, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  /* ★ 第 55 项:气泡要浮到卡片上方,必须压过上一行卡片与组标题 */
+  z-index: 5;
+}
+/* 展示区与卡片同色,所以 hover 提亮时必须同步跟随,否则上半块会留着旧底色 */
+.module-card:hover .module-card__img,
+.module-card:hover .card-spiral {
+  background: var(--card-bg-hover);
+}
+.module-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- 卡片标题(方案 B:半粗体,正式竖排,--star 前缀紫色小竖条)
+   order: 2 → 位于图片下方 */
+.module-card__title {
+  order: 2;
+  /* ★ 18px → 15px(2026-10-10):原字号偏大,与卡片描述(16px)几乎同级,
+     层级糊在一起。15px + 600 字重 / 描述 13px + 400 字重 → 主次分明。
+     同时单行容量变大(实测最长标题「AI生成皮肤+表情+壁纸头像」在 1280 视口下
+     占 175px < 可用 213px),nowrap 也不会被 ellipsis 截断。 */
+  font-size: var(--fs-title);
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.3;
+  color: var(--text-main);
+  letter-spacing: 0.01em;
+  font-family: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+/* 标题左侧星星 ★(替代原竖条)
+   ★ 2026-10-12 第 50 项:原来实色 #6b3fe0,在近黑卡片底上偏暗看不出 →
+     改「渐变文字」:左浅 #B661FF → 右深 #560CF5(色值由用户给定)。
+     星星只有一个字身宽,渐变横跨它的字身,肉眼是"左亮右沉"的一颗紫星。 */
+.module-card__title--star::before {
+  content: "★";
+  color: var(--grad-text-from);   /* 兜底色:万一不支持 background-clip:text,仍是浅紫 */
+  background-image: linear-gradient(90deg, var(--grad-text-from), var(--grad-text-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-right: 6px;
+  font-size: 0.95em;
+  font-style: normal;
+  font-weight: 700;
+  vertical-align: baseline;
+  display: inline;
+}
+
+/* --- 卡片图片(占位底 = 卡片底色,支持 png/gif) ---
+   order: 1 → 置于卡片顶部(标题之前)
+   左右通铺到卡片外沿(0px 侧距),高度降低到 16:8=2:1 */
+.module-card__img {
+  order: 1;
+  /* 顶部通铺:吃掉 card 的横向 padding + 顶部 padding,视觉贴到卡片外沿 */
+  width: calc(100% + var(--space-4) * 2);
+  margin-top: calc(-1 * var(--space-4));
+  margin-left: calc(-1 * var(--space-4));
+  margin-right: calc(-1 * var(--space-4));
+  aspect-ratio: 2 / 1;
+  /* 展示区底色 = 卡片底色(--card-bg),不再用白色。
+     原来这里是纯白 #ffffff:空 src 的卡片会顶出一块刺眼的白块,
+     缩略图/动图自带白边时也会在深色卡片里"开一个洞"。
+     改成同色后展示区与卡片连成一体(下方 .card-spiral 需同步改,
+     它是螺旋卡片里唯一可见的底色来源,会盖住这一层)。 */
+  background: var(--card-bg);
+  /* ★ 2026-10-12 第 55 项:卡片已不再 overflow:hidden(要给 hover 气泡让位),
+     顶部两角改为展示区自己裁 —— 半径 = 卡片圆角 − 1px 边框。 */
+  border-radius: calc(var(--card-radius) - 1px) calc(var(--card-radius) - 1px) 0 0;
+  overflow: hidden;
+  position: relative;
+  /* 与卡片的 hover 过渡同步,避免卡片在渐亮、展示区却瞬间跳色 */
+  transition: background 0.28s ease;
+}
+.module-card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* src 为空时隐藏 img 元素的 alt 文字/裂图,只显示底色 */
+.module-card__img img[src=""],
+.module-card__img img:not([src]) {
+  visibility: hidden;
+}
+
+/* --- 卡片螺旋上升 (3D helix, JS 驱动) ---
+   CSS 负责建立 perspective 透视场景;
+   具体位置、深度缩放、不透明度全部由 JS 每帧计算并写入 style */
+.module-card__img--spiral {
+  padding: 0;
+  cursor: default;
+  overflow: hidden;
+}
+
+/* 透视容器 */
+.card-spiral {
+  width: 100%;
+  height: 100%;
+  perspective: 800px;
+  perspective-origin: 50% 50%;
+  overflow: hidden;
+  position: relative;
+  /* 卡片顶部展示区底色:与卡片同色(--card-bg),不再用白色
+     ⚠️ 该层实际铺满 .module-card__img,会盖住父级的底色,是唯一可见的底色来源 */
+  background: var(--card-bg);
+  transition: background 0.28s ease;
+}
+
+/* 3D 轨道:绝对铺满，子卡片用 JS 绝对定位;
+   perspective 放在直接父级,卡片的 rotateY 转角才有景深 */
+.card-spiral-track {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
+
+/* 每张卡片:绝对定位,JS 负责 transform/opacity/zIndex */
+.card-item {
+  position: absolute;
+  object-fit: cover;
+  border-radius: 8px;
+  pointer-events: none;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+
+/* hover 时暂停:由 JS 监听,CSS 无需额外处理 */
+
+/* 减弱动效:JS 检测后停止 rAF */
+@media (prefers-reduced-motion: reduce) {
+  .card-item { transition: none; }
+}
+
+/* --- 卡片描述:★ 2026-10-12 第 55 项,展示方式整体改变 ---
+   【改前】默认收起(max-height:0 + 负 margin 抵消 flex gap),hover 时在卡片
+           **内部**向下展开,把卡片撑高(同排其它卡不动,所以是"只当前卡变高")。
+   【改后】hover 时描述浮到卡片**上方**,变成一个带小尖角的气泡。
+   元素仍是 <p class="module-card__desc">:语义不变、13 处文案都不用搬家。
+   ★ 第 65 项:胶囊里的**位置关系整体翻新**(用户:"小人在左上角。气泡朝左指向小人。")
+     【第 57~64 项】小人在卡片顶边**正中**,气泡是**通栏**(left:0/right:0)、
+                   铺在小人正上方,尖角在气泡**底边正中朝下**指着小人头顶。
+     【第 65 项(现在)】小人在卡片**左上角**(--ch-left: 16px),
+                   气泡让开小人、**只占右侧**(左边缘 = 小人右边缘 + --ch-gap),
+                   底边压到接近卡片顶边(留 8px),尖角挪到气泡**左边缘朝左**指着小人。
+     · 为什么气泡不再通栏:小人现在占着左边的位置,气泡若还从 left:0 起,
+       会直接盖住小人。让开它是唯一解,顺带宽度变窄、更像一个"说话气泡"而不是一条横幅。
+     · 为什么底边从「卡片顶边 + 小人高 + 6px」改成「卡片顶边 + 8px」:
+       旧值是为了给站在正中的小人**腾出整条身高的通道**,现在小人挪到左边去了,
+       气泡右下这片区域没有东西,把气泡压下来贴着卡沿,三者更像一坨。 */
+.module-card .module-card__desc {
+  /* 权重 (0,2,0),压过上面的 `.module-card > *`(0,1,0) 的 position:relative */
+  position: absolute;
+  /* ★ 第 65 项:左边缘让开小人(小人右边缘 + --ch-gap),向右通到卡片右边 */
+  left: calc(var(--ch-left) + var(--ch-w) + var(--ch-gap));
+  right: 0;
+  /* ★ 第 65 项:底边压到接近卡片顶边,只留 8px 呼吸间隙 */
+  bottom: calc(100% + 8px);
+  order: 0;
+  display: block;
+  max-height: none;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 13px;
+  /* 气泡材质:★ 第 64 项起向卡片靠拢 —— 底色收成与卡片同族的深灰(不再发紫),
+     靠「紫边 + 紫光」去呼应卡片 hover 的紫边,而不是靠底色染紫。
+     ── 为什么改:用户要"气泡和卡片看起来更具整体感,比如带一些微微的边缘紫光"。
+        原来气泡底色是紫调(46,39,60 → 26,22,36)、卡片是纯灰(#161616),
+        两者**材质语言不一致** —— 底色染紫 = 材质本身不同;
+        把底色拉平到深灰、让紫只出现在"边缘光"这一层,才是同一套语言。
+     ★ 第 66 项:连"紫光"这一层也去掉了 —— 紫现在**只留在 border 那 1px 线上**,
+       和 .module-card:hover 完全同一条边线(见下方 border / box-shadow 的注释)。 */
+  background: linear-gradient(180deg, rgba(34, 31, 41, 0.97) 0%, rgba(21, 19, 27, 0.97) 100%);
+  /* ★ 第 66 项:边线效果**完全对齐卡片** ——
+     用户:"两个蓝箭头指向的边线效果,上面的和下面的对齐,用下面卡片的边线效果"
+     (两个蓝箭头:上面那支指向气泡的紫边,下面那支指向卡片的紫边。)
+     【改前】气泡 = 紫边 0.42 + 一圈 0.12 极淡紫环 + 0.20 紫外发光 + 顶部白色内高光;
+             卡片 hover = 紫边 0.5 + **没有任何紫光晕**。
+             → 截图实测:气泡那两层紫光把它的边撑成一条"发光的软边",
+               卡片是一条"干净的硬边",两条边线不是同一种东西。
+     【改后】① 透明度 0.42 → 0.5,与 .module-card:hover 的 border-color 一字不差;
+             ② 紫环、紫外发光、顶部白色内高光**全部去掉**。
+             ③ 只留黑投影(下面那两条 rgba(0,0,0,*))—— 它本来就和卡片 hover 的
+                `0 16px 44px` / `0 3px 10px` 是同一套深度语言,不冲突,保留。
+     ⚠️ 这是对第 64 项「带一些微微的边缘紫光」的**反向操作**:用户看过成品后
+        决定不要那层光,以本次为准,不要再加回去。 */
+  border: 1px solid rgba(107, 63, 224, 0.5);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.52),
+    0 2px 8px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* ★ 第 57 项:字号/字重按用户要求改 —— 字号跟卡片标题(.module-card__title 的 --fs-title),
+     但**不加粗**(标题是 600,气泡这里是 400,保持正文的"念出来"语气)。 */
+  font-size: var(--fs-title);
+  line-height: 1.5;
+  color: var(--text-main);
+  font-weight: 400;
+  /* 气泡里不做行数截断:内容是完整的描述文案 */
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
+  text-overflow: clip;
+  cursor: default;
+  /* 显隐:默认完全藏起来(不占位、不吃鼠标),hover 时淡入 + 从下方弹起 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) scale(0.94);
+  /* ★ 第 65 项:气泡从**左下角**长出来 —— 左下角正是离小人最近的那一头
+     (第 57~64 项小人在正中,用的是 var(--ch-center) 100%) */
+  transform-origin: 0 100%;
+  transition:
+    opacity 0.22s ease,
+    transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.25),
+    visibility 0.22s linear;
+  pointer-events: none;
+  z-index: 3;
+}
+.module-card:hover .module-card__desc {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* ★ 第 67 项:气泡里的文字「流式加载」(打字机) ——
+   用户:"气泡里的文字 流式加载,加载完之后就保持展示。加载速度要很快 3 秒内展示完。"
+   ── 三条硬约束分别是怎么满足的 ──
+   ① **3 秒内打完**(而且要"很快"):总时长按字数线性分配再 clamp,
+      公式在 js/main.js 的 initDescTypewriter 里:
+        dur = clamp(DUR_MIN=400ms, 字数 × PER_CHAR=46ms, DUR_MAX=1900ms)
+      本站文案实测 5~36 字 → 最长 36 字 = 1656ms、最短 5 字 = 400ms,
+      再加 120ms 出场延迟(等气泡先浮出来一点),**最坏 ≈ 1.78s**,
+      离 3s 上限还留了一大截。
+   ② **打完就保持展示**:rAF 跑到最后一拍就把 span 一次填满、撤掉 .is-typing
+      (光标变回透明),此后不再有任何写入 —— 文字定格,不会循环也不会回退。
+   ③ **气泡不能一边打字一边长高**:JS 先量出"完整文案"的高度写进 --desc-h,
+      这里用 min-height 吃掉它。气泡从一开始就按**最终大小**出现,只是字一个一个流进来。
+      ⚠️ 不锁会怎样:气泡是 bottom 定位的(向上长),每多出一行就把顶边往上顶一截,
+         打字过程中会一跳一跳,而且气泡尺寸一直在变 —— 完全没有"气泡"的稳重感。
+      ⚠️ 用 min-height 而不是 height:万一 JS 量到的值偏小,内容还能正常撑开,不会截断。
+   ── 光标 ──
+   用 .desc-txt 这个 span 的 **border-right** 做:
+     · inline 元素上它自动跟在最后一个字后面;多行时只在**最后一行**的末尾出现,
+       正是打字机该有的样子(不会每行都带一条竖线)。
+     · **始终占 2px**(透明时也一样),再用 margin-right:-2px 抵消它的推进宽度
+       → 光标出现/消失都不改变排版,不会把最后一个字挤到下一行触发一次假换行。
+   ⚠️ 为什么不能用伪元素做光标:气泡的 ::after 已经被小尖角占了(第 65 项),
+      ::before 那块第 66 项刚删掉、也不该再加回来 —— 光标只能挂在这个 span 上。 */
+.module-card .module-card__desc {
+  min-height: var(--desc-h, 0px);
+}
+.module-card .module-card__desc .desc-txt {
+  border-right: 2px solid transparent;
+  margin-right: -2px;
+}
+.module-card .module-card__desc.is-typing .desc-txt {
+  border-right-color: rgba(186, 130, 255, 0.95);
+  animation: desc-caret 0.62s steps(1, end) infinite;
+}
+@keyframes desc-caret {
+  0%, 49%   { border-right-color: rgba(186, 130, 255, 0.95); }
+  50%, 100% { border-right-color: transparent; }
+}
+/* 减弱动效:JS 那边直接不打字(整段显示),这里也把光标闪烁关掉 */
+@media (prefers-reduced-motion: reduce) {
+  .module-card .module-card__desc.is-typing .desc-txt { animation: none; }
+}
+
+/* ★★★ 第 66 项:这一层「颈部磨砂层」已整块删除 ★★★
+   ── 它的来历 ──
+   第 64 项引入、第 65 项重做几何。原意是把「气泡 ↔ 小人 ↔ 卡片」糊成一坨:
+   补上气泡底边到卡片顶边那 8px 空档、糊掉卡片顶边那条硬线、给小人垫一层磨砂。
+   ── 为什么删 ──
+   用户第 66 项明确要求:「红箭头指向的背景去掉」。截图像素取证(2× DPR):
+     · 红箭头尖端落在截图 (104,170) → CSS (52,85) → 以卡片左上为原点 (43, +7)
+     · 这一层的覆盖范围 = 卡片左侧 x 16~84、卡片顶边上方 8px 到下方 16px
+     · 两者完全命中;且在 x=104 这一列实测到 y=156~168 有一条从 #3f3d45 渐变到
+       #6c6a73 的暗带(把卡片顶边那条紫边压成了灰的)—— 正是它。
+   → 连带那条 rgba(21,19,27,.97) → 全透明的五档渐变一起删掉。
+   ── 删掉后的副作用(已知,接受)──
+   气泡底边与卡片顶边之间那 8px、以及小人脚下那一小条,会重新露出页面底色,
+   三块东西重新"分开"。这正是用户要的效果。
+   ⚠️ 别再把它加回来,更别再往上写 backdrop-filter:第 64 项曾在这里写过
+      blur(14px),实测是彻底的**空操作** —— blur 0/14/40/80 四档,卡片顶边
+      对比度是 42.7 / 42.7 / 42.7 / 42.5,80 倍模糊度毫无变化。
+      原因:气泡自己带 transform、卡片项带 will-change:transform,都会另起
+      backdrop root,这一层背后是空的,取不到底下的卡片。
+      它当年"看起来有效",100% 来自那条半透明渐变,不是模糊。 */
+/* 气泡的小尖角:一个旋转 45° 的小方块,只露出一个角 → 三角形
+   ★ 第 65 项:方向从「朝下」翻成「朝左」,指向左边的小人。
+   方向怎么定的(第 64 项的坑,记下来免得再推一遍):
+     方块四角旋转 45°(CSS 顺时针)后的落点:NW→上、NE→右、SE→下、SW→左。
+     要哪个方向的尖,就留**相邻那个角的两条边**的描边 ——
+       · 朝下(第 57~64 项):留 SE 角 → border-right + border-bottom
+       · 朝左(第 65 项):  留 SW 角 → border-left  + border-bottom
+     圆角跟着落在那个角上:SW 角 = border-bottom-left → `0 0 0 2px`。 */
+.module-card .module-card__desc::after {
+  content: "";
+  position: absolute;
+  /* 探出气泡左边缘 5px:尖端落在小人右边缘附近(--ch-gap 只有 6px) */
+  left: -5px;
+  /* 垂直对准小人的**脸中心**(实测,不是估的):
+     取素材第 0 帧的肤色像素 bbox → y 42~113 = 第 7~19 逻辑格,中心 12.92 格。
+     换算成显示尺寸:12.92 格 × (40px / 22 格) = 23.5px(距素材上边),
+     即**距卡片顶边 16.5px**。气泡底边在卡片顶边上方 8px,
+     尖角中心(10px 方块,旋转后尖端在方块中心高度)要在底边上方 8.5px
+     → bottom = 8.5 - 5 = 3.5 → 取 4px(尖角中心落在卡顶上方 17px)。 */
+  bottom: 4px;
+  width: 10px;
+  height: 10px;
+  background: rgba(21, 19, 27, 0.97);
+  /* ★ 第 64 项:尖角的边也跟气泡一样转成紫,否则会出现"紫气泡 + 白尖角"的割裂
+     ★ 第 66 项:透明度跟着气泡一起 0.42 → 0.5 ——
+       尖角本来就是气泡边线伸出去了的那一段,两边必须同一档,
+       否则尖角会比气泡边线淡一档,看着像"没接上"。 */
+  border-left: 1px solid rgba(107, 63, 224, 0.5);
+  border-bottom: 1px solid rgba(107, 63, 224, 0.5);
+  border-radius: 0 0 0 2px;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* ===== 卡片顶边上的像素小人 =====
+   ── 素材五代换代 ──
+   ① 第 55 项 card-helper-lie.png   37×19(横躺·侧脸)
+   ② 第 57 项 card-helper-sit.png   32×29(正脸·趴坐,摇头由 CSS keyframes 驱动)
+   ③ 第 60 项 card-helper-desk.gif      22×22(趴桌晃头)
+   ④ 第 64 项 card-helper-point.gif     25×22(趴着 + 抬右手打招呼)
+   ⑤ 第 65 项(★ 现在)assets/card-helper-turn.gif  20×22(转头)
+      —— 来自 pixel-girl 项目的 desk-turn.gif(192×186 / 16 帧 / 透明底)。
+      ★ 动画是一段 4.8s 的循环:第 0 帧**正面** 800ms → 1~14 帧**转向右侧**
+        (200ms/帧,首尾各 400ms)→ 第 15 帧回到正面 800ms。
+        **逐帧时长同样不均匀**,重编码时必须把每帧 duration 一起写进去。
+        (角色转向的那一侧正好是气泡所在的一侧 —— 它在"看着气泡说话"。)
+      ★ 处理方式:与前两代同 —— 按**全帧并集包围盒**(x 36~156, y 6~138)裁成
+        120×132,正好是 20×22 逻辑格 × 6 倍;不按并集裁会把转头时变化的轮廓切掉。
+      ★ 尺寸:仍按 .module-card 里 --ch-pix 的注释 —— 22 格 = 40px,对齐走路小人高度。
+      ★★ 一个必须记下来的坑:这个素材的角色**描边是黑色**,和透明像素的 (0,0,0,0)
+         撞色 —— 用 PIL 直接 `save(..., transparency=0)` 会把**透明区和不透明区整个反转**
+         (量化时黑描边和透明黑落进同一个调色板索引)。④ 没踩到纯属运气。
+         正解:**自己建调色板** —— 把全部帧里 alpha>0 的颜色收集成统一索引、
+         透明单独占一格,再逐帧做整数映射(全程不经过量化,所以无损)。
+         生成后逐帧与源裁剪结果比对过:不透明区掩码不一致 0 帧、RGB 最大通道差 0。
+   ★ 位置:第 55 项靠左 30px → 第 57~64 项**卡片水平正中** → 第 65 项**卡片之上的左上角**
+     (--ch-left: 16px,与卡片文字栏左对齐)。
+   底边正好压在卡片顶边上(= 小人"坐在卡沿上");hover 淡入,移开消失。 */
+.module-card::after {
+  content: "";
+  position: absolute;
+  /* ★ 第 65 项:从「卡片正中」改为「靠左」—— 素材本身在画布里是居中的
+     (并集包围盒中心 = 画布中心),所以这里直接贴 --ch-left 即可,无需重心补偿 */
+  left: var(--ch-left);
+  bottom: 100%;                     /* 底边 = 卡片顶边(坐在卡沿上) */
+  width: var(--ch-w);
+  height: var(--ch-h);
+  background: url("../assets/card-helper-turn.gif") no-repeat center bottom;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
+  /* 旋转轴放在底边中点 */
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transition: opacity 0.24s ease;
+  pointer-events: none;
+  z-index: 4;
+}
+/* ★ 第 60 项:hover 只负责「淡入」,不再挂 CSS 摇头动画(第 64/65 项沿用)。
+   原因:素材自己就是一段完整的循环动画(③ 摇头 + 眨眼、④ 挥手、⑤ 转头),
+   再叠一层整体 translateX/rotate(第 57 项那支 card-helper-shake)等于让整个人跟着甩,
+   和原动画"身钉住、只有局部动"的设计打架。 */
+.module-card:hover::after {
+  opacity: 1;
+}
+/* 减弱动效:GIF 没法用 CSS 暂停,所以直接把背景换成同一造型的静态 PNG(取 GIF 第 0 帧)。
+   注意只换 background-image,不动 opacity —— 淡入淡出保留,hover 依然有反馈。 */
+@media (prefers-reduced-motion: reduce) {
+  .module-card::after {
+    background-image: url("../assets/card-helper-turn-still.png");
+  }
+}
+
+/* ===== 第 68 项:hover「小人 + 气泡 + 卡片」背后的「上升渐变」底衬 =====
+   用户:「这个蓝色区域(小人 + 气泡 + 下面的卡片),从卡片向上延展出一个模糊的渐变。
+          这个渐变有 60% 的透明度,然后高斯模糊。
+          目的是 hover 时能清晰地看到小人和气泡里的信息,让三者看起来是一个整体。」
+   ── 为什么需要它 ──
+   hover 时小人(.module-card::after)与气泡(.module-card__desc)浮在卡片**上方**,
+   背后是上一行卡片的内容 —— 上行若是亮图/花哨画面,气泡里的字与小人会被背景吃掉。
+   补一层「贴住卡片顶边、越往上越淡」的暗色渐变,把这块背景压下去 → 信息清晰;
+   渐变下缘与卡片顶边对齐 → 三者像从卡片"长"出来的一坨,而不是三块浮萍。
+   ── 几何(为什么是这几个数)──
+   · bottom: 100% → 元素底边 = 卡片顶边,与卡片顶边对齐,不侵入卡片内部。
+   · height: var(--glow-h, 190px) → 向上盖住小人(≈40px)+ 气泡(最高 3 行 ≈ 130px)。
+   · left/right 各外扩 var(--space-2) → 比卡片略宽,边缘不切在卡片宽度上。
+   ── 材质 ──
+   · 颜色取 --card-bg 同族的 #0f0f0f → 与卡片同一材质语言(不染紫,紫只留在边线上)。
+   · 渐变(自下而上):底部 = --glow-op(默认 0.6,即「60% 的不透明度」),
+     42% 处降到约一半,顶部全透明 —— 越往上越淡,像光晕自然消散。
+   · filter: blur(var(--glow-blur, 12px)) → 高斯模糊,把底边与左右边缘糊软;
+     用户说的「然后高斯模糊」= 这一层。模糊会让下缘往下渗约 1 个半径,
+     正好把卡片顶边那道线轻轻接住 —— 这是"整体感"的来源。
+   · z-index: 2 → 压过卡片内容(.module-card > * 是 z-index:1),
+     但被小人(4)与气泡(3)盖住,始终在最底层当"影子"。
+   · 只在 hover 淡入,节奏与小人/气泡一致。
+   ── ⚠️ 与第 64/66 项「颈部磨砂层」的区别(别再搞混)──
+   第 64 项那层填的是「气泡底边 ↔ 卡片顶边」那 8px 缝隙、并糊卡片自身的顶边线,
+   第 66 项已按用户要求整块删除、明令不许加回。本层**不是它**:
+   本层底边压在卡片顶边**之上**、主体在卡片**上方**(背景区),只负责压暗浮层背后的背景,
+   不填缝隙、不当磨砂、不单独糊卡片顶边那道线(仅 blur 的自然渗色,极轻)。 */
+.module-card__glow {
+  /* ── 参数(都在这里,想调只动这四行)── */
+  --glow-rgb: 15, 15, 15;   /* 渐变颜色:默认 = 卡片底色 #0f0f0f(中性压暗)。
+                               想换成品牌紫把三个数改成 107, 63, 224 即可。 */
+  --glow-op: 0.6;           /* 用户要的「60% 的透明度」= 渐变最浓处的不透明度 */
+  --glow-blur: 12px;        /* 高斯模糊半径 */
+  --glow-h: 190px;          /* 向上延展的高度(盖住小人 40px + 气泡最高 ~130px) */
+  position: absolute;
+  left: calc(-1 * var(--space-2));
+  right: calc(-1 * var(--space-2));
+  bottom: 100%;
+  height: var(--glow-h);
+  background: linear-gradient(
+    to top,
+    rgba(var(--glow-rgb), var(--glow-op)) 0%,
+    rgba(var(--glow-rgb), calc(var(--glow-op) * 0.5)) 42%,
+    rgba(var(--glow-rgb), 0) 100%
+  );
+  filter: blur(var(--glow-blur));
+  opacity: 0;
+  transition: opacity 0.26s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.module-card:hover .module-card__glow {
+  opacity: 1;
+}
+/* 减弱动效:直接常显/常隐,不淡入 —— 底衬不是动效,保留它不影响"减少动态"的初衷 */
+@media (prefers-reduced-motion: reduce) {
+  .module-card__glow { transition: none; }
+}
+
+/* --- 卡片话题标签(紫色 # 标签,单行展示,超出末尾打点)
+   order: 4 → 位于描述下方 */
+.module-card__tags {
+  order: 4;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0; /* 第 69 项:去掉 2px,使「标题→标签」= 卡片内容 gap(8px),与「标签→分类」对齐(三=四) */
+  cursor: default;
+  line-height: 1.3;
+}
+.module-card__tag {
+  display: inline;             /* 保持水平流式排列 —— 每个标签各自一个渐变盒,不连成一条 */
+  /* ★ 2026-10-12 第 50 项:实色 #6b3fe0 → 渐变文字(左浅 #B661FF → 右深 #560CF5)。
+     因为 display 仍是 inline,每个 <span> 的渐变盒 = 它自己的字身宽,
+     所以「#腾讯可持续社会价值奖」「#pony点赞」各自独立走一遍渐变,而不是两个标签共享一条。 */
+  color: var(--grad-text-from);   /* 兜底色 */
+  background-image: linear-gradient(90deg, var(--grad-text-from), var(--grad-text-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-right: var(--space-3);
+}
+.module-card__tag:last-child {
+  margin-right: 0;
+}
+
+/* --- 卡片分类信息(深灰,以 | 分隔)
+   order: 5 → 位于卡片最底部 */
+.module-card__meta {
+  order: 5;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0 var(--space-1);
+  font-size: var(--fs-xs);
+  color: rgba(var(--text-main-rgb), 0.5);
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.module-card__meta-sep {
+  color: var(--text-main);
+  padding: 0 2px;
+}
+/* 长分类信息在窄卡片下列不换行、超出部分以省略号收尾(保持单行) */
+.module-card__meta > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* --- 占位卡(旧样式,仍供 tl-revenue/tl-views 使用) --- */
+.module-card--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(var(--text-main-rgb), 0.4);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  /* 占位态:与大卡片同底色,只是边线改成虚线(表达"待补充") */
+  background: var(--card-bg);
+  border: 2px dashed var(--card-line);
+  border-radius: var(--card-radius); /* 与大卡片同一圆角 */
+  min-height: 120px;
+  padding: var(--space-4);
+  gap: 0;
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.42),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+}
+.module-card--placeholder::before {
+  content: none; /* 关闭顶部微光 */
+}
+.module-card--placeholder::after {
+  content: none; /* 占位卡片用自身的虚线边线,不叠加渐变实线 */
+}
+.module-card--placeholder:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========== Module Desc Bar (通用描述文字条,横向长条切图) ==========
+   用途:17专利/5荣誉行 —— 描述文字条 (8410x830, ratio 10.13)
+   规则:宽度 100% 铺满 tl-content 内容区,高度按比例自适应
+   ────────────────────────────────────── */
+.module-desc {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin-right: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+/* --- 系统字体版本(替代切图 .module-desc)------------------------
+   用于 17专利/5荣誉 描述文字:系统字体,左对齐,关键词加粗
+   字号与 .module-title__row 一致,统一视觉节奏
+   底衬采用「液态玻璃(glassmorphism)」效果:半透明白 + 背景模糊 + 描边高光
+   ------------------------------------------------------------ */
+.module-desc-text {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-main);
+  letter-spacing: 0.02em;
+  text-align: left;
+  /* 去除底衬:直接铺在页面背景上,左上角对齐,不要玻璃、不要 padding */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 var(--space-4) var(--space-3) 0; /* 描述条→卡片区 收敛到 12px */
+  font-weight: 400;
+}
+/* 关闭液态玻璃光斑 */
+.module-desc-text::before {
+  content: none;
+}
+.module-desc-text strong {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ========== Patent Cards (17个专利:3奖牌堆叠 + H1紫卡 + Q2紫卡) ==========
+   布局:3 列 grid,左侧奖牌列窄,右侧两张紫卡等宽较宽
+   比例:1 : 2.5 : 2.5,gap 随视口缩放
+   ────────────────────────────────────── */
+.patent-cards {
+  display: grid;
+  grid-template-columns: 1fr 2.5fr 2.5fr;
+  gap: var(--space-3);
+  align-items: stretch;      /* 三列同高(等于紫卡自然高度) */
+  margin-right: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+/* 奖牌列:纵向堆叠 3 张,总高与右侧紫卡等高 */
+.patent-medals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+.patent-medal {
+  flex: 1 1 0;
+  min-height: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(17, 17, 26, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.patent-medal:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(17, 17, 26, 0.12);
+}
+.patent-medal img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+/* 紫卡:比例 3560:3286 ≈ 1.0834:1(近方),白底,内含紫色顶部横幅 */
+.patent-card {
+  border-radius: var(--radius-md);
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(20, 20, 60, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.patent-card--purple {
+  aspect-ratio: 3560 / 3286;
+}
+.patent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(20, 20, 60, 0.18);
+}
+.patent-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ========== Honor Cards (5项荣誉:4张卡等高,按原始比例排列) ==========
+   4 卡:优秀员工/公司荣誉(0.839:1 偏方) + FXD-Q2/Q4(0.687:1 竖版海报)
+   ────────────────────────────────────── */
+.honor-cards {
+  display: grid;
+  grid-template-columns: 0.839fr 0.839fr 0.687fr 0.687fr;
+  gap: var(--space-3);
+  align-items: stretch;
+  margin-right: var(--space-4);
+  margin-bottom: clamp(20px, 2.2vw, 32px);
+}
+.honor-card {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+/* 优秀员工 / 公司荣誉:深灰底 */
+.honor-card--dark {
+  aspect-ratio: 2181 / 2600;
+  background: #303746;
+  box-shadow: 0 8px 22px rgba(48, 55, 70, 0.35);
+}
+/* FXD 嘉奖令 Q2/Q4:中蓝底 */
+.honor-card--blue {
+  aspect-ratio: 1785 / 2600;
+  background: #2644b6;
+  box-shadow: 0 8px 22px rgba(38, 68, 182, 0.35);
+}
+.honor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(6, 9, 31, 0.5);
+}
+.honor-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ========== Module Scroll (横向滑动容器,隐藏滚动条) ========== */
+.module-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* ★ 轴线起点那颗节点圆点的圆心正压在第 1 列左缘(= 卡片左缘),半径约 5px
+     会伸到容器左外侧;而 overflow:auto 的裁剪边界是 padding box,
+     所以第一颗圆点会被裁成半个(实测裁到 6px 宽的一个竖椭圆)。
+     解法:用「负 margin + 等量 padding」在左侧撑出一段不可见缓冲区 ——
+     裁剪边界因此左移到内容区之外 6px,而内容(content box)的
+     位置与宽度分毫不动(轴线左端 / 卡片左缘 / 标记左缘仍在原处)。
+     右侧不加 → 轴线右端位置也不变。 */
+  margin-left: -6px;
+  padding-left: 6px;
+}
+.module-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========== Module Timeline (通用模块时间轴:年份标记 + 分割线) ==========
+   样式与顶部「10年鹅厂经历」career-grid 一致,但列数 = 该组卡片数。
+   列宽 = 卡片列宽,因此每个标记左缘与对应卡片左缘精确对齐。
+   ────────────────────────────────────── */
+.module-timeline {
+  /* 位于卡片组下方,上方间距由 module-group 的 margin-bottom(= --card-gap 22px)提供,
+     此处不再重复 —— 第 47 项把原来夹在这里的 .mt-caption 上移后,轴线与卡片组的间距
+     就是全站统一的 22px 节奏(改前是 22 + 标题高 + 7 ≈ 48px)。 */
+  margin: 0 var(--space-4) 0 0;
+}
+
+.mt-grid {
+  display: grid;
+  /* 3 列等宽,column-gap 与 .module-group__cards 完全一致(= 卡片圆角),
+     保证标记左缘 = 卡片左缘 */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--card-gap);
+  row-gap: 8px;
+  /* 标记视觉高度 = 旧尺寸 clamp(14px,1.5vw,24px) × 0.6837
+     (0.6837 = 268/392,切图裁掉上下透明留白后的等效系数,
+      保证裁切前后圆点直径/字号完全一致) */
+  --tl-mark-h: clamp(9.6px, 1.026vw, 16.4px);
+}
+
+/* Row 1: 分割线 — 跨全部列,位于时间轴顶部(紧贴卡片组下方) */
+.mt-divider {
+  grid-row: 1;
+  grid-column: 1 / -1;
+}
+
+/* ===== 时间轴轨道:一条柔光紫带 =====
+   去掉了白色玻璃管 —— 管壁(尤其下半部分)会在紫带下方留出一条
+   发白的半透带,读起来"硬"且抢戏。现在轨道本身就是那根紫色光带
+   (流光由 ::before 承担),整条线统一降到 50% 不透明度。
+   ────────────────────────────────────── */
+.cg-divider,
+.mt-divider {
+  position: relative;
+  width: 100%;
+  /* 轴线行:高度只容纳「刻度伸出量」;节点圆点由 .*-node::before 绝对定位、允许溢出 */
+  height: clamp(9px, 0.95vw, 13px);
+  overflow: visible; /* 刻度 / 圆点 / 流光光晕允许溢出 */
+}
+
+/* ---- 时间轴主轴:细轴线 + 短刻度 + 流光 ----
+   把原来的「紫色玻璃光带」改成一条真正的坐标轴:
+   ① 轴线:1.5px 细线,★ 左端(= 至今 / 现在)最亮,向右(= 过去)逐级渐隐
+      —— 用亮度差做出「时间流向现在」的指向性;
+   ② 刻度:★ 只保留「每 9px 一根的短刻度」这一档 —— 1px 宽 / 4px 高 / alpha 0.38。
+      时间轴的颗粒度就靠它读出来;它是"最细档",不构成中间层次。
+      ⚠ 2026-10-10 第 46 项(用户纠正):第 40 项我把两档刻度删反了 ——
+        当时删掉的是这一层「短刻度」,留下的反而是「长刻度(每 45px 一根,
+        1.5px 宽 / 7px 高 / alpha 0.78)」。用户要的是:主点只有核心的 4 个节点,
+        中间不要再分档,刻度只要"最细"那一档 →
+        现在 **长刻度整层删除、短刻度整层恢复**(层数仍是 3 层,keyframes 无需改)。
+      · 调颗粒度:改这一层的 9px(间距);调粗细:改 1px(宽)/ 4px(高)/ 0.38(alpha)。
+      · 想恢复长刻度:把下面第 ② 层换回
+        repeating-linear-gradient(90deg, rgba(190,130,255,0.78) 0 1.5px, transparent 1.5px 45px),
+        并把 background-size 第 2 段换成 100% 7px。
+   ③ 流光:一道近白光带沿轴 ★ 自左向右 扫过,每 3.5s 一轮(流动感来源),
+      扫过时与节点的呼吸波同相位,读起来像"光走过一个又一个年份"。
+   ────────────────────────────────────── */
+.cg-divider::before,
+.mt-divider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    /* ③ 流光(最上层,一道 5px 高的柔光) */
+    linear-gradient(
+        100deg,
+        transparent 43%,
+        rgba(214, 178, 255, 0.36) 47.5%,
+        rgba(248, 240, 255, 0.85) 50%,
+        rgba(214, 178, 255, 0.36) 52.5%,
+        transparent 57%
+      ),
+    /* ② 短刻度:每 9px 一根,1px 宽 / 4px 高(最细档,长刻度已删) */
+    repeating-linear-gradient(
+        90deg,
+        rgba(169, 123, 255, 0.38) 0 1px,
+        transparent 1px 9px
+      ),
+    /* ① 轴线本体:左亮 → 右暗 */
+    linear-gradient(
+        90deg,
+        rgba(190, 130, 255, 0.95) 0%,
+        rgba(155, 70, 255, 0.58) 42%,
+        rgba(122, 28, 250, 0.24) 100%
+      );
+  background-size: 220% 5px, 100% 4px, 100% 1.5px;
+  background-position: 200% 50%, 0 50%, 0 50%;
+  background-repeat: no-repeat;
+  animation: tl-stream 3.5s linear infinite;
+  pointer-events: none;
+}
+/* 流光方向:★ 自左向右 —— background-size 为 220% 时,position 200% → -200%
+   会让画面内容向右移动。只有第 ③ 层(流光)参与位移,
+   刻度层与轴线层的 background-position 恒为 0 50%,不随之抖动。
+   ⚠ 三层必须一一对应:增/删 background-image 的层,就要同步改这里的段数。 */
+@keyframes tl-stream {
+  from {
+    background-position: 200% 50%, 0 50%, 0 50%;
+  }
+  to {
+    background-position: -200% 50%, 0 50%, 0 50%;
+  }
+}
+
+/* 无障碍:用户偏好减少动态效果时,关掉流光与引导线呼吸
+   (流光停在轴外,避免静止时正好落在光带正中把紫色洗淡) */
+@media (prefers-reduced-motion: reduce) {
+  .cg-divider::before,
+  .mt-divider::before {
+    animation: none;
+    background-position: 200% 50%, 0 50%, 0 50%;
+  }
+  .cg-node::after,
+  .mt-node::after {
+    animation: none;
+    opacity: 0.75;
+  }
+  .cg-node::before,
+  .mt-node::before {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ---- Row 2: 年份标记 — 挂在轨道下方,左对齐于列(= 卡片左缘) ---- */
+.mt-marker {
+  grid-row: 2;
+}
+
+/* ---- 年份标记:纯文本(两条时间轴共用) ----
+   原来是「切图 + 浅色玻璃胶囊」:缩小到十几像素后字糊成一团,且浅底胶囊
+   在深色页面上很跳。现在改成真文本,由三件东西构成:
+     .tl-mark__span  年份区间(如「至今 → 22年」)—— 其中的 → 用品牌紫单拎
+                     出来,直接把"这段时间的流向"画出来 = 指向性;
+     .tl-mark__dur   时长(如「4年」)—— 品牌紫,作为区间的落点;
+     ::before        左侧一条 2px 竖条,★ 高度随该段年数(--dur)变化:
+                     4年最长、1年最短 —— 与节点圆点的大小变化同源,
+                     两处一起构成"长短交替"的节奏感。
+   ────────────────────────────────────── */
+.cg-marker,
+.mt-marker {
+  position: relative;
+  justify-self: start; /* 左对齐于列 = 与卡片左缘、节点严格对齐 */
+  align-self: start;   /* 顶部贴近上方轴线 */
+  display: flex;
+  /* ★ 单行横排:原本是 column(「至今 → 22年」一行、「4年」另起一行),两行把整条
+     时间轴的纵向高度抬到 ~35px,连带下方所有内容整体下移。
+     现在区间与时长并排一行,标签高 ≈ 一个字行(17px),轴区高度回落约 19px。
+     两段字号不同(13.5 / 12),所以用 baseline 对齐而不是 center。 */
+  flex-direction: row;
+  align-items: baseline;
+  gap: clamp(3px, 0.34vw, 6px);
+  padding-left: clamp(7px, 0.72vw, 10px); /* 让出左侧节奏条的位置 */
+  line-height: 1.24;
+  white-space: nowrap;
+}
+/* 左侧节奏条:长度 ∝ 该段年数
+   ★ 高度公式按"单行标签"重新标定(标签高 ≈17px):4年 15px → 1年 9px,
+     既保住长短交替的节奏,又不会上下捅出标签外。两条轴共用同一套。 */
+.cg-marker::before,
+.mt-marker::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: clamp(1px, 0.12vw, 2px);
+  width: 2px;
+  height: calc(clamp(5px, 0.5vw, 7px) + var(--dur, 1) * clamp(1.6px, 0.16vw, 2.4px));
+  border-radius: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(190, 130, 255, 0.95) 0%,
+    rgba(122, 28, 250, 0.26) 100%
+  );
+}
+.tl-mark__span {
+  font-size: var(--fs-tl-span);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-main);
+}
+/* 箭头 → :指向性 —— 段内时间的流向,用品牌紫单拎出来 */
+.tl-mark__span i {
+  font-style: normal;
+  font-weight: 700;
+  margin: 0 clamp(3px, 0.3vw, 5px);
+  color: rgba(190, 130, 255, 0.95);
+}
+.tl-mark__dur {
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(190, 130, 255, 0.92);
+}
+/* 组标题(如「装扮生态建设」):放在轴线左上方,作为这条轴的名字
+   ★ 样式已上移到 .module-group 段的 `.group-caption, .mt-caption` 共用块,
+     与三组卡片前的 title 同一套声明 —— 此处不再重复定义,避免改一处漏一处。 */
+
+/* ===== 时间节点:轴上的圆点 + 贯通上下的引导线 =====
+   ① ::before 圆点:坐在轴线上,★ 直径随该段年数(--dur)变化
+      (4年 10.4px → 1年 6.4px)—— 大小交替 = 节奏感。
+      内芯亮白、外圈品牌紫,与轴线的紫同族;带 .is-now 的节点
+      (= 至今 / 项目进行ing)额外一圈向外扩散的脉冲光环,
+      把"时间轴的终点"钉住 = 指向性的落点。
+   ② ::after 引导线:一条穿过圆点的竖线,★ 自圆点上缘向上伸出 --tl-up
+      指向上方卡片底边,向下渐隐至下方年份标签 ——
+      「卡片 ← 节点 → 标签」三点共线,指向性由这条线承担。
+   ③ 呼吸波:错峰起伏,★ 自左向右依次亮起,与流光同周期(3.5s)。
+   ────────────────────────────────────── */
+.cg-node,
+.mt-node {
+  position: relative;
+  align-self: center;   /* 零尺寸锚点,落在轴线行的中线上 */
+  justify-self: start;  /* 与同列卡片 / 标记左缘对齐 */
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  /* 圆点直径 = 基准 5px + 每年 1.35px
+     → 4年 10.4px / 3年 9.05px / 2年 7.7px / 1年 6.35px */
+  --dot: calc(5px + var(--dur, 1) * 1.35px);
+}
+/* ① 圆点 */
+.cg-node::before,
+.mt-node::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;           /* 压在引导线之上:线从点后面穿过 */
+  width: var(--dot);
+  height: var(--dot);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 38% 34%,
+    #fff 0%,
+    #fff 24%,
+    rgba(200, 150, 255, 1) 32%,
+    rgba(140, 50, 252, 1) 100%
+  );
+  box-shadow:
+    0 0 0 1.5px rgba(176, 88, 255, 0.22),
+    0 0 7px rgba(122, 28, 250, 0.45);
+  animation: tl-tick-wave 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+/* ② 引导线:两端渐隐、中段最亮,圆点压在中段上 */
+.cg-node::after,
+.mt-node::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateX(-50%);
+  /* 顶端 = 圆点上缘再向上 --tl-up;底端 = 圆点下缘再向下一段 */
+  margin-top: calc(-1 * (var(--tl-up, 0px) + var(--dot) / 2));
+  width: 2px;
+  height: calc(
+    var(--tl-up, 0px) + var(--dot) / 2 + var(--dot) / 2 + clamp(7px, 0.78vw, 11px)
+  );
+  border-radius: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(122, 28, 250, 0.2) 0%,
+    rgba(122, 28, 250, 0.6) 30%,
+    rgba(122, 28, 250, 0.6) 50%,
+    rgba(122, 28, 250, 0.24) 78%,
+    rgba(122, 28, 250, 0) 100%
+  );
+  animation: tl-tick-wave 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+/* 「至今 / 项目进行ing」节点:一圈向外扩散的脉冲光环 */
+.cg-node.is-now::before,
+.mt-node.is-now::before {
+  animation:
+    tl-tick-wave 3.5s ease-in-out infinite,
+    tl-now-pulse 2.4s ease-out infinite;
+}
+@keyframes tl-now-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(190, 130, 255, 0.55), 0 0 7px rgba(122, 28, 250, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(190, 130, 255, 0), 0 0 7px rgba(122, 28, 250, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(190, 130, 255, 0), 0 0 7px rgba(122, 28, 250, 0.45);
+  }
+}
+/* 呼吸波:只有不透明度起伏(无发光、无位移),是"光扫过时节点被点亮"的读法 */
+@keyframes tl-tick-wave {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+/* 节点落在轴线行、逐列定位(与卡片 / 标记左缘对齐);
+   career 轴额外向上伸出 --tl-up,让引导线一路送到上方卡片的底边 */
+.career-grid > .cg-node {
+  grid-row: 2;
+  --tl-up: clamp(6px, 0.65vw, 10px);
+}
+.career-grid > .cg-node:nth-of-type(1) { grid-column: 1; }
+.career-grid > .cg-node:nth-of-type(2) { grid-column: 2; }
+.career-grid > .cg-node:nth-of-type(3) { grid-column: 3; }
+.career-grid > .cg-node:nth-of-type(4) { grid-column: 4; }
+
+.mt-grid > .mt-node { grid-row: 1; }
+.mt-grid > .mt-node:nth-of-type(1) { grid-column: 1; }
+.mt-grid > .mt-node:nth-of-type(2) { grid-column: 2; }
+.mt-grid > .mt-node:nth-of-type(3) { grid-column: 3; }
+
+/* 亮起顺序:★ 从左向右(与流光同周期 3.5s,四颗/三颗各自等相位分布)
+   圆点(::before)与引导线(::after)用同一组 delay,两者同步起伏 */
+.career-grid > .cg-node:nth-of-type(1)::before,
+.career-grid > .cg-node:nth-of-type(1)::after { animation-delay: 0s; }
+.career-grid > .cg-node:nth-of-type(2)::before,
+.career-grid > .cg-node:nth-of-type(2)::after { animation-delay: 0.88s; }
+.career-grid > .cg-node:nth-of-type(3)::before,
+.career-grid > .cg-node:nth-of-type(3)::after { animation-delay: 1.75s; }
+.career-grid > .cg-node:nth-of-type(4)::before,
+.career-grid > .cg-node:nth-of-type(4)::after { animation-delay: 2.63s; }
+
+.mt-grid > .mt-node:nth-of-type(1)::before,
+.mt-grid > .mt-node:nth-of-type(1)::after { animation-delay: 0s; }
+.mt-grid > .mt-node:nth-of-type(2)::before,
+.mt-grid > .mt-node:nth-of-type(2)::after { animation-delay: 1.15s; }
+.mt-grid > .mt-node:nth-of-type(3)::before,
+.mt-grid > .mt-node:nth-of-type(3)::after { animation-delay: 2.3s; }
+
+/* ========== Career Grid (10年鹅厂经历 - 时间轴 + 卡片) ==========
+   CSS Grid 实现:
+   - Row 1: 公司卡片(等高,宽度=卡片自然宽,整行 space-between 均匀分布)
+   - Row 2: 时间轴轴线(跨 4 列) + 4 个节点圆点(逐列左对齐)
+   - Row 3: 年份标记(纯文本,左对齐于列内)
+   ────────────────────────────────────
+   卡片(v5 新切图,已裁掉透明留白,内容高 1219/1221px):
+     D9: 1936×1219 → ratio 1.588
+     D8: 2547×1219 → ratio 2.089
+     D7: 3773×1221 → ratio 3.090
+     D6: 3689×1221 → ratio 3.021
+   ↑ v5 与 v4 的区别:①文字色由纯白 #FFF 改为 #BDBDBD(与全站 --text-main 一致);
+     ②三行文字的字号/行高不变,但行间距变大(1219 > 1155),故比例整体变小约 6%。
+     横向内容宽与 v4 完全一致(1936/2547/3773/3689),因此列宽与标记对齐关系不变。
+   布局:卡片定高(--card-h,较上版压缩为 1/2),宽度按比例自适应;
+        grid 整体 width:100% 跟随内容区,列按内容宽、space-between 均匀分布。
+   ──────────────────────────────────── */
+.career-grid {
+  --card-h: clamp(25px, 4vw, 47px);    /* 仅压缩卡片:原 70px 的 2/3(≈47px) */
+  /* --marker-h / --tl-mark-h 已随「标记改文本」下线(原来只服务于标记切图的高度),
+     保留变量名以防有其它引用,值为原值不动。 */
+  --marker-h: clamp(38px, 6vw, 70px);
+  --tl-mark-h: calc(var(--marker-h) * 0.1778);
+  display: grid;
+  grid-template-columns: repeat(4, auto); /* 列宽=卡片自然宽(由定高+比例决定) */
+  width: 100%;                            /* 跟随页面/内容区宽度 */
+  justify-content: space-between;         /* 4 张切图均匀分布,首尾贴左右边 */
+  row-gap: 10px;    /* 模块内纵向间距 10px */
+  column-gap: 20px; /* 最小横向间距,其余空隙由 space-between 均分 */
+}
+
+/* Row 1: 公司卡片 — 置顶,定高,宽度按比例自适应(=> 4 张高度天然相等) */
+.cg-card {
+  grid-row: 1;
+  height: var(--card-h);
+  width: auto;
+  max-width: none;
+  display: block;
+  object-fit: contain;
+}
+
+/* Row 2: 分割线 — 跨 4 列,位于卡片与时间轴之间 */
+.cg-divider {
+  grid-row: 2;
+  grid-column: 1 / -1;
+}
+
+/* Row 3: 年份标记 — 纯文本(共用样式见上方 .cg-marker/.mt-marker 定义) */
+.cg-marker {
+  grid-row: 3;
+}
+
+/* ========== 时间轴像素小人:沿轨道行走,走到节点跳起顶卡片 ==========
+   素材 assets/tl-walker-sprite.png:1:1 的横向 17 帧雪碧图
+   (0-3 走路 4 帧 / 4-16 跳跃 13 帧),由 pixel-girl/make_walker_sprite.py 生成。
+   ─ 为什么不用原始 GIF:需要在「走路循环」与「跳跃一次性播放」之间切换,
+     并把「顶卡片」的时刻精确钉在跳跃的某一帧上 —— 一张雪碧图 + JS 选帧最可控;
+     而且 GIF 是 6 倍放大版,浏览器用 image-rendering:pixelated 缩小时会整格
+     丢像素(像素画会碎),必须先按 1:1 导出、网页里再放大(放大方向是安全的)。
+   ─ 单元格 32 格宽 × 40 格高 = 32 格角色 + 8 格腾空余量,
+     单元格最后一行 = 落地基准线(JS 把这一行对到轨道中心线)。
+   ─ 位置 / 帧号全部由 js/main.js 写内联样式,这里只给几何与外观。
+   ────────────────────────────────────── */
+.career-grid {
+  position: relative;      /* 小人的定位基准 */
+  --tl-pix: 1px;           /* 像素画每格的显示尺寸(整数比 → 像素不糊) */
+  --tl-bump: clamp(4px, 0.46vw, 7px); /* 卡片被顶起的幅度 */
+}
+
+.tl-walker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(32 * var(--tl-pix));
+  height: calc(40 * var(--tl-pix));
+  z-index: 6;              /* 压在卡片与轨道之上 */
+  pointer-events: none;
+  opacity: 0;              /* JS 量完几何后加 .is-ready 淡入,避免先闪在错误位置 */
+  transition: opacity 0.45s ease;
+  background: url("../assets/tl-walker-sprite.png") no-repeat 0 0;
+  background-size: calc(17 * 32 * var(--tl-pix)) calc(40 * var(--tl-pix));
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
+  will-change: transform;
+}
+.tl-walker.is-ready {
+  opacity: 1;
+}
+
+/* ---- 被顶的反馈:上方卡片像被从下方顶了一下 ----
+   ① 受力瞬间快速上移 + 纵向压扁 ② 回落时轻微过冲 ③ 收束回原位;
+   同时压一层接触投影,补上"离地"这层意思。
+   transform-origin 取底边中点:纵向缩放时底边不动,更像顶的是卡片下表面。
+   ────────────────────────────────────── */
+.cg-card {
+  transform-origin: 50% 100%;
+  transition: filter 0.25s ease;
+}
+.cg-card.is-bumped {
+  animation: tl-card-bump 620ms cubic-bezier(0.22, 0.9, 0.28, 1) both;
+  filter: drop-shadow(0 7px 6px rgba(70, 24, 150, 0.18));
+}
+@keyframes tl-card-bump {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  13% {
+    transform: translateY(calc(-1 * var(--tl-bump))) scale(1.015, 0.966);
+  }
+  34% {
+    transform: translateY(calc(-0.3 * var(--tl-bump))) scale(0.996, 1.016);
+  }
+  56% {
+    transform: translateY(calc(-0.13 * var(--tl-bump))) scale(1.003, 0.998);
+  }
+  78% {
+    transform: translateY(calc(0.02 * var(--tl-bump))) scale(1, 1.002);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+/* 无障碍:系统开启「减少动态效果」时整体不启动(JS 也不会加 .is-ready) */
+@media (prefers-reduced-motion: reduce) {
+  .tl-walker {
+    display: none;
+  }
+  .cg-card.is-bumped {
+    animation: none;
+    filter: none;
+  }
+}
+
+/* ========== Toast ========== */
+.toast {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translate(-50%, -16px);
+  background: rgba(20, 24, 40, 0.95);
+  color: var(--text-main);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+}
+.toast svg {
+  width: 20px;
+  height: 20px;
+}
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 560px) {
+  /* 仅真手机竖屏(≤560px)才切换为上下堆叠 */
+  /* 版心留白同步收窄:tab 与信息流共用同一个值,保持左缘同列 */
+  :root {
+    --gutter-x: 16px;
+  }
+  .app {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    flex: 0 0 auto;
+    height: auto;
+    position: relative;
+    padding: 16px;
+  }
+  .sidebar__avatar {
+    width: 80px;
+  }
+  .sidebar__avatar img,
+  .sidebar__avatar video {
+    max-width: 80px;
+  }
+  .sidebar__name img {
+    height: 20px;
+  }
+  .side-blocks {
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    align-items: center;
+  }
+  /* ★ 2026-10-10 第 49 项:同一批实时文本在移动端单独给一档固定字号。
+     桌面侧栏内容宽只有 195~268px,移动端这里被放宽到 420px,
+     继续用 5.4974cqw 会算出 22.9px —— 明显偏大(比桌面大一倍),所以覆写。
+     移动端 initSidebarFit() 一开始就 return(见 js/main.js),宽度不由高度反推,
+     所以这里用固定 px 不会破坏 fit() 的逻辑。
+     14px ≈ 桌面 1920×1200 那一档(14.5px),手机竖屏阅读不吃力。
+     ★ 第 61 项:胶囊不再单独缩小(第 53 项前的"×0.81"已作废),这里给多少胶囊就是多少,
+       padding/border-radius 都是 em,会跟着一起放大到手机可读的尺寸。 */
+  /* ★ 第 69 项:联系方式卡进这个列表了 —— 它是 .side-blocks 的子元素,
+     移动端同样要吃固定字号(手机竖屏 initSidebarFit() 直接 return,栏宽不由高度反推,
+     继续用 5.4974cqw 会按整个屏宽算出 ≈19px,比正文的 14px 大一圈)。
+     宽度/居中不用管:它已在 .side-blocks 内,自动跟随那个 420px + auto margin。 */
+  .side-bio,
+  .side-work-text,
+  .side-honor-list li,
+  .side-edu-text,
+  .side-tags,
+  .side-tag,
+  .info-card--contact {
+    --side-fs: 14px;
+  }
+  .info-card {
+    padding: 10px 12px;
+  }
+  /* ★ 第 69 项:上面 .info-card 的 padding(10px 12px)会把方案 C 的无容器形态顶开,
+     所以在它之后按 (0,1,0) 同权重、更靠后,把 padding 收回来。 */
+  .info-card--contact {
+    padding: 0;
+  }
+  .content {
+    height: auto;
+    min-height: 100vh;
+  }
+  .content__scroll {
+    padding: 16px var(--gutter-x) 60px;
+  }
+  .tabs {
+    padding: 16px var(--gutter-x) 20px;
+    overflow-x: auto;
+  }
+  /* 两列时间轴:移动端缩小左列,卡片更小 */
+  .tl-label {
+    flex: 0 0 80px;
+    min-width: 70px;
+    padding: 12px 10px 12px 0;
+  }
+  .tl-content {
+    padding: 0 0 0 12px;
+    /* 移动端 career-grid 已改 width:100%,此处仅保留内容区上限与其它行一致 */
+    max-width: calc(clamp(30px, 8.25vw, 53px) * 10.411 + 120px + 12px);
+  }
+  .career-grid {
+    --card-h: clamp(20px, 5.5vw, 35px);    /* 仅压缩卡片:原 53px 的 2/3(≈35px) */
+    --marker-h: clamp(30px, 8.25vw, 53px); /* 年份标记保持移动端原尺寸 */
+    column-gap: 12px; /* 移动端最小间距;其余由 space-between 均分 */
+    width: 100%;      /* 跟随内容区宽度,4 张均匀分布 */
+  }
+  .module-placeholder {
+    min-height: 100px;
+    margin-right: 12px;
+  }
+  /* 移动端:主标题最小字号收敛,卡片列改单列铺满 */
+  .module-title {
+    margin-right: 12px;
+  }
+  .module-group {
+    margin-right: 12px;
+  }
+  /* 组标题:原来是左侧竖排切图(需要按移动端 padding 重算右缘偏移 24px),
+     现已统一为卡片组前的 .group-caption 文本 → 无需任何移动端覆盖。 */
+  .module-card {
+    flex: 1 1 100%;      /* 单列铺满 */
+    min-width: 0;
+  }
+  /* 移动端:专利/荣誉卡片改用更紧凑的排列 */
+  .patent-cards {
+    grid-template-columns: 1fr 1fr;
+    margin-right: 12px;
+  }
+  .patent-medals {
+    display: none;              /* 移动端隐藏奖牌堆叠,只保留 2 紫卡 */
+  }
+  .honor-cards {
+    grid-template-columns: 1fr 1fr;
+    margin-right: 12px;
+  }
+  .honor-card {
+    aspect-ratio: auto;
+    height: 220px;
+    width: 100%;
+  }
+  .module-desc {
+    margin-right: 12px;
+  }
+}
+
+/* ========== Detail Modal (通用详情弹层) ==========
+ * 用法:给任意卡片加 data-modal="<modal-id>" 即可触发
+ * cursor:pointer 由 [data-modal] 选择器统一处理 */
+
+/* 触发器:hover 时光标变手指 */
+[data-modal] {
+  cursor: pointer;
+}
+
+/* 卡片激活态(hover):整个 article 区域可点击,显示高亮 */
+.module-card[data-modal] {
+  transition: background 0.28s ease, box-shadow 0.28s ease,
+    border-color 0.28s ease, transform 0.2s ease;
+}
+/* ★ 这里原来是 background:#ffffff(整卡翻白)。
+   卡片底色已是深黑、展示区也改成同色后,再翻白就会出现"上半块黑、下半块白"的割裂;
+   而且白底上的 #BDBDBD 文字对比只有 1.85:1(基本看不见)。
+   现在改成「底色提一档 + 紫色边线 + 紫色外光晕」,与普通 hover 同一套语言,
+   点击态靠紫色光晕区分,卡片整体始终保持深色。
+   想回到白底:把下面 background 换成 #ffffff 即可。 */
+.module-card[data-modal]:hover {
+  background: var(--card-bg-hover);
+  border-color: rgba(107, 63, 224, 0.55);
+  box-shadow:
+    0 6px 20px rgba(107, 63, 224, 0.18),
+    0 0 0 2px rgba(107, 63, 224, 0.26);
+  transform: translateY(-2px);
+}
+/* 覆盖 pointer-events:none,确保螺旋区域点击事件冒泡到 article */
+.module-card[data-modal] .card-item {
+  pointer-events: none;
+}
+.module-card[data-modal] .card-spiral,
+.module-card[data-modal] .module-card__img--spiral {
+  pointer-events: none;
+}
+
+/* 蒙层:全站二级页面统一(见 :root --scrim-*) */
+.detail-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: var(--scrim-bg);
+  backdrop-filter: blur(var(--scrim-blur));
+  -webkit-backdrop-filter: blur(var(--scrim-blur));
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.detail-modal.is-open {
+  display: flex;
+  opacity: 0; /* 先 flex 再触发 opacity 过渡 */
+}
+.detail-modal.is-visible {
+  opacity: 1;
+}
+
+/* 面板:宽度占视口 2/3,高度自适应内容(封顶 92vh 内部滚动),黑色背景 */
+.detail-modal__panel {
+  position: relative;
+  background: #000000;
+  border-radius: 14px;
+  width: 66.67vw;
+  height: auto;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  transform: translateY(18px) scale(0.98);
+  transition: transform 0.26s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.22s ease;
+  opacity: 0;
+  overflow: hidden;
+}
+.detail-modal.is-visible .detail-modal__panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* 关闭按钮:固定在整个页面(蒙层)的右上角 */
+.detail-modal__close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: #333;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  z-index: 2010; /* 高于面板 */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.detail-modal__close:hover {
+  background: #ffffff;
+  color: #000;
+  transform: scale(1.08);
+}
+.detail-modal__close:focus-visible {
+  outline: 3px solid rgba(107, 63, 224, 0.6);
+  outline-offset: 2px;
+}
+
+/* 可滚动内容区:纵向滑动。左右 10px → 与页间距一致 */
+.detail-modal__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 10px 32px 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #000000;
+  scroll-behavior: smooth;
+}
+.detail-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+.detail-modal__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.detail-modal__body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 4px;
+}
+
+/* 内容列:铺满面板宽度(图满宽无白边),上下自适应,纵向流 */
+.detail-modal__content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 页签栏 (AI陪伴 三 tab) ===== */
+.detail-modal__tabs {
+  display: flex;
+  gap: 4px;
+  padding: 14px 16px 0 16px;
+  background: #000000;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.detail-modal__tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: rgba(var(--text-main-rgb), 0.55);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 18px 12px 18px;
+  cursor: pointer;
+  position: relative;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.16s ease, background 0.16s ease;
+  white-space: nowrap;
+}
+.detail-modal__tab:hover {
+  color: rgba(var(--text-main-rgb), 0.85);
+  background: rgba(255, 255, 255, 0.06);
+}
+.detail-modal__tab.is-active {
+  color: var(--text-main);
+}
+.detail-modal__tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: -1px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+}
+.detail-modal__tab:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: -2px;
+}
+
+/* tab 面板:默认隐藏,激活态显示 */
+.detail-modal__tabpanel[hidden] {
+  display: none;
+}
+
+/* tab 内容占位(高清页填充前) */
+.tab-placeholder {
+  color: rgba(var(--text-main-rgb), 0.5);
+  text-align: center;
+  padding: 80px 24px;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+.tab-placeholder small {
+  color: rgba(var(--text-main-rgb), 0.3);
+  font-size: 0.85rem;
+}
+
+/* 标题区单独留左右内边距(图片铺满,文字不贴边);深底白字 */
+.detail-modal__head {
+  padding: 36px 32px 24px 32px;
+  background: #000000;
+}
+.detail-modal__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+.detail-modal__subtitle {
+  font-size: 0.9rem;
+  color: rgba(var(--text-main-rgb), 0.55);
+  margin: 0;
+}
+
+/* 幻灯片:纵向流,页间距 10px = 左右 padding 10px,视觉均匀 */
+.detail-modal__slides {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* 每页容器:相对定位,承载叠加视频;font-size:0 消除行内间隙 */
+.slide-item {
+  position: relative;
+  width: 100%;
+  font-size: 0;
+  line-height: 0;
+}
+.slide-item .slide-full {
+  width: 100%;
+  height: auto;
+  border: none;
+  border-radius: 0;
+  display: block;
+}
+/* 叠加视频:绝对定位到幻灯片内原始位置(手机屏幕/横条),点击播放 */
+.slide-item .slide-video {
+  position: absolute;
+  object-fit: cover;
+  background: #000;
+  border: 0;
+  z-index: 2;
+  cursor: pointer;
+}
+
+/* 视频区:同样铺满宽度,纵向堆叠 */
+.detail-modal__videos {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.detail-modal__video-wrap {
+  width: 100%;
+  border-radius: 0;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+.detail-modal__video-wrap video {
+  width: 100%;
+  display: block;
+  max-height: none;
+  object-fit: contain;
+  background: #000;
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .detail-modal__panel {
+    width: 94vw;
+    height: 90vh;
+    max-height: 90vh;
+  }
+  .detail-modal__body {
+    padding: 0 0 24px 0;
+  }
+  .detail-modal__close {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ========== Lightbox(荣誉/专利大图查看) ==========
+   6 张卡片图联通:点击任意一张打开大图,
+   左右按钮 / ← → 键切换上一张下一张,
+   底部缩略图可直接点击跳转到对应图片。
+   ────────────────────────────────────── */
+/* 可点击放大的缩略图:鼠标指针改为放大镜 */
+[data-gallery] {
+  cursor: zoom-in;
+}
+
+/* 蒙层:与详情弹窗共用同一套 --scrim-*(原为 rgba(8,7,16,.94) + blur(8px),
+   近乎全黑不透明,与二级页面观感不一致) */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: var(--scrim-bg);
+  backdrop-filter: blur(var(--scrim-blur));
+  -webkit-backdrop-filter: blur(var(--scrim-blur));
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3vh 76px 0;
+  box-sizing: border-box;
+}
+.lightbox.is-open {
+  display: flex;
+  opacity: 0; /* 先 flex 渲染,再触发 opacity 过渡 */
+}
+.lightbox.is-visible {
+  opacity: 1;
+}
+
+/* 图片舞台:占据主体高度,图内等比缩放不裁切 */
+.lightbox__stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  /* 背景由 #ffffff 改为透明:深色卡(优秀员工/公司荣誉)四角是透明像素,
+     原先被白底填充 → 大图四角漏白。透明后透明角直接融进深色蒙层,无白可漏 */
+  background: transparent;
+  /* 统一大圆角:6 张图圆角一致;对不透明到边的图(专利卡白角/海报)可裁掉白角,
+     对深色卡则与其自身烘焙圆角对齐,整体观感统一 */
+  border-radius: clamp(20px, 2.4vw, 30px);
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  transform: scale(0.985);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.lightbox.is-visible .lightbox__img {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 底部说明:标题 + 序号 */
+.lightbox__caption {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 8px 4px;
+  color: rgba(var(--text-main-rgb), 0.92);
+  font-size: var(--fs-sm);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.lightbox__counter {
+  color: rgba(var(--text-main-rgb), 0.5);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+/* 缩略图条 */
+.lightbox__thumbs {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 10px 4px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.lightbox__thumbs::-webkit-scrollbar {
+  display: none;
+}
+.lightbox__thumb {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.lightbox__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.lightbox__thumb:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+.lightbox__thumb.is-active {
+  opacity: 1;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+/* 左右切换按钮 */
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+.lightbox__nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.06);
+}
+.lightbox__nav--prev {
+  left: 16px;
+}
+.lightbox__nav--next {
+  right: 16px;
+}
+
+/* 关闭按钮 */
+.lightbox__close {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3010;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.lightbox__close:hover {
+  background: #ffffff;
+  color: #000000;
+  transform: scale(1.08);
+}
+
+.lightbox__close:focus-visible,
+.lightbox__nav:focus-visible,
+.lightbox__thumb:focus-visible,
+[data-gallery]:focus-visible {
+  outline: 3px solid rgba(107, 63, 224, 0.7);
+  outline-offset: 2px;
+}
+
+/* 响应式:窄屏收窄边距与控件 */
+@media (max-width: 600px) {
+  .lightbox {
+    padding: 2vh 52px 0;
+  }
+  .lightbox__nav {
+    width: 40px;
+    height: 40px;
+  }
+  .lightbox__nav--prev {
+    left: 6px;
+  }
+  .lightbox__nav--next {
+    right: 6px;
+  }
+  .lightbox__close {
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+  }
+  .lightbox__thumb {
+    width: 52px;
+    height: 52px;
+  }
+  .lightbox__caption {
+    font-size: var(--fs-xs);
+  }
+}
