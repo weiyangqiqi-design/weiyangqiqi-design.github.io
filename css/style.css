@@ -1989,6 +1989,11 @@ button {
   object-fit: cover;
   display: block;
 }
+/* ★ 2026-10-15:「元宝导流-创新分发」banner 定宽顶部对齐,底部超出部分截断,
+   保证图片正顶部(腾讯元宝搜索条/浮层)始终完整展示。只作用于该卡,不影响其它卡片。 */
+.module-card[data-modal="modal-yuanbao-dist"] .module-card__img img {
+  object-position: top center;
+}
 /* src 为空时隐藏 img 元素的 alt 文字/裂图,只显示底色 */
 .module-card__img img[src=""],
 .module-card__img img:not([src]) {
@@ -2410,6 +2415,32 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+}
+
+/* --- 卡片「创新 / 商业模式」信息块(8.9 亿浏览 CNY 行)
+   order: 5 → 位于标签下方、卡片底部 --- */
+.module-card__info {
+  order: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: rgba(var(--text-main-rgb), 0.72);
+}
+.module-card__info-line {
+  margin: 0;
+}
+.module-card__info-label {
+  color: var(--text-main);
+  font-weight: 600;
+}
+/* 该行卡片标签较多:允许换行,完整展示全部标签 */
+#tl-views .module-card__tags {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 /* --- 占位卡(旧样式,仍供 tl-revenue/tl-views 使用) --- */
@@ -3497,6 +3528,105 @@ button {
   border: 0;
   z-index: 2;
   cursor: pointer;
+}
+
+/* ★ 2026-10-15:多页幻灯片的「页码角标」+「快速跳页索引」(仅 data-pager 的弹层启用) */
+/* 每页右下角页码角标,如「03 / 09」 */
+.slide-item .slide-pageno {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 3;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.slide-item .slide-pageno b {
+  font-weight: 700;
+}
+.slide-item .slide-pageno i {
+  font-style: normal;
+  opacity: 0.6;
+}
+
+/* 跳页索引竖排导航:绝对定位在面板右侧中部,不随内容滚动 */
+.detail-modal__pager {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  z-index: 2005;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 6px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  max-height: 80vh;
+  overflow: visible;
+}
+.detail-modal__pager-btn {
+  appearance: none;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.detail-modal__pager-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.detail-modal__pager-btn.is-active {
+  background: #fff;
+  color: #000;
+  transform: scale(1.08);
+}
+.detail-modal__pager-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+/* 窄屏:索引缩小一点,避免遮挡太多内容 */
+@media (max-width: 768px) {
+  .detail-modal__pager {
+    right: 8px;
+    gap: 4px;
+    padding: 6px 4px;
+  }
+  .detail-modal__pager-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+  .slide-item .slide-pageno {
+    right: 10px;
+    bottom: 10px;
+    padding: 3px 8px;
+    font-size: 11px;
+  }
 }
 
 /* 视频区:同样铺满宽度,纵向堆叠 */

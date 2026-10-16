@@ -1697,4 +1697,91 @@
     });
   })();
 
+  /* ============ 多页弹层:页码角标 + 快速跳页索引 ============
+   * ★ 2026-10-15。只对 `.detail-modal__slides[data-pager]` 生效,其它弹层不受影响。
+   * 做三件事:
+   *   1) 给每个 .slide-item 右下角插页码角标「NN / 总数」;
+   *   2) 在面板右侧生成竖排可点数字导航(点一下平滑滚到对应页);
+   *   3) 随滚动用 IntersectionObserver 高亮「当前页」,打开时回到第 1 页。 */
+  (function initSlidePager() {
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+
+    document.querySelectorAll(".detail-modal__slides[data-pager]").forEach(function (slidesWrap) {
+      var modal = slidesWrap.closest(".detail-modal");
+      var panel = modal && modal.querySelector(".detail-modal__panel");
+      var body = modal && modal.querySelector(".detail-modal__body");
+      var items = Array.prototype.slice.call(slidesWrap.querySelectorAll(".slide-item"));
+      if (!panel || !body || !items.length) return;
+      var total = items.length;
+
+      // 1) 每页页码角标
+      items.forEach(function (item, i) {
+        if (item.querySelector(".slide-pageno")) return;
+        var badge = document.createElement("span");
+        badge.className = "slide-pageno";
+        badge.setAttribute("aria-hidden", "true");
+        badge.innerHTML = "<b>" + pad(i + 1) + "</b> <i>/ " + pad(total) + "</i>";
+        item.appendChild(badge);
+      });
+
+      // 2) 竖排跳页索引
+      var pager = panel.querySelector(".detail-modal__pager");
+      if (!pager) {
+        pager = document.createElement("div");
+        pager.className = "detail-modal__pager";
+        pager.setAttribute("role", "tablist");
+        pager.setAttribute("aria-label", "快速跳页");
+        items.forEach(function (item, i) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "detail-modal__pager-btn";
+          btn.textContent = String(i + 1);
+          btn.setAttribute("aria-label", "第 " + (i + 1) + " 页 / 共 " + total + " 页");
+          btn.addEventListener("click", function () {
+            // 平滑滚动到该页顶部(相对 body 的滚动容器)
+            var top = item.offsetTop - body.offsetTop;
+            body.scrollTo({ top: top, behavior: "smooth" });
+            setActive(i);
+          });
+          pager.appendChild(btn);
+        });
+        panel.appendChild(pager);
+      }
+      var btns = Array.prototype.slice.call(pager.querySelectorAll(".detail-modal__pager-btn"));
+
+      function setActive(idx) {
+        btns.forEach(function (b, i) {
+          b.classList.toggle("is-active", i === idx);
+          b.setAttribute("aria-selected", i === idx ? "true" : "false");
+        });
+      }
+      setActive(0);
+
+      // 3) 滚动时高亮当前页(取可见面积最大的一页)
+      if ("IntersectionObserver" in window) {
+        var ratios = new Array(total).fill(0);
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            var i = items.indexOf(e.target);
+            if (i >= 0) ratios[i] = e.isIntersecting ? e.intersectionRatio : 0;
+          });
+          var best = 0, bestVal = -1;
+          for (var i = 0; i < total; i++) {
+            if (ratios[i] > bestVal) { bestVal = ratios[i]; best = i; }
+          }
+          setActive(best);
+        }, { root: body, threshold: [0.1, 0.25, 0.5, 0.75, 0.95] });
+        items.forEach(function (it) { io.observe(it); });
+      }
+
+      // 打开弹层时回到第 1 页(监听 is-visible 的加入)
+      new MutationObserver(function () {
+        if (modal.classList.contains("is-visible")) {
+          body.scrollTop = 0;
+          setActive(0);
+        }
+      }).observe(modal, { attributes: true, attributeFilter: ["class"] });
+    });
+  })();
+
 })();
