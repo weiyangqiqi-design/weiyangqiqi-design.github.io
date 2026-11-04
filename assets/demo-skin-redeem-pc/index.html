@@ -1121,7 +1121,7 @@ function finishExp() {
 /* 返回领皮肤：关元宝窗 → 活动页蒙层 + 获得皮肤弹窗 */
 function fillRedeem() {
   const i = selectedSkinIdx() ?? 0;
-  $("#rdSkinImg").src = `assets/skin${i + 1}.png`;
+  $("#rdSkinImg").src = `assets/skin${i + 1}.webp`;
   $("#rdName").textContent = `“${SKIN_NAMES[i]}”`;
 }
 $("#expBackBtn").addEventListener("click", () => {
