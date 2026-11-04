@@ -4492,3 +4492,47 @@ button {
   .tl-walker,
   .mg-walker { animation: none; }
 }
+
+/* ==================================================================
+   左侧栏几何收敛(2026-11-04,用户第 N 轮要求)
+   ① 左侧区域:高度严格 = 网页(视口)高度,宽度自适应;
+   ② 顶部竖屏视频:与页面顶边/左边零边距对齐;
+   ③ ABOUT ME 切图 与 顶部竖屏视频 的纵向间距 = 0。
+
+   实现说明(只作用于 >560px 的双栏布局,竖屏紧凑 Header 完全不受影响):
+   · 原本 .sidebar 用 padding-top:22px + 头像 margin-top:-22px 互相抵消来贴顶,
+     再叠 6px flex gap + .side-about-title 的 0.70em(矮屏 0.50em)上边距,
+     于是 ABOUT ME 与视频之间实测有 11.7~16px 的空隙。
+     现在改为「padding-top:0 + 头像 margin:0 -22px + gap:0 + ABOUT ME margin-top:0」,
+     四层间距一次归零,且不再依赖负 margin 抵消,贴顶更稳。
+   · 宽度:CSS 兜底值由写死的 350px 换成随视口高度变化的 clamp(),
+     与 js/main.js 的 initSidebarFit() (按视口高度反推宽度、写内联 width/flex-basis)
+     同一套逻辑;JS 失效时侧栏仍然是「高度定死、宽度自适应」,不会退回 350px 胖栏。
+   · 不改 HTML / JS / 任何资源文件,加载体积与请求数不变。
+   ================================================================== */
+@media (min-width: 561px) {
+  .sidebar {
+    height: 100vh;
+    width: clamp(232px, 28.9vh, 460px);
+    flex: 0 0 clamp(232px, 28.9vh, 460px);
+    padding-top: 0;
+    gap: 0;
+  }
+  .sidebar__avatar {
+    margin: 0 -22px;
+    padding: 0;
+  }
+  .sidebar__avatar img,
+  .sidebar__avatar video {
+    margin: 0;
+    padding: 0;
+  }
+  .sidebar .side-blocks {
+    margin-top: 0;
+  }
+  /* 权重 (0,2,0) 压过常规态 .side-about-title(0,1,0) 与
+     @media (max-height:720px) 的 .side-about-title{margin-top:.50em} */
+  .sidebar .side-about-title {
+    margin-top: 0;
+  }
+}

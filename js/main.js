@@ -12,7 +12,14 @@
   // loop 属性理论上足够,但部分浏览器/内嵌预览会忽略,这里加 JS 双保险:
   // 1) ended 时强制重头播放  2) 自动播放被拦截时,首次交互后补播
   (function initAvatarVideo() {
-    const videos = document.querySelectorAll(".sidebar__avatar video, .module-card__img video");
+    /* ★ 2026-11-04 加载效率复核修复:
+       卡片 banner 视频由 index.html 末尾的 IntersectionObserver 懒播放负责
+       (preload="none" + poster,进入视口才 play(),离开视口 pause())。
+       这里原先连 .module-card__img video 一起无条件 play(),等于首屏就把
+       9 个 mp4 全部拉下来(实测约 2.0MB),让 preload="none" 与懒播形同虚设;
+       而且每个视频都挂了 pointerdown/keydown 补播监听,首次交互又会全量触发。
+       只保留左侧头像视频立即自动播放(主视觉,有意设计),其余交给懒播。 */
+    const videos = document.querySelectorAll(".sidebar__avatar video");
     if (!videos.length) return;
     videos.forEach((v) => {
       v.muted = true;          // 自动播放硬性前提
