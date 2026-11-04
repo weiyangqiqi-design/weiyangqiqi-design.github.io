@@ -541,6 +541,10 @@
       // 内嵌 Demo:首次打开时才写入 src
       // (避免 iframe 处于 display:none 的弹层内时被浏览器跳过加载而白屏)
       modal.querySelectorAll("iframe[data-embed-src]").forEach(function (frame) {
+        /* ★ 2026-11-04 P0:隐藏页签里的 demo 不跟着一起加载;
+           切页签时由 index.html 末尾的 MutationObserver 补挂。 */
+        var tp = frame.closest(".detail-modal__tabpanel");
+        if (tp && !tp.classList.contains("is-active")) return;
         if (!frame.getAttribute("src")) {
           frame.setAttribute("src", frame.getAttribute("data-embed-src"));
         }
@@ -556,12 +560,10 @@
           if (closeBtn) closeBtn.focus();
           // 建立焦点陷阱
           focusTrap = buildFocusTrap(panel);
-          // 自动播放弹层内所有视频(静音循环),重新打开也会恢复播放
-          modal.querySelectorAll("video").forEach(function (v) {
-            v.muted = true;
-            var p = v.play();
-            if (p && typeof p.catch === "function") p.catch(function () {});
-          });
+          /* ★ 2026-11-04 P0:不再在打开瞬间对弹层全部 video 无条件 play()。
+             否则 preload="none" 被击穿,4 个 cifa 视频 6.32MB 会一起下载。
+             改由 index.html 末尾以 .detail-modal__body 为 root 的
+             IntersectionObserver 按视口 play / pause(切页签的播放仍由 activate() 管)。 */
         });
       });
     }
