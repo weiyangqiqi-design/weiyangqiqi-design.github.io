@@ -20,26 +20,23 @@
           muted
           loop
           playsinline
-          poster="assets/avatar.png"
+          poster="assets/avatar.webp"
           aria-label="刘佶松"
         ></video>
       </div>
 
       <!-- 竖排信息切图区(从上至下:ABOUT ME → 简介 → 工作/荣誉/教育经历) -->
       <div class="side-blocks">
-        <img class="side-about-title" src="assets/side-about-title.png" alt="ABOUT ME" />
-        <!-- 名字块仍是切图(从 side-about-text-v2.png 裁出上半段);下半段简介改为实时文本 -->
-        <img class="side-name" src="assets/side-name.png" alt="刘佶松 / 腾讯D9交互设计 · Ai商业化交互设计" />
-        <!-- 简介正文:2026-10-10 第 49 项由切图改为实时文本(字号 = --side-fs)。
-             ★ 2026-10-12 第 52 项:由「<br> 硬断成 4 行」改为**一个自然段**,
-               按语义用 。/ ;/ , 断句,由浏览器按栏宽自动折行(见 css 的 .side-bio)。
-               「0-1」是整体,用 .side-nowrap 包住,避免被拦腰断成 "0-" / "1"。 -->
+        <img class="side-about-title" src="assets/side-about-title.webp" alt="ABOUT ME" />
+        <!-- 名字块仍是切图(从 side-about-text-v2.webp 裁出上半段);下半段简介改为实时文本 -->
+        <img class="side-name" src="assets/side-name.webp" alt="刘佶松 / 腾讯D9交互设计 · Ai商业化交互设计" />
+        
         <p class="side-bio">目前独立负责搜狗输入法商业化交互。擅长<span class="side-nowrap">0-1</span>系统化设计；善于洞察增长&amp;变现机创新会点；对用户体验品质敏感，对创新体验保持好奇。</p>
         <!-- 第 70 项:原「简介 → 工作经历」之间的横向分隔线(品牌紫渐隐)已按用户要求移除。
              两段之间的留白改由 .side-work-title 的 margin-top 统一走板块距(2.15em)。 -->
-        <img class="side-work-title" src="assets/side-work-title.png" alt="工作经历" />
+        <img class="side-work-title" src="assets/side-work-title.webp" alt="工作经历" />
         <!-- 工作经历正文 + 标签胶囊:原 side-work-body.png,改为实时文本 -->
-        <p class="side-work-text">腾讯10年 | 涉猎输入法、技术工具、浏览器、地图等C+B端商业化和工具交互</p>
+        <p class="side-work-text">腾讯10年 | 涉猎输入法、中台工具、浏览器、地图等C+B端商业化和工具交互</p>
         <div class="side-tags">
           <span class="side-tag">#AI应用场景挖掘</span>
           <span class="side-tag">#AI商业化</span>
@@ -47,34 +44,19 @@
           <span class="side-tag">#亿级活动</span>
           <span class="side-tag">#专利创新</span>
         </div>
-        <img class="side-honor-title" src="assets/side-honor-title.png" alt="个人荣誉" />
-        <!-- 荣誉 4 行:原 side-honor-body.png,改为实时文本。
-             ★ 2026-10-12 第 54 项:第 3 行文案精简为「23年 两次获用户体验设计部优秀个人」,
-               去掉 Q2、Q4 与 <br />,4 行全部单行不折行。 -->
+        <img class="side-honor-title" src="assets/side-honor-title.webp" alt="个人荣誉" />
+        
         <ul class="side-honor-list">
           <li>25年 H1获优秀员工（五星）</li>
           <li>24年 H1、H2 两次获腾讯可持续价值奖</li>
           <li>23年 两次获用户体验设计部优秀个人</li>
           <li>21年 H2获优秀员工（四星）</li>
         </ul>
-        <img class="side-edu-title" src="assets/side-edu-title.png" alt="教育经历" />
+        <img class="side-edu-title" src="assets/side-edu-title.webp" alt="教育经历" />
         <!-- 教育经历单行:原 side-edu-body.png,改为实时文本 -->
         <p class="side-edu-text">湖南大学｜工业设计专业</p>
 
-        <!-- ===== 联系方式(第 69 项:方案 C「竖轴索引」)=====
-             ★ 从 .side-blocks **外面**移进来了(原来是 .sidebar 的直接子项)。
-               两个原因:
-               ① 字号:它是 .side-blocks 的后代后,直接吃同一个容器算出来的 --side-fs,
-                  与「湖南大学｜工业设计专业」**严格同值**。留在外面就得自己写 cqw,
-                  而 cqw 按容器内容盒算 —— .side-blocks 比 .sidebar 窄 4px(那条正文缩进),
-                  同一系数折算出来的字号会随栏宽漂 ±0.6%。
-               ② 间距:留在外面时到「教育经历」的距离 = margin-top + .side-blocks 的
-                  margin-bottom(4px) + .sidebar 的 gap(6px),凭空多 10px;移进来之后
-                  margin-top 就是全部,能和其他板块距(2.15em)精确对齐。
-             副作用:① .side-blocks 的 margin-bottom 4px 变成"到侧栏底部"的留白;
-                     ② .sidebar 的 gap 6px 不再作用于它(好,正是上面说的第 ② 条)。
-             ⚠️ 它是 <div> 不是 <p>,不受 .side-blocks :where(p, ul) 的 margin 归零影响;
-                内部间距全部由 .info-card--contact 自己的规则管。 -->
+        
         <div class="info-card info-card--contact">
           <div class="info-card__row copyable" data-copy="北京市 | 海淀区" tabindex="0" role="button" aria-label="复制地址">
             <span class="info-icon info-icon--location" aria-hidden="true">
@@ -129,7 +111,7 @@
           <!-- ===== Row 1: 10年鹅厂经历 ===== -->
           <div class="tl-row" id="tl-career">
             <div class="tl-label">
-              <img src="assets/data-10-career-v2.png" alt="10 年鹅厂经历" />
+              <img src="assets/data-10-career-v2.webp" alt="10 年鹅厂经历" />
             </div>
             <div class="tl-line" aria-hidden="true"></div>
             <div class="tl-content">
@@ -137,10 +119,10 @@
               <div class="module-scroll">
                 <div class="career-grid">
                   <!-- Row 1: 公司卡片(置顶) -->
-                  <img class="cg-card" src="assets/career-card-d9-v5.png" alt="腾讯CSIG-D9 搜狗输入法 商业化交互设计" />
-                  <img class="cg-card" src="assets/career-card-d8-v5.png" alt="腾讯PCG-D8 PCG大数据中台 DE/DS工具交互设计" />
-                  <img class="cg-card" src="assets/career-card-d7-v5.png" alt="腾讯PCG-D7(并入QQ浏览器) 搜狗浏览器 PC/移动双端交互设计" />
-                  <img class="cg-card" src="assets/career-card-d6-v5.png" alt="腾讯CSIG-D6(并入腾讯地图) 搜狗地图 公共出行/综搜交互设计" />
+                  <img class="cg-card" src="assets/career-card-d9-v5.webp" alt="腾讯CSIG-D9 搜狗输入法 商业化交互设计" />
+                  <img class="cg-card" src="assets/career-card-d8-v5.webp" alt="腾讯PCG-D8 PCG大数据中台 DE/DS工具交互设计" />
+                  <img class="cg-card" src="assets/career-card-d7-v5.webp" alt="腾讯PCG-D7(并入QQ浏览器) 搜狗浏览器 PC/移动双端交互设计" />
+                  <img class="cg-card" src="assets/career-card-d6-v5.webp" alt="腾讯CSIG-D6(并入腾讯地图) 搜狗地图 公共出行/综搜交互设计" />
                   <!-- Row 2: 分割线(中间) + 时间节点(零尺寸锚点,由 ::after 垂出细引导线,逐个对齐列左缘) -->
                   <div class="cg-divider" aria-hidden="true"></div>
                   <span class="cg-node is-now" style="--dur: 4" aria-hidden="true"></span>
@@ -175,7 +157,7 @@
           <!-- ===== Row 2: 3 公司荣誉 (AI智能体应用) ===== -->
           <div class="tl-row" id="tl-company">
             <div class="tl-label">
-              <img src="assets/data-3-company-v2.png" alt="3 公司荣誉" />
+              <img src="assets/data-3-company-v2.webp" alt="3 公司荣誉" />
             </div>
             <div class="tl-line" aria-hidden="true"></div>
             <div class="tl-content">
@@ -191,7 +173,7 @@
 
               <!-- Group 1: AI 应用场景 / 商业模式 / AIGC工具 -->
               <div class="module-group">
-                <!-- 组标题:原为左侧竖排切图(assets/group-title-ai-scene.png),已改为
+                <!-- 组标题:原为左侧竖排切图(assets/group-title-ai-scene.webp),已改为
                      卡片组前的纯文本标题,样式与「装扮生态建设」(.mt-caption) 完全一致 -->
                 <p class="group-caption">AI应用场景挖掘</p>
                 <div class="module-group__tags">
@@ -205,21 +187,21 @@
                     <div class="module-card__img module-card__img--spiral" aria-label="输入即搜索-AI搜索 展示卡片">
                       <div class="card-spiral">
                         <div class="card-spiral-track">
-                          <img class="card-item" src="assets/card-01.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-02.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-03.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-04.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-05.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-06.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-07.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-08.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-09.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-10.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-11.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-12.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-13.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-14.png" alt="" loading="lazy" />
-                          <img class="card-item" src="assets/card-15.png" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-01.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-02.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-03.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-04.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-05.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-06.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-07.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-08.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-09.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-10.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-11.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-12.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-13.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-14.webp" alt="" loading="lazy" />
+                          <img class="card-item" src="assets/card-15.webp" alt="" loading="lazy" />
                         </div>
                       </div>
                     </div>
@@ -237,7 +219,8 @@
 
                   <article class="module-card" data-modal="modal-ai" role="button" tabindex="0">
                     <h3 class="module-card__title">AI陪伴</h3>
-                    <div class="module-card__img module-card__img--gif"><img src="assets/ai-companion.gif" alt="AI陪伴" /></div>
+                    
+                    <div class="module-card__img module-card__img--gif"><video class="gif-fallback" muted loop playsinline preload="none" width="900" height="500" poster="assets/ai-companion-banner-poster.webp" aria-label="AI陪伴"><source src="assets/ai-companion-banner.mp4" type="video/mp4" /></video></div>
                     <p class="module-card__desc">将输入法装扮资产引入AI陪伴场景，开辟情感化付费新生态</p>
                     <div class="module-card__tags">
                       <span class="module-card__tag">#PC桌宠</span>
@@ -254,7 +237,8 @@
 
                   <article class="module-card" data-modal="modal-ai-huanzhuang" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看 AI生成皮肤+表情+壁纸头像 详情">
                     <h3 class="module-card__title">AI生成皮肤+表情+壁纸头像</h3>
-                    <div class="module-card__img"><img src="assets/card-ai-huanzhuang.jpg" alt="AI生成皮肤+表情+壁纸头像" /></div>
+                    
+                    <div class="module-card__img"><video class="gif-fallback" muted loop playsinline preload="none" width="1188" height="600" poster="assets/ai-generate-banner-poster.webp" aria-label="AI生成皮肤+表情+壁纸头像"><source src="assets/ai-generate-banner.mp4" type="video/mp4" /></video></div>
                     <p class="module-card__desc">以低门槛高上限的交互，让AI生成从"能用"到"想用"</p>
                     <div class="module-card__tags">
                       <span class="module-card__tag">#AIGC</span>
@@ -272,7 +256,7 @@
 
               <!-- Group 2: Agent 商业化 / 工作流 -->
               <div class="module-group">
-                <!-- 组标题:原为切图 assets/group-title-agent.png,已改为文本 -->
+                <!-- 组标题:原为切图 assets/group-title-agent.webp,已改为文本 -->
                 <p class="group-caption">Agent商业化探索</p>
                 <div class="module-group__tags">
                   <span class="module-tag"># Agent商业化探索</span>
@@ -281,7 +265,8 @@
                 <div class="module-group__cards">
                   <article class="module-card" data-modal="modal-agent-dist" role="button" tabindex="0">
                     <h3 class="module-card__title module-card__title--star">Agent服务找人</h3>
-                    <div class="module-card__img"><img src="assets/card-agent-dist.gif" alt="Word 中 Agent 插入流程演示" /></div>
+                    
+                    <div class="module-card__img"><video class="gif-fallback"  muted loop playsinline width="960" height="480" poster="assets/card-agent-dist-poster.webp" aria-label="Word 中 Agent 插入流程演示" preload="none"><source src="assets/card-agent-dist.mp4" type="video/mp4" /></video></div>
                     <p class="module-card__desc">让Agent在用户任务卡点处主动介入，开辟"需求即分发"的新场景</p>
                     <div class="module-card__tags">
                       <span class="module-card__tag">#利用Agent分发APP</span>
@@ -295,8 +280,8 @@
 
                   <article class="module-card" data-modal="modal-skin-agent" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看自动化生产皮肤Agent详情">
                     <h3 class="module-card__title">自动化生产皮肤Agent</h3>
-                    <!-- ★ 2026-10-15:banner 用「AI皮肤自动化全流程」动图(assets/card-skin-agent.gif,GIF89a 1080×621)。 -->
-                    <div class="module-card__img"><img src="assets/card-skin-agent.gif" alt="AI皮肤自动化全流程" /></div>
+                    
+                    <div class="module-card__img"><video class="gif-fallback"  muted loop playsinline width="1080" height="621" poster="assets/card-skin-agent-violet-poster.webp" aria-label="AI皮肤自动化全流程" preload="none"><source src="assets/card-skin-agent-violet.mp4" type="video/mp4" /></video></div>
                     <p class="module-card__desc">构建皮肤生产工作流、建立质量评估体系，驱动工作流从"能出图"到"出好图"</p>
                     <div class="module-card__tags">
                       <span class="module-card__tag">#agent工作流</span>
@@ -312,7 +297,7 @@
 
               <!-- Group 3: 元宝分发机会点挖掘 -->
               <div class="module-group">
-                <!-- 组标题:原为切图 assets/group-title-yuanbao.png,已改为文本 -->
+                <!-- 组标题:原为切图 assets/group-title-yuanbao.webp,已改为文本 -->
                 <p class="group-caption">元宝分发机会点挖掘</p>
                 <div class="module-group__tags">
                   <span class="module-tag"># 元宝分发机会点挖掘</span>
@@ -320,8 +305,8 @@
                 <div class="module-group__cards">
                   <article class="module-card" data-modal="modal-yuanbao-dist" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看元宝导流-创新分发详情">
                     <h3 class="module-card__title module-card__title--star">元宝导流-创新分发</h3>
-                    <!-- ★ 2026-10-15:banner 用「缘宝下载」动图 assets/card-yuanbao-dist.gif(GIF89a 1000×624,75帧无限循环)。 -->
-                    <div class="module-card__img"><img src="assets/card-yuanbao-dist.gif" alt="元宝导流-创新分发" /></div>
+                    
+                    <div class="module-card__img"><video class="gif-fallback"  muted loop playsinline width="1600" height="800" poster="assets/card-yuanbao-dist-silkbg-poster.webp" aria-label="元宝导流-创新分发" preload="none"><source src="assets/card-yuanbao-dist-silkbg.mp4" type="video/mp4" /></video></div>
                     <p class="module-card__desc">拆解分发全链路关键触点，洞察更有需求的导流场景与创新承接形式</p>
                     <div class="module-card__tags">
                       <span class="module-card__tag">#给元宝导流</span>
@@ -334,13 +319,14 @@
                     </div>
                   </article>
 
-                  <article class="module-card">
+                  <article class="module-card" data-modal="modal-skin-redeem" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看元宝导流-皮肤带增 Demo 详情">
                     <h3 class="module-card__title">元宝导流-皮肤带增</h3>
-                    <div class="module-card__img"><img src="" alt="元宝导流-皮肤带增" /></div>
+                    
+                    <div class="module-card__img"><video class="gif-fallback"  muted loop playsinline preload="none" width="1080" height="534" poster="assets/card-skin-redeem-banner-poster.webp" aria-label="元宝导流-皮肤带增 — 移动端免费领皮肤与 PC 端跨端导流"><source src="assets/card-skin-redeem-banner.mp4" type="video/mp4" /></video></div>
                     <p class="module-card__desc">以皮肤权益为核心钩子，构建输入法向元宝持续导流的长效转化闭环</p>
                     <div class="module-card__tags">
                       <span class="module-card__tag">#激励任务</span>
-                      <span class="module-card__tag">#给元宝导流</span>
+                      <span class="module-card__tag">#可交互demo</span>
                     </div>
                     <div class="module-card__meta">
                       <span>激励任务</span>
@@ -356,7 +342,7 @@
           <!-- ===== Row 3: 3 亿营收 (0-1复杂系统) ===== -->
           <div class="tl-row" id="tl-revenue">
             <div class="tl-label">
-              <img src="assets/data-3-revenue-v2.png" alt="3 亿营收" />
+              <img src="assets/data-3-revenue-v2.webp" alt="3 亿营收" />
             </div>
             <div class="tl-line" aria-hidden="true"></div>
             <div class="tl-content">
@@ -370,89 +356,80 @@
               </div>
 
               <!-- 「装扮生态建设」组:横向 3 张 -->
-              <div class="module-group">
-                <!-- 组标题:★ 2026-10-10 从卡片组下方的 <p class="mt-caption"> 移到这里 ——
-                     与前面几组(Group 1/2/3 的 .group-caption)完全同一套规范:
-                     同一个 class、同一个位置(卡片组开头)、同一套声明
-                     (css 里 .group-caption 与 .mt-caption 本就是共用的一处声明)。 -->
-                <p class="group-caption">装扮生态建设</p>
-                <div class="module-group__tags">
-                  <span class="module-tag module-tag--placeholder"># 待提供标签</span>
+              
+              <div class="row-unit">
+                <div class="module-group">
+                  
+                  <p class="group-caption">装扮生态建设</p>
+                  <div class="module-group__tags">
+                    <span class="module-tag module-tag--placeholder"># 待提供标签</span>
+                  </div>
+                  <div class="module-group__cards">
+                    <article class="module-card" data-modal="modal-skin-editor" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看B端皮肤编辑器详情">
+                      <h3 class="module-card__title module-card__title--star">B端皮肤编辑器</h3>
+                      
+                      <div class="module-card__img"><img src="assets/card-skin-editor.webp" alt="B端皮肤编辑器 · PC 皮肤编辑器三端界面" /></div>
+                      <p class="module-card__desc">深挖生产团队作业行为定制清晰工作流；设计素材提醒、属性复用、合拆功能精准提效</p>
+                      <div class="module-card__tags">
+                        <span class="module-card__tag"># 0-1创作者工具</span>
+                        <span class="module-card__tag">#bpo降本增效</span>
+                      </div>
+                      <div class="module-card__meta">
+                        <span>内容生产</span>
+                        <span class="module-card__meta-sep">|</span>
+                        <span>Windows端、MAC端</span>
+                      </div>
+                    </article>
+                    
+                    <article class="module-card" data-modal="modal-member" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看输入法会员体系详情">
+                      <h3 class="module-card__title module-card__title--star">输入法会员体系</h3>
+                      
+                      <div class="module-card__img"><video class="gif-fallback"  muted loop playsinline width="1080" height="550" poster="assets/card-membership-poster.webp" aria-label="输入法会员体系动图 — 开会员环旋转 / 会员中心 / 用会员自上而下流动 / 支付板块 / 基建" preload="none"><source src="assets/card-membership.mp4" type="video/mp4" /></video></div>
+                      <p class="module-card__desc">搭建分层会员体系；开会员“构建营销矩阵逐级吸引激励”；用会员“贯穿使用链层层感知会员身份”</p>
+                      <div class="module-card__tags">
+                        <span class="module-card__tag">#0-1会员生态</span>
+                      </div>
+                      <div class="module-card__meta">
+                        <span>商城会员</span>
+                        <span class="module-card__meta-sep">|</span>
+                        <span>移动双端</span>
+                      </div>
+                    </article>
+                    <article class="module-card" data-modal="modal-zhuangban-mall" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看 移动/PC商城 详情">
+                      <h3 class="module-card__title">移动/PC商城</h3>
+                      
+                      <div class="module-card__img"><img src="assets/card-zhuangban-mall.webp" alt="移动/PC商城 · 移动端(APP+键盘) / PC端 / MAC端" /></div>
+                      <p class="module-card__desc">构建键盘 双端app WIN MAC五端商城，针对平台定制分发和消费链</p>
+                      <div class="module-card__tags">
+                        <span class="module-card__tag">#0-1商城生态</span>
+                      </div>
+                      <div class="module-card__meta">
+                        <span>内容售卖</span>
+                        <span class="module-card__meta-sep">|</span>
+                        <span>移动双端、Windows/MAC端</span>
+                      </div>
+                    </article>
+                  </div>
+                  <!-- 像素小人:沿三张卡片轮廓【左缘上爬 → 顶边右走 → 跳过间隙 → 右缘失足掉落 → 底部向左返回】循环 -->
+                  <div class="mg-walker" aria-hidden="true"></div>
                 </div>
-                <div class="module-group__cards">
-                  <article class="module-card" data-modal="modal-skin-editor" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看B端皮肤编辑器详情">
-                    <h3 class="module-card__title module-card__title--star">B端皮肤编辑器</h3>
-                    <!-- ★ 2026-10-15:banner 用皮肤编辑器(Skin Editor)静态展示图 assets/card-skin-editor.jpg(1920×1061)。 -->
-                    <div class="module-card__img"><img src="assets/card-skin-editor.jpg" alt="B端皮肤编辑器 · Skin Editor" /></div>
-                    <p class="module-card__desc">待提供描述</p>
-                    <div class="module-card__tags">
-                      <span class="module-card__tag"># 0-1创作者工具</span>
-                      <span class="module-card__tag">#bpo降本增效</span>
-                    </div>
-                    <div class="module-card__meta">
-                      <span>内容生产</span>
-                      <span class="module-card__meta-sep">|</span>
-                      <span>Windows端、MAC端</span>
-                    </div>
-                  </article>
-                  <!-- ★ 2026-10-13:「输入法会员体系」卡 —— 展示区用正稿封面图(深色版「输入法会员框架」),
-                       并挂上二级页面(data-modal="modal-member":会员一期 / 会员二期 两个页签)。
-                       封面 1920×974(长宽比 1.971)≈ 展示区 2:1,且底色是均匀深色 #222,
-                       故沿用默认 object-fit:cover 通铺、裁切仅约 1.4%,与同排其他卡片一致。
-                       (上一版是白底浅色图 1920×1514(1.268),比例差太多、cover 会裁掉 37%,
-                        当时才加的 --contain 修饰类;现已随封面替换一并移除。)
-                       ★ 2026-10-14:静态封面 PNG/JPG 换成**动图** assets/card-membership.gif
-                       (1080×550,比例 1.964,与展示区 2:1 基本一致 → cover 仅裁约 1.8%,
-                        与旧深色封面观感一致;循环播放「开会员环顺时针旋转 / 用会员自上而下流动」两组动效)。
-                        旧图 card-membership.jpg 仍保留在 assets 内以备回退。 -->
-                  <article class="module-card" data-modal="modal-member" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看输入法会员体系详情">
-                    <h3 class="module-card__title module-card__title--star">输入法会员体系</h3>
-                    <div class="module-card__img"><img src="assets/card-membership.gif" alt="输入法会员框架动图 — 开会员环旋转 / 会员中心 / 用会员自上而下流动 / 支付板块 / 基建" /></div>
-                    <p class="module-card__desc">待提供描述</p>
-                    <div class="module-card__tags">
-                      <span class="module-card__tag">#0-1会员生态</span>
-                    </div>
-                    <div class="module-card__meta">
-                      <span>商城会员</span>
-                      <span class="module-card__meta-sep">|</span>
-                      <span>移动双端</span>
-                    </div>
-                  </article>
-                  <article class="module-card" data-modal="modal-zhuangban-mall" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看 移动/PC商城 详情">
-                    <h3 class="module-card__title">移动/PC商城</h3>
-                    <div class="module-card__img"><img src="assets/card-zhuangban-mall.jpg" alt="移动/PC商城" /></div>
-                    <p class="module-card__desc">待提供描述</p>
-                    <div class="module-card__tags">
-                      <span class="module-card__tag">#0-1商城生态</span>
-                    </div>
-                    <div class="module-card__meta">
-                      <span>内容售卖</span>
-                      <span class="module-card__meta-sep">|</span>
-                      <span>移动双端、Windows/MAC端</span>
-                    </div>
-                  </article>
-                </div>
-                <!-- 像素小人:沿三张卡片轮廓【左缘上爬 → 顶边右走 → 跳过间隙 → 右缘失足掉落 → 底部向左返回】循环 -->
-                <div class="mg-walker" aria-hidden="true"></div>
-              </div>
 
-              <!-- 时间轴:位于卡片组下方;轴线在上,节点 + 纯文本年份标记挂在轴线下方
-                   ★ 2026-10-10:「装扮生态建设」那行标题已上移为卡片组的 .group-caption,
-                     这里不再重复(轴线本身的位置几乎不变,卡片组整体下移一点)。 -->
-              <div class="module-timeline">
-                <div class="mt-grid">
-                  <div class="mt-divider" aria-hidden="true"></div>
-                  <span class="mt-node is-now" style="--dur: 3" aria-hidden="true"></span>
-                  <span class="mt-node" style="--dur: 1" aria-hidden="true"></span>
-                  <span class="mt-node" style="--dur: 2" aria-hidden="true"></span>
-                  <div class="mt-marker" style="--dur: 3">
-                    <b class="tl-mark__span">项目进行ing</b>
-                  </div>
-                  <div class="mt-marker" style="--dur: 1">
-                    <b class="tl-mark__span">25年</b>
-                  </div>
-                  <div class="mt-marker" style="--dur: 2">
-                    <b class="tl-mark__span">24-23年</b>
+                
+                <div class="module-timeline">
+                  <div class="mt-grid">
+                    <div class="mt-divider" aria-hidden="true"></div>
+                    <span class="mt-node is-now" style="--dur: 3" aria-hidden="true"></span>
+                    <span class="mt-node" style="--dur: 1" aria-hidden="true"></span>
+                    <span class="mt-node" style="--dur: 2" aria-hidden="true"></span>
+                    <div class="mt-marker" style="--dur: 3">
+                      <b class="tl-mark__span">项目进行ing</b>
+                    </div>
+                    <div class="mt-marker" style="--dur: 1">
+                      <b class="tl-mark__span">25年</b>
+                    </div>
+                    <div class="mt-marker" style="--dur: 2">
+                      <b class="tl-mark__span">24-23年</b>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -463,7 +440,7 @@
           <!-- ===== Row 4: 8.9 亿浏览 (数据驱动增长) ===== -->
           <div class="tl-row" id="tl-views">
             <div class="tl-label">
-              <img src="assets/data-89-views-v2.png" alt="8.9 亿浏览" />
+              <img src="assets/data-89-views-v2.webp" alt="8.9 亿浏览" />
             </div>
             <div class="tl-line" aria-hidden="true"></div>
             <div class="tl-content">
@@ -485,46 +462,48 @@
                   <!-- 卡片 1:「CNY」拜年专区(点击打开 CNY.pdf 逐页浏览) -->
                   <article class="module-card" data-modal="modal-cny" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看「CNY」拜年专区详情">
                     <h3 class="module-card__title module-card__title--star">「CNY」拜年专区</h3>
-                    <div class="module-card__img"><img src="assets/card-cny.jpg" alt="「CNY」拜年专区" /></div>
+                    <div class="module-card__img"><video class="gif-fallback"  muted loop playsinline preload="none" width="1920" height="970" poster="assets/card-cny-video-poster.webp" aria-label="「CNY」拜年专区 动效展示"><source src="assets/card-cny-video.mp4" type="video/mp4" /></video></div>
+                    <p class="module-card__desc">洞察群体高并发机会点，设计符合节日氛围、主动、利手的聚合表达新形式</p>
                     <div class="module-card__tags">
-                      <span class="module-card__tag">#AI表达</span>
                       <span class="module-card__tag">#8.9亿浏览量</span>
                       <span class="module-card__tag">#百万收益</span>
                       <span class="module-card__tag">#2个专利</span>
                     </div>
-                    <div class="module-card__info">
-                      <p class="module-card__info-line"><span class="module-card__info-label">创新：</span>用研决策工作任务流，设计组件&amp;复制能力提效</p>
-                      <p class="module-card__info-line"><span class="module-card__info-label">商业模式：</span>内容生产</p>
+                    <div class="module-card__meta">
+                      <span>流量广告</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端</span>
                     </div>
                   </article>
                   <!-- 卡片 2:「CNY」装扮活动(点击打开 装扮活动.pdf 逐页浏览) -->
                   <article class="module-card" data-modal="modal-zhuangban" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看「CNY」装扮活动详情">
                     <h3 class="module-card__title">「CNY」装扮活动</h3>
-                    <div class="module-card__img"><img src="assets/card-zhuangban.jpg" alt="「CNY」装扮活动" /></div>
+                    <div class="module-card__img"><video class="gif-fallback"  muted loop playsinline preload="none" width="3564" height="1800" poster="assets/card-zhuangban-video-poster.webp" aria-label="「CNY」装扮活动 效果展示"><source src="assets/card-zhuangban-video.mp4" type="video/mp4" /></video></div>
+                    <p class="module-card__desc">洞察社区群体交易行为，设计创新低成本高增值活动</p>
                     <div class="module-card__tags">
-                      <span class="module-card__tag">#查看作品</span>
-                      <span class="module-card__tag">#查看作品</span>
-                      <span class="module-card__tag">#查看作品</span>
-                      <span class="module-card__tag">#查看作品</span>
+                      <span class="module-card__tag">#收益客单双增</span>
+                      <span class="module-card__tag">#互动上万条</span>
                     </div>
-                    <div class="module-card__info">
-                      <p class="module-card__info-line"><span class="module-card__info-label">创新：</span>用研决策工作任务流，设计组件&amp;复制能力提效</p>
-                      <p class="module-card__info-line"><span class="module-card__info-label">商业模式：</span>内容生产</p>
+                    <div class="module-card__meta">
+                      <span>内容售卖</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端</span>
                     </div>
                   </article>
-                  <!-- 卡片 3:移动PC广告生态建设 -->
-                  <article class="module-card">
+                  <!-- 卡片 3:移动PC广告生态建设(点击打开《十大商业化业务全景体检》· 11 页签) -->
+                  <article class="module-card" data-modal="modal-pc-ad" role="button" tabindex="0" aria-haspopup="dialog" aria-label="查看 移动PC广告生态建设 · 十大商业化业务全景体检 详情">
                     <h3 class="module-card__title">移动PC广告生态建设</h3>
-                    <div class="module-card__img"><img src="" alt="移动PC广告生态建设" /></div>
+                    <div class="module-card__img"><img src="assets/banner-pc-ad-macro.webp" alt="移动PC广告生态建设 · 输入法商业化宏观图" /></div>
+                    <p class="module-card__desc">基于输入法亿级流量、面板小、停留短特性定制专属商业模式</p>
                     <div class="module-card__tags">
+                      <span class="module-card__tag">#0-1生态建设</span>
+                      <span class="module-card__tag">#持续探索深耕</span>
                       <span class="module-card__tag">#多专利</span>
-                      <span class="module-card__tag">#查看作品</span>
-                      <span class="module-card__tag">#查看作品</span>
-                      <span class="module-card__tag">#pony点赞</span>
                     </div>
-                    <div class="module-card__info">
-                      <p class="module-card__info-line"><span class="module-card__info-label">创新：</span>用研决策工作任务流，设计组件&amp;复制能力提效</p>
-                      <p class="module-card__info-line"><span class="module-card__info-label">商业模式：</span>内容生产</p>
+                    <div class="module-card__meta">
+                      <span>多商业模式</span>
+                      <span class="module-card__meta-sep">|</span>
+                      <span>移动双端、Windows/MAC端</span>
                     </div>
                   </article>
                 </div>
@@ -535,7 +514,7 @@
           <!-- ===== Row 5: 17 个专利 ===== -->
           <div class="tl-row" id="tl-patents">
             <div class="tl-label">
-              <img src="assets/data-17-patents-v2.png" alt="17 个专利" />
+              <img src="assets/data-17-patents-v2.webp" alt="17 个专利" />
             </div>
             <div class="tl-line" aria-hidden="true"></div>
             <div class="tl-content">
@@ -547,15 +526,15 @@
               <!-- 卡片区: [3枚奖牌纵向堆叠] + [H1紫卡] + [Q2紫卡] -->
               <div class="patent-cards">
                 <div class="patent-medals">
-                  <div class="patent-medal"><img src="assets/medal-king.png" alt="专利大师 2024-07-01" /></div>
-                  <div class="patent-medal"><img src="assets/medal-master.png" alt="专利高手 2022-09-10" /></div>
-                  <div class="patent-medal"><img src="assets/medal-rookie.png" alt="专利新秀 2022-01-14" /></div>
+                  <div class="patent-medal"><img src="assets/medal-king.webp" alt="专利大师 2024-07-01" /></div>
+                  <div class="patent-medal"><img src="assets/medal-master.webp" alt="专利高手 2022-09-10" /></div>
+                  <div class="patent-medal"><img src="assets/medal-rookie.webp" alt="专利新秀 2022-01-14" /></div>
                 </div>
                 <div class="patent-card patent-card--purple">
-                  <img src="assets/card-patent-h1.png" alt="H1 专利荣誉 - 季度专利质量评分最高" data-gallery="honors" />
+                  <img src="assets/card-patent-h1.webp" alt="H1 专利荣誉 - 季度专利质量评分最高" data-gallery="honors" />
                 </div>
                 <div class="patent-card patent-card--purple">
-                  <img src="assets/card-patent-q2.png" alt="Q2 专利荣誉 - 季度专利数量最多" data-gallery="honors" />
+                  <img src="assets/card-patent-q2.webp" alt="Q2 专利荣誉 - 季度专利数量最多" data-gallery="honors" />
                 </div>
               </div>
             </div>
@@ -564,7 +543,7 @@
           <!-- ===== Row 6: 5 项荣誉 ===== -->
           <div class="tl-row" id="tl-honors">
             <div class="tl-label">
-              <img src="assets/data-5-honors-v2.png" alt="5 项荣誉" />
+              <img src="assets/data-5-honors-v2.webp" alt="5 项荣誉" />
             </div>
             <div class="tl-line" aria-hidden="true"></div>
             <div class="tl-content">
@@ -576,16 +555,16 @@
               <!-- 卡片区: [优秀员工] + [公司荣誉] + [FXD-Q2] + [FXD-Q4] -->
               <div class="honor-cards">
                 <div class="honor-card honor-card--dark">
-                  <img src="assets/card-honor-employee.png" alt="优秀员工 - 2025年上半年 OUTSTANDING CONTRIBUTOR" data-gallery="honors" />
+                  <img src="assets/card-honor-employee.webp" alt="优秀员工 - 2025年上半年 OUTSTANDING CONTRIBUTOR" data-gallery="honors" />
                 </div>
                 <div class="honor-card honor-card--dark">
-                  <img src="assets/card-honor-company.png" alt="公司荣誉 x2 - 腾讯可持续社会价值奖" data-gallery="honors" />
+                  <img src="assets/card-honor-company.webp" alt="公司荣誉 x2 - 腾讯可持续社会价值奖" data-gallery="honors" />
                 </div>
                 <div class="honor-card honor-card--blue">
-                  <img src="assets/fxd-poster-q2.png" alt="FXD 用户体验设计部 2023Q2 嘉奖令 优秀个人奖" data-gallery="honors" />
+                  <img src="assets/fxd-poster-q2.webp" alt="FXD 用户体验设计部 2023Q2 嘉奖令 优秀个人奖" data-gallery="honors" />
                 </div>
                 <div class="honor-card honor-card--blue">
-                  <img src="assets/fxd-poster-q4.png" alt="FXD 用户体验设计部 2023Q4 嘉奖令 优秀个人奖" data-gallery="honors" />
+                  <img src="assets/fxd-poster-q4.webp" alt="FXD 用户体验设计部 2023Q4 嘉奖令 优秀个人奖" data-gallery="honors" />
                 </div>
               </div>
             </div>
@@ -620,47 +599,55 @@
           </div>
 
           <!-- 幻灯片:11 页高清,保持 Keynote 原始顺序;视频叠加在各自原位 -->
-          <div class="detail-modal__slides">
+          <div class="detail-modal__slides" data-pager="true">
             <!-- 01 -->
             <div class="slide-item">
-              <img class="slide-full" src="assets/modal-cifa/slide-01.jpg" alt="幻灯片 1" loading="lazy" />
+              <img class="slide-full" data-src="assets/modal-cifa/slide-01.webp" alt="幻灯片 1" loading="lazy" />
             </div>
             <!-- 02:右侧竖屏手机录屏(外扩盖住整个手机,不露底图) -->
             <div class="slide-item">
-              <img class="slide-full" src="assets/modal-cifa/slide-02.jpg" alt="幻灯片 2" loading="lazy" />
+              <img class="slide-full" data-src="assets/modal-cifa/slide-02.webp" alt="幻灯片 2" loading="lazy" />
               <video class="slide-video" style="left:67.0%;top:9.0%;width:22.0%;height:89.0%"
-                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s02.png">
-                <source src="assets/modal-cifa/vid-s02.mov" type="video/mp4" />
+                      muted loop playsinline preload="none" poster="assets/modal-cifa/poster-s02.webp">
+                
+
+                <source src="assets/modal-cifa/vid-s02.mp4" type="video/mp4" />
               </video>
             </div>
             <!-- 03:底部 ICON 横条动画 -->
             <div class="slide-item">
-              <img class="slide-full" src="assets/modal-cifa/slide-03.jpg" alt="幻灯片 3" loading="lazy" />
+              <img class="slide-full" data-src="assets/modal-cifa/slide-03.webp" alt="幻灯片 3" loading="lazy" />
               <video class="slide-video" style="left:25.8%;top:74.7%;width:47.9%;height:17.5%"
-                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s03.png">
-                <source src="assets/modal-cifa/vid-s03.mov" type="video/mp4" />
+                      muted loop playsinline preload="none" poster="assets/modal-cifa/poster-s03.webp">
+                
+
+                <source src="assets/modal-cifa/vid-s03.mp4" type="video/mp4" />
               </video>
             </div>
             <!-- 04:左右两个竖屏手机录屏(外扩盖住整个手机,不露底图) -->
             <div class="slide-item">
-              <img class="slide-full" src="assets/modal-cifa/slide-04.jpg" alt="幻灯片 4" loading="lazy" />
+              <img class="slide-full" data-src="assets/modal-cifa/slide-04.webp" alt="幻灯片 4" loading="lazy" />
               <video class="slide-video" style="left:25.8%;top:13.0%;width:19.6%;height:79.0%"
-                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s04a.png">
-                <source src="assets/modal-cifa/vid-s04a.mov" type="video/mp4" />
+                      muted loop playsinline preload="none" poster="assets/modal-cifa/poster-s04a.webp">
+                
+
+                <source src="assets/modal-cifa/vid-s04a.mp4" type="video/mp4" />
               </video>
               <video class="slide-video" style="left:56.8%;top:13.0%;width:19.6%;height:79.0%"
-                     autoplay muted loop playsinline preload="metadata" poster="assets/modal-cifa/poster-s04b.png">
+                      muted loop playsinline preload="none" poster="assets/modal-cifa/poster-s04b.webp">
+                
+
                 <source src="assets/modal-cifa/vid-s04b.mp4" type="video/mp4" />
               </video>
             </div>
             <!-- 05-11:纯静态页 -->
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-05.jpg" alt="幻灯片 5" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-06.jpg" alt="幻灯片 6" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-07.jpg" alt="幻灯片 7" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-08.jpg" alt="幻灯片 8" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-09.jpg" alt="幻灯片 9" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-10.jpg" alt="幻灯片 10" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cifa/slide-11.jpg" alt="幻灯片 11" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cifa/slide-05.webp" alt="幻灯片 5" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cifa/slide-06.webp" alt="幻灯片 6" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cifa/slide-07.webp" alt="幻灯片 7" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cifa/slide-08.webp" alt="幻灯片 8" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cifa/slide-09.webp" alt="幻灯片 9" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cifa/slide-10.webp" alt="幻灯片 10" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cifa/slide-11.webp" alt="幻灯片 11" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -685,79 +672,79 @@
       <div class="detail-modal__body">
         <!-- Tab 1: AI陪伴一期 -->
         <div class="detail-modal__content detail-modal__tabpanel is-active" id="ai-p1" role="tabpanel">
-          <div class="detail-modal__slides" data-src="智能陪伴20240927.key">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-01.jpg" alt="AI陪伴一期 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-02.jpg" alt="AI陪伴一期 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-03.jpg" alt="AI陪伴一期 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-04.jpg" alt="AI陪伴一期 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-05.jpg" alt="AI陪伴一期 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-06.jpg" alt="AI陪伴一期 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-07.jpg" alt="AI陪伴一期 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-08.jpg" alt="AI陪伴一期 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-09.jpg" alt="AI陪伴一期 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-10.jpg" alt="AI陪伴一期 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-11.jpg" alt="AI陪伴一期 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-12.jpg" alt="AI陪伴一期 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-13.jpg" alt="AI陪伴一期 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p1/slide-14.jpg" alt="AI陪伴一期 第14页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="智能陪伴20240927.key">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-01.webp" alt="AI陪伴一期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-02.webp" alt="AI陪伴一期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-03.webp" alt="AI陪伴一期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-04.webp" alt="AI陪伴一期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-05.webp" alt="AI陪伴一期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-06.webp" alt="AI陪伴一期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-07.webp" alt="AI陪伴一期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-08.webp" alt="AI陪伴一期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-09.webp" alt="AI陪伴一期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-10.webp" alt="AI陪伴一期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-11.webp" alt="AI陪伴一期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-12.webp" alt="AI陪伴一期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-13.webp" alt="AI陪伴一期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p1/slide-14.webp" alt="AI陪伴一期 第14页" loading="lazy" /></div>
           </div>
         </div>
         <!-- Tab 2: AI陪伴二期 -->
         <div class="detail-modal__content detail-modal__tabpanel" id="ai-p2" role="tabpanel" hidden>
-          <div class="detail-modal__slides" data-src="AI陪伴-二期.deck">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-01.jpg" alt="AI陪伴二期 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-02.jpg" alt="AI陪伴二期 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-03.jpg" alt="AI陪伴二期 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-04.jpg" alt="AI陪伴二期 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-05.jpg" alt="AI陪伴二期 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-06.jpg" alt="AI陪伴二期 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-07.jpg" alt="AI陪伴二期 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-08.jpg" alt="AI陪伴二期 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-09.jpg" alt="AI陪伴二期 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-10.jpg" alt="AI陪伴二期 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-11.jpg" alt="AI陪伴二期 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-12.jpg" alt="AI陪伴二期 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-13.jpg" alt="AI陪伴二期 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-14.jpg" alt="AI陪伴二期 第14页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-15.jpg" alt="AI陪伴二期 第15页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-16.jpg" alt="AI陪伴二期 第16页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-17.jpg" alt="AI陪伴二期 第17页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-18.jpg" alt="AI陪伴二期 第18页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-19.jpg" alt="AI陪伴二期 第19页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-20.jpg" alt="AI陪伴二期 第20页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-21.jpg" alt="AI陪伴二期 第21页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-22.jpg" alt="AI陪伴二期 第22页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-p2/slide-23.jpg" alt="AI陪伴二期 第23页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="AI陪伴-二期.deck">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-01.webp" alt="AI陪伴二期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-02.webp" alt="AI陪伴二期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-03.webp" alt="AI陪伴二期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-04.webp" alt="AI陪伴二期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-05.webp" alt="AI陪伴二期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-06.webp" alt="AI陪伴二期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-07.webp" alt="AI陪伴二期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-08.webp" alt="AI陪伴二期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-09.webp" alt="AI陪伴二期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-10.webp" alt="AI陪伴二期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-11.webp" alt="AI陪伴二期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-12.webp" alt="AI陪伴二期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-13.webp" alt="AI陪伴二期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-14.webp" alt="AI陪伴二期 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-15.webp" alt="AI陪伴二期 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-16.webp" alt="AI陪伴二期 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-17.webp" alt="AI陪伴二期 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-18.webp" alt="AI陪伴二期 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-19.webp" alt="AI陪伴二期 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-20.webp" alt="AI陪伴二期 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-21.webp" alt="AI陪伴二期 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-22.webp" alt="AI陪伴二期 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-p2/slide-23.webp" alt="AI陪伴二期 第23页" loading="lazy" /></div>
           </div>
         </div>
         <!-- Tab 3: AI陪伴竞品分析 -->
         <div class="detail-modal__content detail-modal__tabpanel" id="ai-comp" role="tabpanel" hidden>
-          <div class="detail-modal__slides" data-src="Q3AI陪伴竞品分享（松子）.deck">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-01.jpg" alt="AI陪伴竞品分析 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-02.jpg" alt="AI陪伴竞品分析 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-03.jpg" alt="AI陪伴竞品分析 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-04.jpg" alt="AI陪伴竞品分析 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-05.jpg" alt="AI陪伴竞品分析 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-06.jpg" alt="AI陪伴竞品分析 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-07.jpg" alt="AI陪伴竞品分析 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-08.jpg" alt="AI陪伴竞品分析 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-09.jpg" alt="AI陪伴竞品分析 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-10.jpg" alt="AI陪伴竞品分析 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-11.jpg" alt="AI陪伴竞品分析 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-12.jpg" alt="AI陪伴竞品分析 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-13.jpg" alt="AI陪伴竞品分析 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-14.jpg" alt="AI陪伴竞品分析 第14页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-15.jpg" alt="AI陪伴竞品分析 第15页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-16.jpg" alt="AI陪伴竞品分析 第16页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-17.jpg" alt="AI陪伴竞品分析 第17页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-18.jpg" alt="AI陪伴竞品分析 第18页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-19.jpg" alt="AI陪伴竞品分析 第19页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-20.jpg" alt="AI陪伴竞品分析 第20页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-21.jpg" alt="AI陪伴竞品分析 第21页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-22.jpg" alt="AI陪伴竞品分析 第22页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-23.jpg" alt="AI陪伴竞品分析 第23页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-24.jpg" alt="AI陪伴竞品分析 第24页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-comp/slide-25.jpg" alt="AI陪伴竞品分析 第25页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="Q3AI陪伴竞品分享（松子）.deck">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-01.webp" alt="AI陪伴竞品分析 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-02.webp" alt="AI陪伴竞品分析 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-03.webp" alt="AI陪伴竞品分析 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-04.webp" alt="AI陪伴竞品分析 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-05.webp" alt="AI陪伴竞品分析 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-06.webp" alt="AI陪伴竞品分析 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-07.webp" alt="AI陪伴竞品分析 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-08.webp" alt="AI陪伴竞品分析 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-09.webp" alt="AI陪伴竞品分析 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-10.webp" alt="AI陪伴竞品分析 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-11.webp" alt="AI陪伴竞品分析 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-12.webp" alt="AI陪伴竞品分析 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-13.webp" alt="AI陪伴竞品分析 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-14.webp" alt="AI陪伴竞品分析 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-15.webp" alt="AI陪伴竞品分析 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-16.webp" alt="AI陪伴竞品分析 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-17.webp" alt="AI陪伴竞品分析 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-18.webp" alt="AI陪伴竞品分析 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-19.webp" alt="AI陪伴竞品分析 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-20.webp" alt="AI陪伴竞品分析 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-21.webp" alt="AI陪伴竞品分析 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-22.webp" alt="AI陪伴竞品分析 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-23.webp" alt="AI陪伴竞品分析 第23页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-24.webp" alt="AI陪伴竞品分析 第24页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-comp/slide-25.webp" alt="AI陪伴竞品分析 第25页" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -780,23 +767,23 @@
           </div>
 
           <!-- 幻灯片:16 页高清,源文件《2026 商业化-PC Agent 分发.pdf》 -->
-          <div class="detail-modal__slides" data-src="2026 商业化-PC Agent 分发.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-01.jpg" alt="PC Agent 分发 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-02.jpg" alt="PC Agent 分发 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-03.jpg" alt="PC Agent 分发 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-04.jpg" alt="PC Agent 分发 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-05.jpg" alt="PC Agent 分发 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-06.jpg" alt="PC Agent 分发 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-07.jpg" alt="PC Agent 分发 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-08.jpg" alt="PC Agent 分发 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-09.jpg" alt="PC Agent 分发 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-10.jpg" alt="PC Agent 分发 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-11.jpg" alt="PC Agent 分发 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-12.jpg" alt="PC Agent 分发 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-13.jpg" alt="PC Agent 分发 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-14.jpg" alt="PC Agent 分发 第14页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-15.jpg" alt="PC Agent 分发 第15页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-agent-dist/slide-16.jpg" alt="PC Agent 分发 第16页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="2026 商业化-PC Agent 分发.pdf">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-01.webp" alt="PC Agent 分发 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-02.webp" alt="PC Agent 分发 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-03.webp" alt="PC Agent 分发 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-04.webp" alt="PC Agent 分发 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-05.webp" alt="PC Agent 分发 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-06.webp" alt="PC Agent 分发 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-07.webp" alt="PC Agent 分发 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-08.webp" alt="PC Agent 分发 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-09.webp" alt="PC Agent 分发 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-10.webp" alt="PC Agent 分发 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-11.webp" alt="PC Agent 分发 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-12.webp" alt="PC Agent 分发 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-13.webp" alt="PC Agent 分发 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-14.webp" alt="PC Agent 分发 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-15.webp" alt="PC Agent 分发 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-agent-dist/slide-16.webp" alt="PC Agent 分发 第16页" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -814,23 +801,23 @@
       <div class="detail-modal__body">
         <div class="detail-modal__content">
           <div class="detail-modal__head">
-            <h2 class="detail-modal__title" id="modal-cny-title">2024 春节 CNY 系列活动</h2>
+            <h2 class="detail-modal__title" id="modal-cny-title">25年、26年春节 CNY 系列活动</h2>
             <p class="detail-modal__subtitle">搜狗输入法 CNY 春节系列活动 · 单次活动最高 8.9 亿浏览量 · UE 刘佶松</p>
           </div>
 
           <!-- 幻灯片:11 页 16:9,源文件《CNY.pdf》 -->
-          <div class="detail-modal__slides" data-src="CNY.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-01.jpg" alt="CNY 系列活动 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-02.jpg" alt="CNY 系列活动 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-03.jpg" alt="CNY 系列活动 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-04.jpg" alt="CNY 系列活动 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-05.jpg" alt="CNY 系列活动 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-06.jpg" alt="CNY 系列活动 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-07.jpg" alt="CNY 系列活动 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-08.jpg" alt="CNY 系列活动 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-09.jpg" alt="CNY 系列活动 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-10.jpg" alt="CNY 系列活动 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-cny/slide-11.jpg" alt="CNY 系列活动 第11页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="CNY.pdf">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-01.webp" alt="CNY 系列活动 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-02.webp" alt="CNY 系列活动 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-03.webp" alt="CNY 系列活动 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-04.webp" alt="CNY 系列活动 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-05.webp" alt="CNY 系列活动 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-06.webp" alt="CNY 系列活动 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-07.webp" alt="CNY 系列活动 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-08.webp" alt="CNY 系列活动 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-09.webp" alt="CNY 系列活动 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-10.webp" alt="CNY 系列活动 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-cny/slide-11.webp" alt="CNY 系列活动 第11页" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -853,18 +840,18 @@
           </div>
 
           <!-- 幻灯片:11 页 16:9,源文件《装扮活动.pdf》 -->
-          <div class="detail-modal__slides" data-src="装扮活动.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-01.jpg" alt="CNY 装扮活动 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-02.jpg" alt="CNY 装扮活动 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-03.jpg" alt="CNY 装扮活动 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-04.jpg" alt="CNY 装扮活动 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-05.jpg" alt="CNY 装扮活动 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-06.jpg" alt="CNY 装扮活动 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-07.jpg" alt="CNY 装扮活动 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-08.jpg" alt="CNY 装扮活动 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-09.jpg" alt="CNY 装扮活动 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-10.jpg" alt="CNY 装扮活动 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban/slide-11.jpg" alt="CNY 装扮活动 第11页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="装扮活动.pdf">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-01.webp" alt="CNY 装扮活动 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-02.webp" alt="CNY 装扮活动 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-03.webp" alt="CNY 装扮活动 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-04.webp" alt="CNY 装扮活动 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-05.webp" alt="CNY 装扮活动 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-06.webp" alt="CNY 装扮活动 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-07.webp" alt="CNY 装扮活动 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-08.webp" alt="CNY 装扮活动 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-09.webp" alt="CNY 装扮活动 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-10.webp" alt="CNY 装扮活动 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban/slide-11.webp" alt="CNY 装扮活动 第11页" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -887,16 +874,16 @@
           </div>
 
           <!-- 幻灯片:9 页 16:9,源文件《AI换装.pdf》 -->
-          <div class="detail-modal__slides" data-src="AI换装.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-01.jpg" alt="AI 换装 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-02.jpg" alt="AI 换装 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-03.jpg" alt="AI 换装 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-04.jpg" alt="AI 换装 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-05.jpg" alt="AI 换装 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-06.jpg" alt="AI 换装 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-07.jpg" alt="AI 换装 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-08.jpg" alt="AI 换装 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-ai-huanzhuang/slide-09.jpg" alt="AI 换装 第9页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="AI换装.pdf">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-01.webp" alt="AI 换装 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-02.webp" alt="AI 换装 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-03.webp" alt="AI 换装 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-04.webp" alt="AI 换装 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-05.webp" alt="AI 换装 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-06.webp" alt="AI 换装 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-07.webp" alt="AI 换装 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-08.webp" alt="AI 换装 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-ai-huanzhuang/slide-09.webp" alt="AI 换装 第9页" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -918,32 +905,28 @@
             <p class="detail-modal__subtitle">搜狗输入法装扮商城 · 0-1 商城生态 · 内容售卖 · UE 刘佶松</p>
           </div>
 
-          <!-- 幻灯片:14 页 16:9,源文件《装扮商城.pdf》 -->
-          <div class="detail-modal__slides" data-src="装扮商城.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-01.jpg" alt="移动/PC商城 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-02.jpg" alt="移动/PC商城 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-03.jpg" alt="移动/PC商城 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-04.jpg" alt="移动/PC商城 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-05.jpg" alt="移动/PC商城 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-06.jpg" alt="移动/PC商城 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-07.jpg" alt="移动/PC商城 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-08.jpg" alt="移动/PC商城 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-09.jpg" alt="移动/PC商城 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-10.jpg" alt="移动/PC商城 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-11.jpg" alt="移动/PC商城 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-12.jpg" alt="移动/PC商城 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-13.jpg" alt="移动/PC商城 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-zhuangban-mall/slide-14.jpg" alt="移动/PC商城 第14页" loading="lazy" /></div>
+          <!-- 幻灯片:13 页 16:9,源文件《装扮商城.pdf》(原第 1 页「2025H1 收入目标」已移除) -->
+          <div class="detail-modal__slides" data-pager="true" data-src="装扮商城.pdf">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-02.webp" alt="移动/PC商城 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-03.webp" alt="移动/PC商城 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-04.webp" alt="移动/PC商城 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-05.webp" alt="移动/PC商城 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-06.webp" alt="移动/PC商城 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-07.webp" alt="移动/PC商城 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-08.webp" alt="移动/PC商城 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-09.webp" alt="移动/PC商城 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-10.webp" alt="移动/PC商城 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-11.webp" alt="移动/PC商城 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-12.webp" alt="移动/PC商城 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-13.webp" alt="移动/PC商城 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-zhuangban-mall/slide-14.webp" alt="移动/PC商城 第13页" loading="lazy" /></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Detail Modal: 自动化生产皮肤Agent (id="modal-skin-agent") 单张长图 =====
-       源文件:《AI皮肤自动化生产全流程.pdf》(单页超长图 5000×37401),
-       ★ 2026-10-15:整页按 2400 宽渲染成一张无缝长图(2400×17953),
-       打开后纵向滚完整条「选题→风格定义→皮肤生产→打包→审核→上线→监测」全流程。 -->
+  
   <div id="modal-skin-agent" class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-skin-agent-title">
     <button class="detail-modal__close" aria-label="关闭详情">
       <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -958,16 +941,14 @@
             <p class="detail-modal__subtitle">皮肤生产工作流 · 质量评估体系 · 选题→风格定义→皮肤生产→打包→审核→上线→监测</p>
           </div>
           <div class="detail-modal__slides" data-src="AI皮肤自动化生产全流程.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-agent/slide-01.jpg" alt="AI皮肤自动化全流程" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-agent/slide-01.webp" alt="AI皮肤自动化全流程" loading="lazy" /></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Detail Modal: B端皮肤编辑器 (id="modal-skin-editor") 9 页 16:9 幻灯片 =====
-       源文件《皮肤编辑器.pdf》(9 页 1920×1080,原 28MB),
-       ★ 2026-10-15:每页按 2400×1350 渲染为 jpg(共 1.49MB),纵向滚动浏览。 -->
+  
   <div id="modal-skin-editor" class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-skin-editor-title">
     <button class="detail-modal__close" aria-label="关闭详情">
       <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -982,24 +963,22 @@
             <p class="detail-modal__subtitle">0-1 创作者工具 · BPO 降本增效 · Windows / MAC 端</p>
           </div>
           <div class="detail-modal__slides" data-src="皮肤编辑器.pdf" data-pager="true">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-01.jpg" alt="皮肤编辑器 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-02.jpg" alt="皮肤编辑器 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-03.jpg" alt="皮肤编辑器 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-04.jpg" alt="皮肤编辑器 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-05.jpg" alt="皮肤编辑器 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-06.jpg" alt="皮肤编辑器 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-07.jpg" alt="皮肤编辑器 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-08.jpg" alt="皮肤编辑器 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-skin-editor/slide-09.jpg" alt="皮肤编辑器 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-01.webp" alt="皮肤编辑器 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-02.webp" alt="皮肤编辑器 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-03.webp" alt="皮肤编辑器 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-04.webp" alt="皮肤编辑器 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-05.webp" alt="皮肤编辑器 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-06.webp" alt="皮肤编辑器 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-07.webp" alt="皮肤编辑器 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-08.webp" alt="皮肤编辑器 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-skin-editor/slide-09.webp" alt="皮肤编辑器 第9页" loading="lazy" /></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Detail Modal: 元宝导流-创新分发 (id="modal-yuanbao-dist") 15 页 16:9 幻灯片 =====
-       源文件《创新分发.pdf》(15 页 1920×1080,原 45MB),
-       ★ 2026-10-15:每页按 2000×1125 渲染为 jpg(共 ~1.76MB,懒加载),带页码+跳页索引。 -->
+  
   <div id="modal-yuanbao-dist" class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-yuanbao-dist-title">
     <button class="detail-modal__close" aria-label="关闭详情">
       <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1014,31 +993,28 @@
             <p class="detail-modal__subtitle">给元宝导流 · 给 WorkBuddy 导流 · 分发全链路关键触点与创新承接形式</p>
           </div>
           <div class="detail-modal__slides" data-src="创新分发.pdf" data-pager="true">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-01.jpg" alt="元宝创新分发 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-02.jpg" alt="元宝创新分发 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-03.jpg" alt="元宝创新分发 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-04.jpg" alt="元宝创新分发 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-05.jpg" alt="元宝创新分发 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-06.jpg" alt="元宝创新分发 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-07.jpg" alt="元宝创新分发 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-08.jpg" alt="元宝创新分发 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-09.jpg" alt="元宝创新分发 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-10.jpg" alt="元宝创新分发 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-11.jpg" alt="元宝创新分发 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-12.jpg" alt="元宝创新分发 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-13.jpg" alt="元宝创新分发 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-14.jpg" alt="元宝创新分发 第14页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-yuanbao-dist/slide-15.jpg" alt="元宝创新分发 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-01.webp" alt="元宝创新分发 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-02.webp" alt="元宝创新分发 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-03.webp" alt="元宝创新分发 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-04.webp" alt="元宝创新分发 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-05.webp" alt="元宝创新分发 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-06.webp" alt="元宝创新分发 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-07.webp" alt="元宝创新分发 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-08.webp" alt="元宝创新分发 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-09.webp" alt="元宝创新分发 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-10.webp" alt="元宝创新分发 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-11.webp" alt="元宝创新分发 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-12.webp" alt="元宝创新分发 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-13.webp" alt="元宝创新分发 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-14.webp" alt="元宝创新分发 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-yuanbao-dist/slide-15.webp" alt="元宝创新分发 第15页" loading="lazy" /></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Detail Modal: 输入法会员体系 (id="modal-member") 带 2 个页签 =====
-       源文件:《会员一期.pdf》(28 页) /《会员二期.pdf》(29 页),
-       ★ 2026-10-13:两份 PDF 已逐页渲染成 2400x1350 高清切片(A4 见 assets/modal-member-p1|p2),
-       与「AI陪伴」「PC Agent 分发」二级页面完全同一套规范 —— 打开即可纵向滚完整份汇报。 -->
+  
   <div id="modal-member" class="detail-modal detail-modal--tabbed" role="dialog" aria-modal="true" aria-label="输入法会员体系详情">
     <button class="detail-modal__close" aria-label="关闭详情">
       <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1059,35 +1035,35 @@
             <h2 class="detail-modal__title">输入法会员体系 — 会员一期</h2>
             <p class="detail-modal__subtitle">2025 输入法商业化项目「输入法会员」设计工作汇报 · UE 刘佶松 / UI 何福林 · 2025.05.30</p>
           </div>
-          <div class="detail-modal__slides" data-src="会员一期.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-01.jpg" alt="会员一期 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-02.jpg" alt="会员一期 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-03.jpg" alt="会员一期 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-04.jpg" alt="会员一期 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-05.jpg" alt="会员一期 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-06.jpg" alt="会员一期 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-07.jpg" alt="会员一期 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-08.jpg" alt="会员一期 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-09.jpg" alt="会员一期 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-10.jpg" alt="会员一期 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-11.jpg" alt="会员一期 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-12.jpg" alt="会员一期 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-13.jpg" alt="会员一期 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-14.jpg" alt="会员一期 第14页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-15.jpg" alt="会员一期 第15页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-16.jpg" alt="会员一期 第16页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-17.jpg" alt="会员一期 第17页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-18.jpg" alt="会员一期 第18页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-19.jpg" alt="会员一期 第19页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-20.jpg" alt="会员一期 第20页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-21.jpg" alt="会员一期 第21页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-22.jpg" alt="会员一期 第22页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-23.jpg" alt="会员一期 第23页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-24.jpg" alt="会员一期 第24页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-25.jpg" alt="会员一期 第25页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-26.jpg" alt="会员一期 第26页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-27.jpg" alt="会员一期 第27页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p1/slide-28.jpg" alt="会员一期 第28页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="会员一期.pdf">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-01.webp" alt="会员一期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-02.webp" alt="会员一期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-03.webp" alt="会员一期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-04.webp" alt="会员一期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-05.webp" alt="会员一期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-06.webp" alt="会员一期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-07.webp" alt="会员一期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-08.webp" alt="会员一期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-09.webp" alt="会员一期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-10.webp" alt="会员一期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-11.webp" alt="会员一期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-12.webp" alt="会员一期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-13.webp" alt="会员一期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-14.webp" alt="会员一期 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-15.webp" alt="会员一期 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-16.webp" alt="会员一期 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-17.webp" alt="会员一期 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-18.webp" alt="会员一期 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-19.webp" alt="会员一期 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-20.webp" alt="会员一期 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-21.webp" alt="会员一期 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-22.webp" alt="会员一期 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-23.webp" alt="会员一期 第23页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-24.webp" alt="会员一期 第24页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-25.webp" alt="会员一期 第25页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-26.webp" alt="会员一期 第26页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-27.webp" alt="会员一期 第27页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p1/slide-28.webp" alt="会员一期 第28页" loading="lazy" /></div>
           </div>
         </div>
         <!-- Tab 2: 会员二期 -->
@@ -1096,36 +1072,242 @@
             <h2 class="detail-modal__title">输入法会员体系 — 会员二期</h2>
             <p class="detail-modal__subtitle">2025 输入法商业化项目 设计工作汇报 · UE 刘佶松 · 2025.09.15</p>
           </div>
-          <div class="detail-modal__slides" data-src="会员二期.pdf">
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-01.jpg" alt="会员二期 第1页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-02.jpg" alt="会员二期 第2页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-03.jpg" alt="会员二期 第3页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-04.jpg" alt="会员二期 第4页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-05.jpg" alt="会员二期 第5页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-06.jpg" alt="会员二期 第6页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-07.jpg" alt="会员二期 第7页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-08.jpg" alt="会员二期 第8页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-09.jpg" alt="会员二期 第9页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-10.jpg" alt="会员二期 第10页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-11.jpg" alt="会员二期 第11页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-12.jpg" alt="会员二期 第12页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-13.jpg" alt="会员二期 第13页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-14.jpg" alt="会员二期 第14页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-15.jpg" alt="会员二期 第15页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-16.jpg" alt="会员二期 第16页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-17.jpg" alt="会员二期 第17页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-18.jpg" alt="会员二期 第18页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-19.jpg" alt="会员二期 第19页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-20.jpg" alt="会员二期 第20页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-21.jpg" alt="会员二期 第21页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-22.jpg" alt="会员二期 第22页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-23.jpg" alt="会员二期 第23页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-24.jpg" alt="会员二期 第24页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-25.jpg" alt="会员二期 第25页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-26.jpg" alt="会员二期 第26页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-27.jpg" alt="会员二期 第27页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-28.jpg" alt="会员二期 第28页" loading="lazy" /></div>
-            <div class="slide-item"><img class="slide-full" src="assets/modal-member-p2/slide-29.jpg" alt="会员二期 第29页" loading="lazy" /></div>
+          <div class="detail-modal__slides" data-pager="true" data-src="会员二期.pdf">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-01.webp" alt="会员二期 第1页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-02.webp" alt="会员二期 第2页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-03.webp" alt="会员二期 第3页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-04.webp" alt="会员二期 第4页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-05.webp" alt="会员二期 第5页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-06.webp" alt="会员二期 第6页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-07.webp" alt="会员二期 第7页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-08.webp" alt="会员二期 第8页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-09.webp" alt="会员二期 第9页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-10.webp" alt="会员二期 第10页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-11.webp" alt="会员二期 第11页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-12.webp" alt="会员二期 第12页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-13.webp" alt="会员二期 第13页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-14.webp" alt="会员二期 第14页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-15.webp" alt="会员二期 第15页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-16.webp" alt="会员二期 第16页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-17.webp" alt="会员二期 第17页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-18.webp" alt="会员二期 第18页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-19.webp" alt="会员二期 第19页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-20.webp" alt="会员二期 第20页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-21.webp" alt="会员二期 第21页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-22.webp" alt="会员二期 第22页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-23.webp" alt="会员二期 第23页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-24.webp" alt="会员二期 第24页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-25.webp" alt="会员二期 第25页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-26.webp" alt="会员二期 第26页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-27.webp" alt="会员二期 第27页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-28.webp" alt="会员二期 第28页" loading="lazy" /></div>
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-member-p2/slide-29.webp" alt="会员二期 第29页" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Modal: 元宝导流-皮肤带增 (id="modal-skin-redeem") 内嵌交互 Demo ===== -->
+  <div id="modal-skin-redeem" class="detail-modal detail-modal--embed" role="dialog" aria-modal="true" aria-labelledby="modal-skin-redeem-title">
+    <button class="detail-modal__close" aria-label="关闭详情，返回主页">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="detail-modal__panel">
+      
+      <div class="detail-modal__tabs" role="tablist" aria-label="导流方案端">
+        <button class="detail-modal__tab is-active" role="tab" aria-selected="true" data-tab="sr-pc">PC端导流方案</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="sr-mobile">移动端导流方案</button>
+      </div>
+      <div class="detail-modal__body">
+        <!-- Tab 1: 移动端导流方案(内容) -->
+        <div class="detail-modal__tabpanel" id="sr-mobile" role="tabpanel" hidden>
+          <div class="detail-modal__content">
+            
+            <div class="detail-modal__head embed-head">
+              <div class="embed-head__text">
+                <h2 class="detail-modal__title" id="modal-skin-redeem-title">元宝导流-皮肤带增</h2>
+                <p class="detail-modal__subtitle">移动端 · 体验元宝 30 秒领皮肤 · 跨 App 导流交互 Demo · 可点击高亮热区操作</p>
+              </div>
+              <a class="embed-head__link" href="assets/demo-skin-redeem/index.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+            </div>
+            <div class="demo-embed">
+              <iframe class="demo-embed__frame" data-embed-src="assets/demo-skin-redeem/index.html" title="体验元宝30秒领皮肤 · 移动端交互Demo" allow="fullscreen"></iframe>
+            </div>
+          </div>
+        </div>
+        <!-- Tab 2: PC端导流方案(默认展示) -->
+        <div class="detail-modal__tabpanel is-active" id="sr-pc" role="tabpanel">
+          <div class="detail-modal__content">
+            <div class="detail-modal__head embed-head">
+              <div class="embed-head__text">
+                <h2 class="detail-modal__title">元宝导流-皮肤带增</h2>
+                <p class="detail-modal__subtitle">PC端 · 跨 App 导流交互 Demo · 可点击高亮热区操作</p>
+              </div>
+              <a class="embed-head__link" href="assets/demo-skin-redeem-pc/index.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+            </div>
+            <div class="demo-embed">
+              <iframe class="demo-embed__frame" data-embed-src="assets/demo-skin-redeem-pc/index.html" title="PC端跨App导流 · 交互Demo" allow="fullscreen"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Detail Modal: 移动PC广告生态建设 · 搜狗输入法十大商业化业务全景体检 (id="modal-pc-ad") 11 个页签 =====
+       素材:assets/modal-pc-ad/01~11*.webp —— 体检报告 11 个板块逐板块高清截图 -->
+  <div id="modal-pc-ad" class="detail-modal detail-modal--tabbed" role="dialog" aria-modal="true" aria-label="移动PC广告生态建设 · 十大商业化业务全景体检">
+    <button class="detail-modal__close" aria-label="关闭详情">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="detail-modal__panel">
+      <!-- 顶部页签栏:与体检报告自带导航一一对应(宏观结论 + 10 大业务) -->
+      <div class="detail-modal__tabs" role="tablist" aria-label="体检报告板块">
+        <button class="detail-modal__tab is-active" role="tab" aria-selected="true" data-tab="pcad-intro">商业化全景</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-overview">宏观结论</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-01">01 移动标广</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-02">02 移动非标</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-03">03 移动装扮商城</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-04">04 移动装扮 VIP</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-05">05 PC Win 装扮</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-06">06 MAC 装扮</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-07">07 AI 陪伴三端</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-08">08 福利中心 CPS</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-09">09 PC 标广三位一体</button>
+        <button class="detail-modal__tab" role="tab" aria-selected="false" data-tab="pcad-10">10 PC 非标</button>
+      </div>
+
+      <div class="detail-modal__body">
+        <!-- Tab 0: 商业化全景(默认页,宏观图) -->
+        <div class="detail-modal__content detail-modal__tabpanel is-active" id="pcad-intro" role="tabpanel">
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" src="assets/banner-pc-ad-macro.webp" alt="输入法商业化宏观图" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 1: 宏观结论 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-overview" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">十大商业化业务 全景体检 · 集团结论页</h2>
+            <p class="detail-modal__subtitle">搜狗输入法 · 2026 Q2 · v7 体检框架 4 维 40 指标 · 集团均分 36/100（黄牌）· 3 红 7 黄 0 绿</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/01-overview.webp" alt="宏观结论 · 集团结论页" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 01 移动标广 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-01" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">01 · 移动标广</h2>
+            <p class="detail-modal__subtitle">26 红牌 · 11 类标广位全堆叠 · 从「输入即用」到「输入即广告」</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/02-mobile-ad.webp" alt="01 移动标广" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 3: 02 移动非标 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-02" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">02 · 移动非标</h2>
+            <p class="detail-modal__subtitle">26 红牌 · 10 类非标位 · dark pattern + 主动打扰</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/03-mobile-nonstd.webp" alt="02 移动非标" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 4: 03 移动装扮商城 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-03" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">03 · 移动装扮商城</h2>
+            <p class="detail-modal__subtitle">48 黄牌 · 21 类 SKU 横向爆炸 · AI 装扮三入口</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/04-mobile-skin.webp" alt="03 移动装扮商城" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 5: 04 移动装扮 VIP -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-04" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">04 · 移动装扮 VIP</h2>
+            <p class="detail-modal__subtitle">44 黄牌 · 11 模块 + 8 特权 + 3 类券的订阅迷宫</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/05-mobile-skin-vip.webp" alt="04 移动装扮 VIP" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 6: 05 PC Win 装扮 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-05" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">05 · PC Win 装扮</h2>
+            <p class="detail-modal__subtitle">42 黄牌 · 13 品类电商化 · 6 处二维码倒流</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/06-pc-skin.webp" alt="05 PC Win 装扮" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 7: 06 MAC 装扮 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-06" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">06 · MAC 装扮</h2>
+            <p class="detail-modal__subtitle">32 红牌 · 46% 残废移植 · 4 重生态错配</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/07-mac-skin.webp" alt="06 MAC 装扮" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 8: 07 AI 陪伴三端 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-07" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">07 · AI 陪伴三端</h2>
+            <p class="detail-modal__subtitle">31 红牌 · 三端三团队三 KPI 散装实验</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/08-ai-companion.webp" alt="07 AI 陪伴三端" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 9: 08 福利中心 CPS -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-08" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">08 · 福利中心 CPS</h2>
+            <p class="detail-modal__subtitle">33 红牌 · 双端 9 模块机械复制 · 4 品类大杂烩</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/09-welfare.webp" alt="08 福利中心 CPS" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 10: 09 PC 标广三位一体 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-09" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">09 · PC 标广三位一体</h2>
+            <p class="detail-modal__subtitle">36 黄牌 · 弹窗 + 灵犀壳 + Banner 的古典门户日落</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/10-pc-stdad.webp" alt="09 PC 标广三位一体" loading="lazy" /></div>
+          </div>
+        </div>
+
+        <!-- Tab 11: 10 PC 非标 -->
+        <div class="detail-modal__content detail-modal__tabpanel" id="pcad-10" role="tabpanel" hidden>
+          <div class="detail-modal__head">
+            <h2 class="detail-modal__title">10 · PC 非标</h2>
+            <p class="detail-modal__subtitle">40 黄牌 · 内部 AI 矩阵交叉分发 · 烧根换芽</p>
+          </div>
+          <div class="detail-modal__slides">
+            <div class="slide-item"><img class="slide-full" data-src="assets/modal-pc-ad/11-pc-nonstdad.webp" alt="10 PC 非标" loading="lazy" /></div>
           </div>
         </div>
       </div>
@@ -1160,5 +1342,38 @@
   </div>
 
   <script src="js/main.js"></script>
+
+<script>
+(function(){
+  var vs = document.querySelectorAll('video.gif-fallback, video.slide-video');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if (e.isIntersecting && e.intersectionRatio > 0.2) {
+          var p = v.play(); if (p && p.catch) p.catch(function(){});
+        } else { try { v.pause(); } catch(_){} }
+      });
+    }, {threshold: [0, 0.2, 0.5]});
+    vs.forEach(function(v){ io.observe(v); });
+  } else {
+    vs.forEach(function(v){ var p=v.play(); if(p&&p.catch)p.catch(function(){}); });
+  }
+  function loadModalImages(modal){
+    modal.querySelectorAll('img[data-src]').forEach(function(img){
+      if (!img.getAttribute('src')) img.src = img.getAttribute('data-src');
+    });
+  }
+  if ('MutationObserver' in window) {
+    var mo = new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        if (m.target.classList && m.target.classList.contains('is-open')) loadModalImages(m.target);
+      });
+    });
+    document.querySelectorAll('.detail-modal').forEach(function(m){ mo.observe(m, {attributes:true, attributeFilter:['class']}); });
+  }
+})();
+</script>
+
 </body>
 </html>

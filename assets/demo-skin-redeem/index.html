@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>免费领皮肤 · 交互Demo（新截图 + 原图还原）</title>
+<style>
+  :root{
+    --brand:#34c759; --ink:#111; --sub:#8a9099; --line:#e8ebf0; --ylb:#ff8c1a;
+    --price:#FB6D0E;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:
+      radial-gradient(1100px 620px at 50% -12%, rgba(178,123,238,.16) 0%, rgba(178,123,238,0) 60%),
+      #222222;
+    color:#e9e4f2; min-height:100vh;
+    display:flex; gap:36px; align-items:flex-start; justify-content:center;
+    flex-wrap:wrap;
+    padding:32px 24px 60px;
+  }
+
+  /* ---------- 手机外壳 ---------- */
+  .stage{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .phone{
+    position:relative; width:340px;
+    background:#000; border-radius:46px; padding:11px;
+    box-shadow:0 30px 70px rgba(20,40,30,.28), 0 4px 14px rgba(0,0,0,.18);
+  }
+  .screen{
+    position:relative; width:100%; border-radius:36px; overflow:hidden;
+    background:#fff; aspect-ratio:360/801;
+  }
+  .page{
+    position:absolute; inset:0; width:100%; height:100%;
+    background-size:100% 100%; background-position:center; background-repeat:no-repeat;
+    display:none; overflow:hidden;
+  }
+  .page.active{display:block;}
+  /* 首页：新高清底图（hero/CTA/绿pill 在图内；倒计时与底部提示为 HTML 覆盖层） */
+  .page-home{background-image:url('assets/home-bg.webp');}
+  /* 首页覆盖层：倒计时 + 底部动态提示（旧版烘焙在图内，新高清图缺，按旧图位置还原）
+     像素校准（1080×2400 内屏）：倒计时文字中心 23.9%；提示文案中心 87.95%（绿 pill 顶 89.6%） */
+  .cd{
+    position:absolute; z-index:6; top:23.9%; left:0; width:100%;
+    transform:translateY(-50%);
+    text-align:center; font-size:11.5px; font-weight:600; color:#141414;
+    letter-spacing:.3px; pointer-events:none;
+  }
+  .home-tip{
+    position:absolute; z-index:6; top:87.95%; left:0; width:100%;
+    transform:translateY(-50%);
+    text-align:center; font-size:12.5px; font-weight:600; color:#1c1c1c;
+    letter-spacing:.2px; padding:0 20px; pointer-events:none;
+  }
+  /* 活动入口封面页（装扮商城截图 884×1920；banner 绿卡 x 4.1%–48.3% / y 48.9%–84.9%） */
+  .page-mall{background-image:url('assets/mall-bg.webp');}
+  /* 已领取页：新截图整屏背景 */
+  .page-claimed{background-image:url('assets/claimed-bg.webp');}
+  /* 元宝对话页：原链接切图 */
+  .page-chat{background-image:url('assets/orig/chat.webp'); background-size:100% 100%;}
+  /* 皮肤详情页：原链接切图·双状态
+     两张原图内容区不同皮肤（locked=扫除大作战 为错误素材），
+     统一用已解锁原图的内容区（除底部导航栏，y 0–90.42%）贴在两态之上，仅保留各自底部导航栏 */
+  .page-detail.locked{background-image:url('assets/orig/detail_locked.webp'); background-size:100% 100%;}
+  .page-detail.unlocked{background-image:url('assets/orig/detail_unlocked.webp'); background-size:100% 100%;}
+  .detail-content{
+    position:absolute; z-index:1; top:0; left:0; width:100%; height:90.42%;
+    background:url('assets/orig/detail_content_unlocked.webp') center/100% 100% no-repeat;
+    pointer-events:none;
+  }
+  .page-detail.locked .unlocked-only{display:none;}
+  .page-detail.unlocked .locked-only{display:none;}
+  /* 已启用态：覆盖原图「立即启用」橙钮（x 72.5%–96.1%, y 91.4%–95.2%），启用完成后显示 */
+  .enabled-pill{
+    position:absolute; z-index:6; left:72.5%; top:91.4%; width:23.6%; height:3.85%;
+    display:none; align-items:center; justify-content:center;
+    background:#F87A1F; color:#fff; font-size:12px; font-weight:700;
+    border-radius:20px; cursor:pointer; letter-spacing:1px;
+  }
+  .enabled-pill:active{transform:scale(.97);}
+  .detail-badge{
+    position:absolute; z-index:24; right:4%; top:10.5%;
+    font-size:10.5px; font-weight:800; color:#fff; padding:4px 10px; border-radius:20px;
+    box-shadow:0 6px 16px rgba(0,0,0,.18); pointer-events:none; letter-spacing:.3px;
+  }
+  .page-detail.locked .badge-locked{display:inline-block; background:linear-gradient(135deg,#ff9a3c,#ff7a1a);}
+  .page-detail.locked .badge-unlocked{display:none;}
+  .page-detail.unlocked .badge-unlocked{display:inline-block; background:linear-gradient(135deg,#1f9d4e,#34c759);}
+  .page-detail.unlocked .badge-locked{display:none;}
+
+  /* 顶部 App 切换条 */
+  .appbar{
+    position:absolute; top:0; left:0; width:100%; z-index:25;
+    display:flex; align-items:center; gap:7px;
+    padding:8px 14px; font-size:11px; font-weight:600; color:#fff;
+    background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0));
+    pointer-events:none;
+  }
+  .appbar .dot{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.9;}
+  .appbar.yb .dot{background:#ffd54a;}
+
+  /* 透明可点击热区 */
+  .hot{position:absolute; cursor:pointer; border-radius:12px; z-index:5;}
+  .hot:active{background:rgba(52,199,89,.18);}
+  .debug .hot{background:rgba(255,0,80,.22); outline:1px dashed #ff0050;}
+  .pulse{animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(52,199,89,0)}50%{box-shadow:0 0 0 6px rgba(52,199,89,.25)}}
+
+  /* ---------- 首页·皮肤信息流（新截图：可视区域内上下滑动，双列卡片） ---------- */
+  .feed{
+    position:absolute; z-index:8;
+    left:0; width:100%;
+    top:28.2%; bottom:16.2%;
+    overflow-y:auto; overflow-x:hidden;
+    display:grid; grid-template-columns:1fr 1fr; gap:2.9%;
+    padding:1% 4.7% 2%;
+    align-content:start; grid-auto-rows:max-content;
+    scrollbar-width:none;
+  }
+  .feed::-webkit-scrollbar{display:none;}
+  .skin-card{
+    position:relative; cursor:pointer;
+    border-radius:9px; overflow:hidden; background:#fff;
+    box-shadow:0 2px 8px rgba(30,60,40,.06);
+  }
+  .skin-card .kb{display:block; width:100%; aspect-ratio:320/254; object-fit:cover;}
+  .skin-card .meta{position:relative; padding:7px 9px 9px;}
+  .skin-card .nm{font-size:13px; font-weight:700; color:#111; line-height:1.25;}
+  .skin-card .pr{margin-top:2px; font-size:11px; font-weight:700; color:var(--price); display:flex; align-items:baseline; gap:4px;}
+  .skin-card .pr .og{color:#A8ADB4; font-weight:500; text-decoration:line-through; font-size:10px;}
+  /* radio：未选=灰环白底；选中=用户提供的黑圆白勾切图 */
+  .skin-card .rd{
+    position:absolute; right:8px; bottom:9px;
+    width:19px; height:19px; border-radius:50%;
+    background:#fff; border:1.5px solid #D9D9D9;
+  }
+  .skin-card.sel{box-shadow:0 0 0 1.5px #111, 0 4px 12px rgba(0,0,0,.12);}
+  .skin-card.sel .rd{
+    border:none; background:url('assets/check.webp') center/100% 100% no-repeat;
+    animation:bounce .4s cubic-bezier(.2,.9,.3,1.4);
+  }
+  @keyframes bounce{0%{transform:scale(.5)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+  /* ---------- 元宝App内：体验计时浮条 ---------- */
+  .exp-bar{
+    position:absolute; z-index:28; left:4%; width:92%; top:8%;
+    background:rgba(20,28,24,.92); color:#fff; border-radius:16px;
+    padding:10px 12px; display:none; align-items:center; gap:10px;
+    box-shadow:0 12px 30px rgba(0,0,0,.3);
+    backdrop-filter:blur(4px);
+  }
+  .exp-bar.active{display:flex; animation:dropin .35s cubic-bezier(.2,.9,.3,1.3);}
+  @keyframes dropin{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .exp-ring{position:relative;width:38px;height:38px;flex:none;}
+  .exp-ring svg{transform:rotate(-90deg);width:38px;height:38px;}
+  .exp-ring .n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+  .exp-bar .tx{flex:1 1 auto; min-width:0;}
+  .exp-bar .tx b{font-size:12.5px;line-height:1.25;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .exp-bar .tx span{font-size:10.5px;line-height:1.3;margin-top:1px;color:rgba(255,255,255,.65);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .exp-back{
+    margin-left:auto; flex:none; background:var(--brand); color:#fff; border:none;
+    border-radius:16px; padding:7px 12px; font-size:11.5px; font-weight:700;
+    cursor:pointer; white-space:nowrap; display:none;
+  }
+  .exp-bar.done{background:linear-gradient(135deg,#1f9d4e,#34c759);}
+  .exp-bar.done .exp-back{display:block; animation:pulse 1.4s infinite;}
+
+  /* ---------- 浮层 ---------- */
+  .overlay{
+    position:absolute; inset:0; z-index:30; display:none;
+    align-items:center; justify-content:center; padding:24px;
+    background:rgba(15,25,20,.55); backdrop-filter:blur(3px);
+  }
+  .overlay.active{display:flex;}
+
+  /* 全屏原图登录页（原链接 login.png）—— 从下至上平移进场，无回弹 */
+  .overlay.login-fs{padding:0; background:rgba(0,0,0,.25); align-items:stretch; justify-content:stretch;}
+  .overlay.login-fs .login-bg{
+    position:absolute; inset:0; width:100%; height:100%;
+    background:url('assets/orig/login.webp') center/100% 100% no-repeat #fff;
+    animation:loginUp .32s ease-out;
+  }
+  @keyframes loginUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  /* 全屏原图·皮肤启用完成页（原链接 skin_applied.png） */
+  .overlay.applied-fs{padding:0; background:rgba(0,0,0,.25); align-items:stretch; justify-content:stretch;}
+  .overlay.applied-fs .applied-bg{
+    position:absolute; inset:0; width:100%; height:100%;
+    background:url('assets/orig/skin_applied.webp') center/100% 100% no-repeat #fff;
+    animation:loginUp .34s cubic-bezier(.2,.9,.3,1.2);
+  }
+  /* 协议勾选选中态 */
+  .agree-on::after{
+    content:'✓'; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:14px; height:14px; line-height:14px; text-align:center; font-size:9.5px; font-weight:900;
+    color:#fff; background:linear-gradient(135deg,#ff9a3c,#ff7a1a); border-radius:50%;
+  }
+
+  /* 规则弹窗：用户提供的弹窗切图（带透明通道）整图呈现
+     「知道了」黑色实心按钮块（像素校准 600×800）：x 23.3%–76.7% / y 81.5%–91.5% */
+  .rules-wrap{position:relative; width:84%; max-width:300px; animation:pop .34s cubic-bezier(.2,.9,.3,1.3);}
+  .rules-wrap img{display:block; width:100%;}
+  .rules-wrap .hot{border-radius:18px;}
+
+  /* 领取提醒弹窗：用户弹窗切图整图呈现（按钮热区：暂不启用 8%–47.8%，去启用 52%–91.8%，y 61.6%–83.4%） */
+  .rem-wrap{position:relative; width:78%; max-width:280px; animation:pop .34s cubic-bezier(.2,.9,.3,1.3);}
+  @keyframes pop{from{transform:scale(.86) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+  .rem-wrap img{display:block; width:100%;}
+  .rem-wrap .hot{border-radius:22px;}
+  /* 动态描述文案（切图标题下空档 y 中心 43.9%）：「"XX"皮肤已发放，快去启用吧」 */
+  .rem-desc{
+    position:absolute; z-index:2; top:43.9%; left:6%; width:88%;
+    transform:translateY(-50%); text-align:center;
+    font-size:11.5px; font-weight:600; color:#333; letter-spacing:.2px;
+    pointer-events:none; white-space:nowrap; overflow:hidden;
+  }
+
+  .toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);
+    background:rgba(20,20,20,.86);color:#fff;font-size:13px;padding:10px 18px;border-radius:22px;
+    z-index:60;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .label{font-size:12px;color:#a8a1b6;}
+
+  /* ---------- 右侧流程导航（液态玻璃 · 与 PC demo 同一套交互结构） ----------
+     ★ 2026-11-03:外框与 PC demo 的 #panel 逐条对齐(用户:"PC 的和移动的保持一致"):
+     圆角 18px / 四边 1px 发丝边 / 内高光 + 双层投影(贴边短影 + 大范围扩散)。 */
+  .flow{
+    width:330px; border-radius:18px; padding:16px 14px 12px;
+    display:flex; flex-direction:column; gap:12px;
+    max-height:calc(100vh - 64px); position:sticky; top:32px;
+    color:#cbc3d8;
+    background:
+      radial-gradient(130% 70% at 8% 0%, rgba(178,123,238,.20), transparent 62%),
+      linear-gradient(168deg, rgba(46,44,54,.68), rgba(24,23,28,.82));
+    -webkit-backdrop-filter:blur(26px) saturate(160%); backdrop-filter:blur(26px) saturate(160%);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 2px 6px rgba(0,0,0,.40),
+      0 18px 44px rgba(0,0,0,.56);
+  }
+  .flow .phead{flex:none;display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+  .flow h2{margin:0;font-size:15px;font-weight:600;color:#f4effb;letter-spacing:.4px;line-height:1.3;}
+  .flow .cnt{font-size:11px;font-weight:600;color:#b9a6d8;letter-spacing:.5px;font-variant-numeric:tabular-nums;}
+  .flow .steps{
+    flex:1; min-height:0; display:flex; flex-direction:column; gap:4px;
+    overflow-y:auto; overflow-x:hidden; padding:4px 2px;
+    scrollbar-width:thin; scrollbar-color:rgba(178,123,238,.4) transparent;
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%);
+            mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%);
+  }
+  .flow .steps::-webkit-scrollbar{width:6px;}
+  .flow .steps::-webkit-scrollbar-thumb{background:rgba(178,123,238,.35);border-radius:6px;}
+  .step{position:relative;flex:none;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;cursor:pointer;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;border:1px solid transparent;background:transparent;}
+  .step:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}
+  .step.cur{background:linear-gradient(180deg,rgba(178,123,238,.22),rgba(178,123,238,.08));border-color:rgba(255,255,255,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 5px 16px rgba(110,55,200,.20);}
+  .step .n{position:relative;z-index:1;flex:none;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;line-height:1;color:#d8c6f4;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);transition:.18s ease;}
+  .step:not(:last-child) .n::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);width:2px;height:14px;background:linear-gradient(180deg,rgba(178,123,238,.5),rgba(178,123,238,.06));z-index:-1;}
+  .step.cur .n{background:linear-gradient(135deg,#d1aaff,#9a55f0);color:#1a1024;border-color:transparent;box-shadow:0 0 0 3px rgba(178,123,238,.16),0 4px 12px rgba(150,80,230,.5);}
+  .step .c{min-width:0;}
+  .step .c b{font-size:12.5px;font-weight:500;color:#cbc3d8;line-height:1.32;display:block;}
+  .step.cur .c b{color:#fff;font-weight:600;}
+  .flow .tools{flex:none;display:flex;gap:10px;}
+  .flow .tools button{flex:1;height:38px;font-size:12.5px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);cursor:pointer;color:#e9e3f3;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background .15s ease,border-color .15s ease,color .15s ease;}
+  .flow .tools button:hover{background:rgba(255,255,255,.12);}
+  .flow .tools button.on{background:linear-gradient(180deg,rgba(178,123,238,.30),rgba(178,123,238,.14));border-color:rgba(178,123,238,.62);color:#fff;}
+
+  /* ---------- 嵌入模式（被 iframe 包裹时自动启用）：高度撑满、宽度自适应 ----------
+     手机壳高度=视口高、宽度按整机屏比(340:729.6)自适应；右侧流程面板 100% 高、内部滚动。
+     独立打开（顶层窗口）时完全不生效，保持原布局。 */
+  html.embed body{height:100vh; min-height:0; flex-wrap:nowrap; align-items:center; justify-content:center; padding:14px 22px; gap:20px; overflow:hidden;}
+  /* ★ 2026-11-03:stage 改成「吃满剩余宽度」（flex:1 1 auto），与 PC demo 的 #stageWrap 同一套布局逻辑。
+     原来是 flex:0 0 auto + body justify-content:center —— 手机+面板作为一个整体居中，
+     面板右侧会空出一大块（与 PC 面板贴右边缘的做法不一致）。现在手机在剩余空间里居中、
+     面板贴右边缘，两个 demo 的面板位置/内边距/投影完全对齐。 */
+  html.embed .stage{flex:1 1 auto; height:100%; min-width:0; justify-content:center; gap:0; overflow:hidden;}
+  html.embed .stage .label{display:none;}
+  /* 显式宽度：不依赖 aspect-ratio + width:auto（Safari 会把它撑满可用宽度，导致手机壳压住面板）。
+     手机壳高 = 视口高 - 上下 padding，宽 = 高 × 340/729.6。 */
+  html.embed .phone{height:calc(100vh - 28px); width:calc((100vh - 28px) * 0.466); aspect-ratio:340/729.6; flex:0 0 auto;}
+  html.embed .screen{position:absolute; inset:11px; width:auto; height:auto;}
+  /* 嵌入态：面板宽度与 PC demo 一致（23%，PC 端标准），步骤间距用移动端标准 */
+  html.embed .flow{position:static; height:100%; width:23vw; max-width:23vw; flex:0 0 auto; top:auto; max-height:none;}
+</style>
+  <script>/* 嵌入检测：被 iframe 包裹时启用满高布局（须在首帧前生效） */if(window.self!==window.top){document.documentElement.className='embed';}</script>
+</head>
+<body>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="screen" id="screen">
+
+        <!-- ⓪ 活动入口封面（装扮商城截图 · banner 绿卡点击进活动页） -->
+        <div class="page page-mall active" data-ratio="884/1920" id="pMall">
+          <div class="hot pulse" style="left:3.6%;top:48.4%;width:45.2%;height:37%;" onclick="enterActivity()"></div>
+        </div>
+
+        <!-- ① 活动首页（新高清底图 + 皮肤信息流上下滑动 + 单选） -->
+        <div class="page page-home" data-ratio="1080/2400" id="pHome">
+          <!-- 覆盖层：活动倒计时（粗略计时器，从 3天20:56:31 起每秒递减） -->
+          <div class="cd">{ 活动还剩 <span id="cdD">3</span> 天 <span id="cdT">20:56:31</span> }</div>
+          <!-- 覆盖层：底部动态提示（默认/已选皮肤两态，上下预留间距） -->
+          <div class="home-tip" id="homeTip">请选择1款皮肤，完成任务后即可解锁</div>
+
+          <!-- 热区：返回（像素校准：钮中心 8.2%,6.5%）→ 提醒返回入口页 -->
+          <div class="hot" style="left:3.2%;top:4.1%;width:10%;height:4.7%;" onclick="go('pMall')"></div>
+          <!-- 热区：右上问号 → 购买规则弹窗（像素校准：钮中心 91.6%,6.5%） -->
+          <div class="hot" style="left:86.6%;top:4.1%;width:10%;height:4.7%;" onclick="show('mRules')"></div>
+          <!-- 热区：底部黑色 CTA「下载并注册元宝解锁皮肤」（像素校准：黑条 90.6%–96.2%，x 4.2%–95.7%） -->
+          <div class="hot pulse" id="ctaHot" style="left:4.2%;top:90.6%;width:91.6%;height:5.7%;" onclick="onCTA()"></div>
+
+          <!-- 皮肤信息流：双列卡片，可视区域内上下滑动，单选（黑圆白勾为用户切图） -->
+          <div class="feed" id="feed"></div>
+        </div>
+
+        <!-- ② 元宝 App · 对话页（原链接切图 chat.png） -->
+        <div class="page page-chat" data-ratio="756/1616" id="pChat">
+          <div class="appbar yb"><span class="dot"></span>已跳转 · 腾讯元宝</div>
+
+          <div class="exp-bar" id="expBar">
+            <div class="exp-ring">
+              <svg width="42" height="42" viewBox="0 0 42 42">
+                <circle cx="21" cy="21" r="17" stroke="rgba(255,255,255,.2)" stroke-width="4" fill="none"/>
+                <circle id="expRing" cx="21" cy="21" r="17" stroke="#34c759" stroke-width="4" fill="none"
+                  stroke-linecap="round" stroke-dasharray="106.8" stroke-dashoffset="0"/>
+              </svg>
+              <div class="n" id="expNum">30</div>
+            </div>
+            <div class="tx" id="expTx">
+              <b>正在体验元宝 AI…</b>
+              <span>停留满 30 秒即可返回领皮肤</span>
+            </div>
+            <button class="exp-back" onclick="backToClaim()">返回领皮肤</button>
+          </div>
+
+          <!-- 热区：三个推荐话题 -->
+          <div class="hot" style="left:6%;top:67.5%;width:50%;height:3.5%;" onclick="toast('正在体验元宝 AI…')"></div>
+          <div class="hot" style="left:6%;top:73%;width:56%;height:3.5%;" onclick="toast('正在体验元宝 AI…')"></div>
+          <div class="hot" style="left:6%;top:78.6%;width:62%;height:3.5%;" onclick="toast('正在体验元宝 AI…')"></div>
+          <!-- 热区：返回（未满30s提示） -->
+          <div class="hot" style="left:1.5%;top:0.5%;width:10%;height:3%;" onclick="tryLeaveYB()"></div>
+        </div>
+
+        <!-- ③ 任务完成 · 已解锁1款皮肤（新截图整屏 854×1900） -->
+        <div class="page page-claimed" data-ratio="854/1900" id="pClaimed">
+          <!-- 热区：返回 → 活动入口封面页（装扮商城） -->
+          <div class="hot" style="left:3.1%;top:4.2%;width:10%;height:4.7%;" onclick="go('pMall')"></div>
+          <!-- 热区：右上问号 → 规则弹窗（钮中心 91.9%,6.6%） -->
+          <div class="hot" style="left:86.9%;top:4.2%;width:10%;height:4.7%;" onclick="show('mRules')"></div>
+          <!-- 热区：底部 CTA「去启用」→ 皮肤详情页（按当前领取状态展示底部工具栏：未启用=立即启用 / 已启用=已启用） -->
+          <div class="hot pulse" style="left:4.1%;top:90.7%;width:91.7%;height:5.6%;" onclick="previewDetail(true)"></div>
+        </div>
+
+        <!-- ④ 皮肤详情页（原链接切图·双状态：locked/unlocked，内容区统一为已解锁原图素材） -->
+        <div class="page page-detail locked" data-ratio="1284/2778" id="pDetail">
+          <div class="detail-content"></div>
+          <div class="appbar"><span class="dot"></span>搜狗输入法 · 皮肤详情</div>
+          <span class="detail-badge badge-locked">🔒 未解锁 · 完成任务可领</span>
+          <span class="detail-badge badge-unlocked">✓ 已解锁</span>
+
+          <!-- 热区：返回（红框校准：屏内 x 0.3%–12.1% / y 5.5%–10.6%；未解锁→活动首页 / 已解锁→活动已解锁页） -->
+          <div class="hot pulse" style="left:0.3%;top:5.5%;width:11.8%;height:5.1%;" onclick="detailBack()"></div>
+          <div class="hot" style="left:88%;top:1.6%;width:10%;height:2.4%;" onclick="toast('分享给好友')"></div>
+
+          <div class="locked-only">
+            <div class="hot" style="left:3%;top:90.8%;width:9%;height:5%;" onclick="toast('已收藏 ❤')"></div>
+            <div class="hot" style="left:13%;top:90.8%;width:9%;height:5%;" onclick="toast('送礼给好友 🎁')"></div>
+            <div class="hot" style="left:43%;top:90.8%;width:24.5%;height:5%;" onclick="toast('完成任务（体验元宝 30 秒）即可免费领此皮肤')"></div>
+            <div class="hot" style="left:68%;top:90.8%;width:29%;height:5%;" onclick="toast('开通 VIP 可免费用此皮肤')"></div>
+          </div>
+          <div class="unlocked-only">
+            <div class="hot pulse" id="enableHot" style="left:72.5%;top:91.4%;width:23.6%;height:3.85%;" onclick="enableSkin()"></div>
+            <div class="enabled-pill" id="enabledPill" onclick="toggleEnable()">已启用</div>
+          </div>
+        </div>
+
+        <!-- 购买规则弹窗（用户弹窗切图整图 + 弹出动画） -->
+        <div class="overlay" id="mRules" onclick="hide('mRules')">
+          <div class="rules-wrap" onclick="event.stopPropagation()">
+            <img src="assets/rules-modal.webp" alt="购买规则">
+            <div class="hot" style="left:23.3%;top:81.5%;width:53.4%;height:10%;" onclick="hide('mRules')"></div>
+          </div>
+        </div>
+
+        <!-- 领取提醒弹窗（用户弹窗切图整图：恭喜你获得免费皮肤 · 暂不启用/去启用） -->
+        <div class="overlay" id="mRemind">
+          <div class="rem-wrap">
+            <img src="assets/rem-modal.webp" alt="领取提醒">
+            <div class="rem-desc" id="remDesc">“遇见森林”皮肤已发放，快去启用吧</div>
+            <div class="hot" style="left:8%;top:61.6%;width:39.8%;height:21.8%;" onclick="skipEnable()"></div>
+            <div class="hot" style="left:52%;top:61.6%;width:39.8%;height:21.8%;" onclick="goEnable()"></div>
+          </div>
+        </div>
+
+        <!-- 登录页（原链接切图 login.webp 全屏） -->
+        <div class="overlay login-fs" id="mLogin">
+          <div class="login-bg">
+            <div class="hot" style="left:89.5%;top:6%;width:9.5%;height:4.6%;" onclick="hide('mLogin')"></div>
+            <div class="hot pulse" style="left:17.3%;top:48.7%;width:65.1%;height:4.6%;" onclick="doLogin()"></div>
+            <div class="hot" style="left:17.3%;top:55.3%;width:65.1%;height:4.3%;" onclick="smsLogin()"></div>
+            <div class="hot" style="left:15.3%;top:60.7%;width:7%;height:4.6%;" onclick="toggleAgree(this)"></div>
+          </div>
+        </div>
+
+        <!-- 皮肤启用完成页（原链接切图 skin_applied.webp 全屏） -->
+        <div class="overlay applied-fs" id="mApplied">
+          <div class="applied-bg">
+            <div class="hot pulse" style="left:2.5%;top:4.6%;width:9%;height:3.4%;" onclick="closeApplied()"></div>
+          </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+      </div>
+    </div>
+    <div class="label">真机比例 · 点击高亮区可交互</div>
+  </div>
+
+  <!-- 右侧流程导航（与 PC demo 同一套交互结构：序号 + 标题 + 竖向连接线） -->
+  <div class="flow">
+    <div class="phead">
+      <h2>下载元宝 · 免费领皮肤</h2>
+      <span class="cnt" id="stepCntM">01 / 10</span>
+    </div>
+
+    <div class="steps" id="stepsM">
+    <div class="step cur" data-go="pMall" onclick="go('pMall')">
+      <div class="n">01</div><div class="c"><b>活动入口</b></div>
+    </div>
+    <div class="step" data-go="pHome" onclick="go('pHome')">
+      <div class="n">02</div><div class="c"><b>活动首页</b></div>
+    </div>
+    <div class="step" onclick="previewLogin()">
+      <div class="n">03</div><div class="c"><b>登录判断</b></div>
+    </div>
+    <div class="step" data-go="pChat" onclick="gotoYB()">
+      <div class="n">04</div><div class="c"><b>跳转元宝</b></div>
+    </div>
+    <div class="step" onclick="forceDone()">
+      <div class="n">05</div><div class="c"><b>体验 30 秒</b></div>
+    </div>
+    <div class="step" onclick="previewRemind()">
+      <div class="n">06</div><div class="c"><b>领取提醒</b></div>
+    </div>
+    <div class="step" data-go="pClaimed" onclick="goClaimed()">
+      <div class="n">07</div><div class="c"><b>已解锁页</b></div>
+    </div>
+    <div class="step" onclick="enableSkin()">
+      <div class="n">08</div><div class="c"><b>启用皮肤</b></div>
+    </div>
+    <div class="step" onclick="previewDetail(false)">
+      <div class="n">09</div><div class="c"><b>皮肤详情 · 未解锁</b></div>
+    </div>
+    <div class="step" onclick="previewDetail(true)">
+      <div class="n">10</div><div class="c"><b>皮肤详情 · 已解锁</b></div>
+    </div>
+    </div><!-- /steps -->
+    <div class="tools">
+      <button onclick="reset()">↺ 重置流程</button>
+      <button id="dbg" onclick="toggleDebug()">显示热区</button>
+    </div>
+  </div>
+
+<script>
+  var screen = document.getElementById('screen');
+
+  // 6 款皮肤（键盘图 = 用户信息流切图裁剪；meta 文字按主截图规格）
+  var SKINS=[
+    {img:'assets/kb-kawaii.webp', name:'可爱限定'},
+    {img:'assets/kb-bohe.webp',   name:'薄荷冰'},
+    {img:'assets/kb-duck.webp',   name:'哎鸭！'},
+    {img:'assets/kb-forest.webp', name:'森林见'},
+    {img:'assets/kb-eat.webp',    name:'大吃一口'},
+    {img:'assets/kb-purple.webp', name:'唯美系蝴弄'}
+  ];
+
+  var state={ logged:false, expDone:false, claimed:false, enabled:false, idx:-1, skin:'', detailLocked:true };
+
+  function toast(t){
+    var el=document.getElementById('toast'); el.textContent=t; el.classList.add('show');
+    clearTimeout(el._t); el._t=setTimeout(function(){el.classList.remove('show');},1600);
+  }
+  function setRatio(id){
+    var p=document.getElementById(id);
+    if(p && p.dataset.ratio){ screen.style.aspectRatio=p.dataset.ratio; }
+  }
+  // 装扮商城入口：已领取过 → 进任务中心已解锁页；否则进活动首页
+  function enterActivity(){
+    if(state.claimed){ go('pClaimed'); }
+    else{ go('pHome'); }
+  }
+  function go(id){
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+    var p=document.getElementById(id); if(p){p.classList.add('active'); setRatio(id);}
+    document.querySelectorAll('.step').forEach(function(s){s.classList.remove('cur');});
+    var cur=document.querySelector('.step[data-go="'+id+'"]'); if(cur) cur.classList.add('cur');
+    closeAll();
+  }
+  function show(id){ var m=document.getElementById(id); if(m) m.classList.add('active'); }
+  function hide(id){ var m=document.getElementById(id); if(m) m.classList.remove('active'); }
+  function closeAll(){ document.querySelectorAll('.overlay').forEach(function(m){m.classList.remove('active');}); }
+
+  /* ---------- 首页信息流 ---------- */
+  function buildFeed(){
+    var html='';
+    SKINS.forEach(function(s,i){
+      html+='<div class="skin-card" id="card'+i+'" onclick="selectSkin('+i+')">'
+          +  '<img class="kb" src="'+s.img+'" alt="'+s.name+'">'
+          +  '<div class="meta"><div class="nm">'+s.name+'</div>'
+          +  '<div class="pr">免费 <span class="og">¥3.0</span></div>'
+          +  '<div class="rd"></div></div></div>';
+    });
+    document.getElementById('feed').innerHTML=html;
+  }
+  function selectSkin(i){
+    document.querySelectorAll('.skin-card').forEach(function(c,k){
+      c.classList.toggle('sel', k===i);
+    });
+    state.idx=i; state.skin=SKINS[i].name;
+    // 底部提示联动：跟随所选皮肤名
+    document.getElementById('homeTip').textContent='已选择“'+SKINS[i].name+'”，快去完成任务吧。';
+  }
+  function resetHomeTip(){
+    document.getElementById('homeTip').textContent='请选择1款皮肤，完成任务后即可解锁';
+  }
+
+  /* ---------- 首页倒计时（粗略计时器：进入页面从 3天20:56:31 起倒数，无完成处理） ---------- */
+  var CD_INIT = 3*86400 + 20*3600 + 56*60 + 31, cdLeft = CD_INIT;
+  function fmt2(n){ return (n<10?'0':'')+n; }
+  function renderCD(){
+    var d=Math.floor(cdLeft/86400), r=cdLeft%86400;
+    var h=Math.floor(r/3600), m=Math.floor(r%3600/60), s=r%60;
+    document.getElementById('cdD').textContent=d;
+    document.getElementById('cdT').textContent=fmt2(h)+':'+fmt2(m)+':'+fmt2(s);
+  }
+  setInterval(function(){ if(cdLeft>0){ cdLeft--; renderCD(); } }, 1000);
+  renderCD();
+
+  /* ---------- CTA ---------- */
+  function onCTA(){
+    if(state.claimed){ goClaimed(); return; }      // 已领取 → 直接去已解锁页
+    if(!state.skin){ toast('请先选择1款皮肤'); return; }
+    if(!state.logged){ show('mLogin'); return; }
+    gotoYB();
+  }
+
+  /* ---------- 登录（原切图） ---------- */
+  var agreed=false;
+  function toggleAgree(el){ agreed=!agreed; el.classList.toggle('agree-on', agreed); }
+  function doLogin(){
+    if(!agreed){ toast('请先勾选并同意相关协议'); return; }
+    state.logged=true; hide('mLogin'); toast('一键登录成功');
+    setTimeout(function(){ gotoYB(); }, 350);
+  }
+  function smsLogin(){
+    if(!agreed){ toast('请先勾选并同意相关协议'); return; }
+    state.logged=true; hide('mLogin'); toast('短信验证登录成功');
+    setTimeout(function(){ gotoYB(); }, 350);
+  }
+
+  /* ---------- 元宝 30 秒体验（原切图） ---------- */
+  var et=null, eleft=30, ECIRC=106.8;
+  function gotoYB(){
+    if(!state.skin){ toast('请先选择1款皮肤'); go('pHome'); return; }
+    toast('正在跳转腾讯元宝…');
+    setTimeout(function(){ go('pChat'); startExp(); }, 600);
+  }
+  function startExp(){
+    eleft=30;
+    var bar=document.getElementById('expBar');
+    bar.classList.add('active'); bar.classList.remove('done');
+    document.getElementById('expTx').innerHTML='<b>正在体验元宝 AI…</b><span>停留满 30 秒即可返回领皮肤</span>';
+    expTick();
+    clearInterval(et);
+    et=setInterval(function(){ eleft--; expTick(); if(eleft<=0){ expFinish(); } }, 60); // 演示加速：30 档 ≈1.8s 播完
+  }
+  function expTick(){
+    document.getElementById('expNum').textContent = eleft>0?eleft:0;
+    document.getElementById('expRing').style.strokeDashoffset = ECIRC*(1 - Math.max(eleft,0)/30);
+  }
+  function expFinish(){
+    clearInterval(et); state.expDone=true;
+    var bar=document.getElementById('expBar'); bar.classList.add('done');
+    document.getElementById('expNum').textContent='✓';
+    document.getElementById('expRing').style.strokeDashoffset=0;
+    document.getElementById('expTx').innerHTML='<b>已体验 30 秒，达成！</b><span>返回领皮肤</span>';
+    toast('体验完成 🎉');
+  }
+  function forceDone(){
+    go('pChat');
+    document.getElementById('expBar').classList.add('active');
+    clearInterval(et); eleft=0; state.expDone=true;
+    expFinish();
+  }
+  function tryLeaveYB(){
+    if(!state.expDone){ toast('还没满 30 秒，离开将无法领皮肤'); }
+    else{ backToClaim(); }
+  }
+  function backToClaim(){
+    clearInterval(et);
+    document.getElementById('expBar').classList.remove('active');
+    go('pHome');
+    if(state.expDone && !state.claimed){
+      // 返回首页 → 弹领取提醒弹窗（用户切图整图）
+      setTimeout(openRemind, 350);
+    }
+  }
+
+  /* ---------- 领取提醒弹窗（用户切图双按钮 + 动态描述文案） ---------- */
+  function openRemind(){
+    document.getElementById('remDesc').textContent='“'+(state.skin||'遇见森林')+'”皮肤已发放，快去启用吧';
+    show('mRemind');
+  }
+  // 暂不启用 → 直接进入已解锁页
+  function skipEnable(){
+    hide('mRemind');
+    state.claimed=true; state.expDone=true; state.logged=true;
+    go('pClaimed');
+  }
+  // 去启用 → 打开皮肤详情页·已解锁态
+  function goEnable(){
+    hide('mRemind');
+    state.claimed=true; state.expDone=true; state.logged=true;
+    previewDetail(true);
+  }
+
+  /* ---------- 已解锁页（新截图） ---------- */
+  function goClaimed(){
+    state.expDone=true; state.claimed=true;
+    if(!state.logged) state.logged=true;
+    go('pClaimed');
+  }
+  function previewRemind(){
+    state.expDone=true;
+    go('pHome'); openRemind();
+  }
+
+  /* ---------- 启用皮肤 → 启用完成页（原切图） ---------- */
+  function enableSkin(){
+    if(!state.skin){ toast('请先选择1款皮肤'); go('pHome'); return; }
+    state.claimed=true; state.enabled=true; show('mApplied');
+  }
+  // 右下角「已启用」胶囊点击：已启用 → 取消启用（回到已解锁待启用态，可重新启用）
+  function toggleEnable(){
+    if(state.enabled){
+      state.enabled=false;
+      document.getElementById('enabledPill').style.display='none';
+      toast('已取消启用');
+    } else {
+      enableSkin();
+    }
+  }
+  function closeApplied(){
+    hide('mApplied');
+    state.enabled=true;
+    // 关闭启用完成页 → 回皮肤详情页·已解锁态，右下角「立即启用」→「已启用」
+    previewDetail(true);
+    toast('皮肤「'+(state.skin||'遇见森林')+'」已启用');
+  }
+
+  /* ---------- 皮肤详情预览（原切图） ---------- */
+  function previewDetail(unlocked){
+    state.detailLocked=!unlocked;
+    var p=document.getElementById('pDetail');
+    if(unlocked){ p.classList.add('unlocked'); p.classList.remove('locked'); }
+    else{ p.classList.add('locked'); p.classList.remove('unlocked'); }
+    // 已启用态：右下角「立即启用」→「已启用」
+    document.getElementById('enabledPill').style.display=(unlocked&&state.enabled)?'flex':'none';
+    go('pDetail');
+    toast(unlocked?'详情页·已解锁（原切图）':'详情页·未解锁（原切图）');
+  }
+  // 详情页返回分流：未解锁 → 活动首页；已解锁 → 活动已解锁页
+  function detailBack(){
+    if(state.detailLocked){ go('pHome'); }
+    else{ go('pClaimed'); }
+  }
+
+  /* ---------- 工具 ---------- */
+  function reset(){
+    state={logged:false,expDone:false,claimed:false,enabled:false,idx:-1,skin:'',detailLocked:true};
+    agreed=false;
+    clearInterval(et); eleft=30;
+    document.querySelectorAll('.skin-card').forEach(function(c){c.classList.remove('sel');});
+    resetHomeTip();
+    cdLeft=CD_INIT; renderCD();
+    document.getElementById('expBar').classList.remove('active','done');
+    document.getElementById('enabledPill').style.display='none';
+    closeAll();
+    go('pMall'); toast('已重置到活动入口');
+  }
+  function toggleDebug(){
+    screen.classList.toggle('debug');
+    var b=document.getElementById('dbg'); b.classList.toggle('on');
+    b.textContent = screen.classList.contains('debug')?'隐藏热区':'显示热区';
+  }
+
+  /* ---------- 流程导航：任意步骤点击都高亮 + 居中滚动（前后/末项入视野） ---------- */
+  var stepsM = document.getElementById('stepsM');
+  function revealM(el){
+    if(!el) return;
+    var lr=stepsM.getBoundingClientRect(), er=el.getBoundingClientRect();
+    var elTop = er.top - lr.top + stepsM.scrollTop;
+    var target = elTop - (stepsM.clientHeight - er.height)/2;
+    if(el === stepsM.firstElementChild) target = 0;
+    if(el === stepsM.lastElementChild) target = stepsM.scrollHeight - stepsM.clientHeight;
+    target = Math.max(0, Math.min(target, stepsM.scrollHeight - stepsM.clientHeight));
+    stepsM.scrollTo({top:target, behavior:'smooth'});
+  }
+  function setCur(el){
+    if(!el) return;
+    var all = stepsM.querySelectorAll('.step');
+    Array.prototype.forEach.call(all, function(s){ s.classList.toggle('cur', s===el); });
+    revealM(el);
+    var idx = Array.prototype.indexOf.call(all, el);
+    var cnt = document.getElementById('stepCntM');
+    if(cnt) cnt.textContent = (idx>=0?String(idx+1).padStart(2,'0'):'--') + ' / ' + all.length;
+  }
+  stepsM.addEventListener('click', function(e){
+    var s = e.target.closest ? e.target.closest('.step') : null;
+    if(s && stepsM.contains(s)) setCur(s);
+  });
+
+  // 登录判断预览（原缺失：步骤「登录判断」调用 previewLogin 会报 ReferenceError）
+  function previewLogin(){ show('mLogin'); }
+
+  setRatio('pMall');
+  buildFeed();
+  setCur(stepsM.querySelector('.step.cur'));
+</script>
+</body>
+</html>

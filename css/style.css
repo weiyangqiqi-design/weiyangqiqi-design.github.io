@@ -309,7 +309,11 @@ button {
 }
 
 .sidebar__avatar {
-  /* 负 margin 吃掉 .sidebar 的顶部 + 左右 22px padding,视频整块贴边铺满全宽 */
+  /* ★ 2026-10-21(回退):恢复到「整块贴边铺满侧栏全宽」的原始展示规则
+     (用户:视频宽度恢复之前的规则,不需要和文字宽度一致)。
+     · width:100%+44px + 左右 -22px 负 margin:吃掉 .sidebar 的 22px 内边距,视频左右直抵栏边。
+     · 之前那版「与正文同宽」(`calc(100% - 4px)` + `margin-left:4px`)已废弃。
+     · 裁切逻辑不动:仍是源帧零裁切(832/1110)+ object-position:center top。 */
   width: calc(100% + 44px);
   margin: -22px -22px 0;
   display: block;
@@ -317,18 +321,20 @@ button {
 .sidebar__avatar img,
 .sidebar__avatar video {
   width: 100%;
-  height: auto;             /* 高度由 aspect-ratio 决定(裁到胸前) */
-  /* 裁切高度沿革(改的一直只有"底沿在哪",横向永远铺满 100%,所以三版都是同一张脸同一构图):
-       ① 原版   1 / 1.18 —— 裁到胸前
-       ② 某次   1 / 1.12 —— 裁到锁骨,底沿上提到肩线,给 ABOUT ME 腾位置
-       ③ 第 62 项(★ 现在)1 / 1.04 —— 用户指认"只保留蓝框内",底沿再上提一档
-    ★ 第 62 项:用户拿截图圈了保留区,量出蓝框内比例 h/w = 1.0395 → 取整 1.04。
-      换算:原视频 832×1110(h/w 1.3341),改前保留 83.9%、改后 77.9%,**再裁掉 7.2% 高度**;
-      1440×900 下头像块 276.6 → 256.8px,给下方个人信息多让出约 20px。
-      横向不动(仍是 width:100%),所以脸部构图、水平位置完全不变 —— 只是底沿往上收。
-      ⚠️ 素材如果换了(视频/封面图比例变了),这个数要重算:
-        目标值 = 想要的保留高度 / 原视频高度 × 原视频 h/w,再手写成分数。 */
-  aspect-ratio: 1 / 1.04;
+  height: auto;             /* 高度由 aspect-ratio 决定 */
+  /* ★ 2026-10-21(第 72 项):裁切比例 → **源视频原生比例 832 / 1110 = 零裁切**。
+     用户反馈「头发没露全,裁切的高度有点多了」。
+     量过之后发现症结不是"切到了头发",而是**头发与黑毛衣同色**:
+       ① 源帧里最亮的发丝到 y≈820 就结束了,而旧的 1/1.04 底沿在 y≈865 ——
+          理论上头发是完整的,但黑发在 y≈780 之后就融进黑衣服里,底沿一切看着就像"从发梢中间断开"。
+       ② 所以任何小于原生比例的裁切都会有这个观感问题,唯一彻底的解法是**不裁**。
+     aspect-ratio 写成 832/1110(视频实际像素比)后,object-fit:cover 等于原样呈现,
+     object-position 退化为无作用(四边都不裁),人物的构图/位置与源片逐像素一致。
+     代价:画面下方的黑色区域(约 25%,纯黑毛衣+暗背景)也一起吃进来了 + 模块整体变高,
+     所以同步把下方三个板块距 2.15 → 1.72em、荣誉行高 1.58 → 1.54、联系卡 1.90 → 1.65em
+     匀出高度(见各自注释)。
+     ⚠️ 素材如果换了(视频比例变了),这里要跟着改成新的 w / h,否则会重新出现裁切。 */
+  aspect-ratio: 832 / 1110;
   object-fit: cover;
   object-position: center top; /* 锚定顶部:头部永不被切,只裁画面最下方 */
   display: block;
@@ -437,7 +443,7 @@ button {
      放宽到 24.5% 后 ≈1.40 倍,和正文的层级差才够"一眼分级"。
      标题是 trim 过 ink 的等比切图(948×294 / 3.224),放大只是重新缩放,不会糊。 */
 .side-about-title { width: 60.3%; margin-top: 0.70em; aspect-ratio: 2413 / 370; }   /* ABOUT ME(未换,保留) */
-/* 名字块:从 side-about-text-v2.png 裁出的上半段(刘佶松 + 职位行),下半段简介已改实时文本。
+/* 名字块:从 side-about-text-v2.webp 裁出的上半段(刘佶松 + 职位行),下半段简介已改实时文本。
    裁切 y=0..407(名字块 ink 在 1..406),所以宽高比由 3794/1831 变成 3794/407,
    渲染高度不变(原来 406/1831 份,现在整张就是 406)。
    ★ 第 68 项:13px → 1.00em —— ABOUT ME 是 kicker、名字是 headline,这一对应当抱紧。
@@ -449,16 +455,16 @@ button {
 .side-name        { width: 94.0%; margin-top: 1.60em; aspect-ratio: 3794 / 407; }
 /* 紫色渐变标题(独立切图,替代旧图片内部暗色标题) - 948x294 (ratio 3.22:1)
    ★ 第 68 项:宽度 21% → 24.5%(见上面「标题层级」段),字号相对正文 ≈1.40 倍。 */
-.side-work-title  { width: 24.5%; margin-top: 2.15em; aspect-ratio: 948 / 294; }  /* ★ 第 70 项:分隔线已移除,改为板块距 2.15em(与荣誉/教育标题同档) */
-.side-honor-title { width: 24.5%; margin-top: 2.15em; aspect-ratio: 948 / 294; }  /* ← ★ 板块距 */
-.side-edu-title   { width: 24.5%; margin-top: 2.15em; aspect-ratio: 948 / 294; }  /* ← ★ 板块距 */
+.side-work-title  { width: 24.5%; margin-top: 1.72em; aspect-ratio: 948 / 294; }  /* ★ 第 72 项:板块距 2.15 → 1.72em(为「视频零裁切」腾高度,与荣誉/教育标题同档) */
+.side-honor-title { width: 24.5%; margin-top: 1.72em; aspect-ratio: 948 / 294; }  /* ← ★ 板块距 */
+.side-edu-title   { width: 24.5%; margin-top: 1.72em; aspect-ratio: 948 / 294; }  /* ← ★ 板块距 */
 
 /* ========== 侧栏正文:实时文本(2026-10-10 第 49 项)==========
    【改了什么】这 5 处原来是 4 张切图,字号烤在 PNG 里,「加大一号」改不了:
-     side-work-body.png   → .side-work-text + .side-tags / .side-tag
-     side-honor-body.png  → .side-honor-list > li
-     side-edu-body.png    → .side-edu-text
-     side-about-text-v2.png 的下半段 → .side-bio(上半段裁成 side-name.png,仍是切图)
+     side-work-body.webp   → .side-work-text + .side-tags / .side-tag
+     side-honor-body.webp  → .side-honor-list > li
+     side-edu-body.webp    → .side-edu-text
+     side-about-text-v2.webp 的下半段 → .side-bio(上半段裁成 side-name.png,仍是切图)
    改成实时文本后,字号由 .side-blocks 一节里的 --side-fs 控制(第 53 项起标签也吃同一个值),一处改全栏同步。
 
    【字号怎么定的】改前在 side=240px(.side-blocks 内容宽 192px)下,按「切图像素宽 ÷
@@ -584,7 +590,9 @@ button {
 }
 .side-honor-list li {
   font-size: var(--side-fs);
-  line-height: 1.58;
+  /* ★ 第 72 项:1.58 → 1.54 —— 4 行共省 ≈0.16em,把高度让给「零裁切」的视频。
+     仍略紧于正文(1.6),列表"紧"、散文"松"的层级关系没变。 */
+  line-height: 1.54;
 }
 /* 荣誉最后一行行高松(1.765),行盒底部比 ink 多出约 4.5px(正文行高 1.6 时只有约 1.5px);
    实测「荣誉最后一行 ink → 教育经历 ink」比切图时代松 5px,所以把标题的 24px 收到 19px,
@@ -597,7 +605,7 @@ button {
    ⚠️ 第 51 项那次「为定高一屏而收 8px」的方向,本次被明确推翻了 ——
       用户看过成品后要求的是"有节奏",而不是"塞得更满";以本次为准。 */
 .side-honor-list + .side-edu-title {
-  margin-top: 2.15em;
+  margin-top: 1.72em;
 }
 /* 教育经历:单行 */
 .side-edu-text {
@@ -615,7 +623,7 @@ button {
      → 所以改在「矮屏才生效」的一组紧凑值上再压一档,**字号保持不变**。
    ────────────────────────────────────────────────────────
     项目            常规        矮屏      省(@240px 侧栏)
-    头像裁切比例    1 / 1.12    1 / 0.78  81.6px
+    头像裁切比例    832/1110    1 / 0.78  省 60px+
     侧栏底部留白    14          8         6
     联系卡内边距    上6 / 行2   4 / 0     16
     各段间距        —           见下      ~18
@@ -634,6 +642,8 @@ button {
   .sidebar {
     padding-bottom: 8px;
   }
+  /* 矮屏(可视高 ≤720)是唯一还保留裁切的地方:整帧(1.334)在这一档要多占约 130px,
+     塞不进一屏,只能退回「更近一点的特写」。这是空间不够时的取舍,不是遗漏。 */
   .sidebar__avatar img,
   .sidebar__avatar video {
     aspect-ratio: 1 / 0.78;
@@ -673,7 +683,7 @@ button {
 /* --- 左侧栏横向分隔线 ---
    (DOM 里目前只挂了一条 —— 简介与「工作经历」之间那条;下面 .side-edu + .side-divider
     是留给「教育经历之后」的备用位,当前 HTML 没有该元素,留着不影响渲染。)
-   ★ 原来是一张切图 assets/side-divider-v2.png(紫色,左端最亮、向右渐暗)。
+   ★ 原来是一张切图 assets/side-divider-v2.webp(紫色,左端最亮、向右渐暗)。
    用户看到右侧 .tl-line 那条「两端渐隐、中间最亮」的紫线后认可这个效果,
    要求左侧栏的横向分隔线也用它 —— 现在改用 CSS 画,配方见 :root 的
    --brand-line-h(横向),与 --brand-line-v(竖向)同样只差 90° 方向。
@@ -685,9 +695,9 @@ button {
      高度/占位与切图时代逐像素一致 —— 这样 initSidebarFit 按「内容高=视口高」
      反推侧栏宽的结果不会漂。
    · HTML 同步从 <img> 换成 <div>:它不是内容,不该是一张图;顺带不进灯箱图组。
-   · 老切图 assets/side-divider-v2.png 保留未删。想还原:
-     把下面的 background 换成 url("../assets/side-divider-v2.png") center / 100% 100% no-repeat,
-     再把标签换回 <img class="side-divider" src="assets/side-divider-v2.png" alt="" aria-hidden="true">。 */
+   · 老切图 assets/side-divider-v2.webp 保留未删。想还原:
+     把下面的 background 换成 url("../assets/side-divider-v2.webp") center / 100% 100% no-repeat,
+     再把标签换回 <img class="side-divider" src="assets/side-divider-v2.webp" alt="" aria-hidden="true">。 */
 /* ⚠️ 第 70 项:DOM 中的 .side-divider(「简介 → 工作经历」那条紫线)已按用户要求移除,
    下面这三条规则(含 .side-bio + .side-divider / .side-edu-text + .side-divider)
    当前均**无匹配元素**,保留仅为便于日后还原;要整段删除可直接删到本段末尾。 */
@@ -941,11 +951,20 @@ button {
   /* 左内边距 0:它是 .side-blocks 的子元素,那 4px 缩进已经由父元素提供。
      再写 4px 就会变成 8px,与上方正文错开。 */
   padding: 0;
-  gap: 0.42em;
-  /* 板块距:与 .side-honor-title / .side-edu-title 完全同档(2.15em)。
-     移进 .side-blocks 之后这里不再叠加父级的 margin-bottom 与 .sidebar 的 gap,
-     所以用满档而不是像第一版那样收成 2.00em。 */
-  margin-top: 2.15em;
+  gap: 0.24em;
+  /* 板块距:与 .side-honor-title / .side-edu-title 完全同档(第 72 项起同为 1.72em;
+     本块 1.65em —— 教育经历是单行短文本,行盒底部余量小,略微收一点视觉上才与前几块等距)。
+     移进 .side-blocks 之后这里不再叠加父级的 margin-bottom 与 .sidebar 的 gap。 */
+  margin-top: 1.65em;
+  /* ★ 2026-10-21:整块纵向收紧(用户:「这个位置纵向再紧凑一些,给上部有效信息多留空间」)。
+     · 行距 gap 0.42 → 0.24em;节点 1.75 → 1.60em;再把 .copy-tip 的 line-height 收到 1
+       (详见 .copy-tip 那条注释 —— 它才是行高的真正瓶颈)。
+     · 实测(1440×900,侧栏 272px、正文 12.27px):节距 30.0 → 22.6px(-25%),
+       整块高 84.9 → 约 66px(-22%),三行本来 79.5px。
+     · 到「教育经历」的板块距 2.15 → 1.90em,仍与上方各块同一套 em 节奏(不新开一档)。
+     · 节点缩到 1.60em 后,竖轴两端锚点必须同步改成 0.80em(= 半个行盒),
+       否则线头会多探出 0.075em 扎进节点圆里(见下面 ::before 的 top/bottom/left)。
+     · 图标本体仍是 0.82em,不跟着缩 —— 「icon 太小」是已踩过的坑。 */
   width: 100%;
   position: relative;            /* 竖轴的定位锚点 */
 }
@@ -953,9 +972,9 @@ button {
 .info-card--contact::before {
   content: "";
   position: absolute;
-  left: calc(0.875em - 0.5px);   /* 节点半径(1.75em / 2)− 半像素;4px 缩进由 .side-blocks 提供 */
-  top: 0.875em;
-  bottom: 0.875em;
+  left: calc(0.80em - 0.5px);    /* 节点半径(1.60em / 2)− 半像素;4px 缩进由 .side-blocks 提供 */
+  top: 0.80em;
+  bottom: 0.80em;
   width: 1px;
   background: linear-gradient(180deg,
     rgba(255, 255, 255, calc(var(--line-neutral-peak) * 0.18)) 0%,
@@ -969,8 +988,8 @@ button {
 /* 节点:圆底 + 1px 内圈。**不透明** —— 竖轴从它背后穿过时被截断,形成"串珠" */
 .info-card--contact .info-icon {
   -webkit-mask-image: none; mask-image: none;   /* 圆底是实心,不套 mask */
-  width: 1.75em;
-  height: 1.75em;
+  width: 1.60em;                /* ★ 2026-10-21:1.75 → 1.60em(整块纵向收紧;图标本体仍 0.82em) */
+  height: 1.60em;
   flex: 0 0 auto;
   border-radius: 50%;
   background: #15151a;
@@ -1059,6 +1078,11 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--side-tag-to);
   font-size: var(--side-fs);
+  /* ★ 2026-10-21:line-height 1 —— 这个 chip 是 static 内联(靠占位避免 hover 推挤排版),
+     于是它**参与行高**:继承的 1.58 行高 + 上下 padding 让整个 .info-card__row 变成
+     0.24 + 0.48 + 1.58 ≈ 2.02em,把三行联系方式的节距从「节点 1.6em」顶到 2.45em。
+     收成 1 之后 chip 自身高 ≈ 1.48em < 节点 1.6em → 行高重新由节点决定,节距才真的降下来。 */
+  line-height: 1;
   padding: 0.24em 0.55em;
   border-radius: var(--radius-xs);
   margin-left: 0.1em;
@@ -1130,7 +1154,7 @@ button {
   flex-direction: column;
   /* 右侧背景:按参考图吸色后的**纯色** #222222(原来的极光图已下线,文件仍保留在
      assets/ 里;想换回图片背景:把下面这行换成
-     background: #222222 url("../assets/aurora-dark-1-calm-fade.jpg") center center / cover no-repeat; )
+     background: #222222 url("../assets/aurora-dark-1-calm-fade.webp") center center / cover no-repeat; )
      .content 自身不滚动(内部 .content__scroll 才滚),背景相对视口固定。 */
   background: var(--page-bg);
   color: var(--text-main); /* 右侧全局默认白字,覆盖 body 的深灰继承 */
@@ -1530,7 +1554,7 @@ button {
      ⚠ 竖线(584px)与右侧内容完全不受影响 —— 空出来的 39px 从"左侧"挪到了"右侧",
        即标签与竖线之间的呼吸位变大。
      若要进一步把文字左缘压到严格 384px,需要裁掉切图左侧的透明留白
-     (data-*-v2.png 左侧留白 361~1181px 不等),本次按最小改动未动切图。 */
+     (data-*-v2.webp 左侧留白 361~1181px 不等),本次按最小改动未动切图。 */
 .tl-label {
   flex: 0 0 14%;
   min-width: 100px;
@@ -1734,6 +1758,7 @@ button {
   align-items: flex-start;
   /* 单值 gap:列间距 = 行间距 = 卡片统一圆角(22px) */
   gap: var(--card-gap);
+  position: relative; /* 保留:组内绝对定位元素(像素小人)的定位参考 */
 }
 
 /* ===== 模块像素小人(「3 亿营收」三张卡片轮廓路线动画) =====
@@ -1751,7 +1776,7 @@ button {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.45s ease;
-  background: url("../assets/mg-walker-sprite.png") no-repeat 0 0;
+  background: url("../assets/mg-walker-sprite.webp") no-repeat 0 0;
   background-size: calc(21 * 32 * var(--mg-pix, 2px)) calc(40 * var(--mg-pix, 2px));
   image-rendering: pixelated;
   -ms-interpolation-mode: nearest-neighbor;
@@ -1845,11 +1870,11 @@ button {
   z-index: 0;
   /* ===== 第 55 项:卡片 hover「小人 + 气泡」的尺寸令牌 =====
      ── 素材五代换代,每次都要重算这几个值 ──
-     ① 第 55 项:card-helper-lie.png       37×19(横躺·侧脸)
-     ② 第 57 项:card-helper-sit.png       32×29(正脸·趴坐,纯 CSS 摇头)
+     ① 第 55 项:card-helper-lie.webp       37×19(横躺·侧脸)
+     ② 第 57 项:card-helper-sit.webp       32×29(正脸·趴坐,纯 CSS 摇头)
      ③ 第 60 项:card-helper-desk.gif      22×22(趴桌晃头,GIF 自带动画)
      ④ 第 64 项:card-helper-point.gif     25×22(趴着 + 抬右手打招呼)
-     ⑤ 第 65 项(★ 现在):card-helper-turn.gif 20×22(转头:GIF 自带动画)
+     ⑤ 第 65 项(★ 现在):card-helper-turn.webp 20×22(转头:素材自带循环动画)
      --ch-pix:像素小人的 1 个逻辑格 = 多少 CSS px
      ★ 第 64 项:尺寸基准换成**「和走路的小人整体一样大」**。
        · 走路小人 .tl-walker = 32 宽 × 40 高(元素框;--tl-pix: 1px 固定,不随视口变)
@@ -1871,12 +1896,17 @@ button {
                 和卡片里标题/描述的文字栏**左对齐**,系统一致。
                 验算圆角:--card-radius = 22px,顶边曲线在 x=16 处只下沉 0.83px,
                 所以视觉上小人是"坐"在平的卡沿上,不会悬空在圆角外。
-     --ch-gap:  小人右边缘 → 气泡左边缘的间隙。取 6px ——
-                气泡尖角向外出 5px,尖端正好落在小人右边缘附近,
-                构成"气泡从左边的小人那头长出来"的读法。
-     气泡左边缘 = --ch-left + --ch-w + --ch-gap = 16 + 36.36 + 6 ≈ 58.4px */
+     --ch-gap:  小人右边缘 → 气泡左边缘的间隙。
+                【第 65 项】6px:当时尾巴是个 10px 的旋转方块,出 5px 就顶到小人,
+                       结果尾巴只能缩在缝里、看不出是个尾巴。
+                【★ 第 75 项】6px → 13px:给尾巴**留出可见的长度**。
+                       量过代价:气泡宽度 227 → 220px(只少 7px),13 张卡的
+                       描述**行数全部不变**,没有人被挤到多一行。
+                       换来的是尾巴能从 6px 长到 11px,一眼能读出"这是从人那边
+                       说过来的话",而不是"气泡左下角缺了个口"。
+     气泡左边缘 = --ch-left + --ch-w + --ch-gap = 16 + 36.36 + 13 ≈ 65.4px */
   --ch-left: 16px;
-  --ch-gap: 6px;
+  --ch-gap: 13px;
   transition: background 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, transform 0.28s ease;
 }
 /* 卡片顶部那道"边线的亮部"(照图:顶边比左右两侧更亮) —— 只压在最上沿,极淡,
@@ -1895,11 +1925,19 @@ button {
   pointer-events: none;
   z-index: 0;
 }
-/* hover:底色提一档 + 边线转成品牌紫(交互态保留原意) */
+/* hover:底色提一档 + 边线转成品牌紫(交互态保留原意)
+   ★ 2026-10-21:再叠「外发光」—— 光边本体由 .module-card__edge 画(见下方),
+     这里只补**卡片外侧的辉光**,让亮边像真的在发光而不是一条白线。
+     三层由紧到松:贴边 14px(亮紫、高 alpha)→ 34px(中)→ 64px(大范围扩散、低 alpha)。
+     卡片的投影(0 16px 44px …)必须留在最后,否则光晕会把投影吃掉、卡片浮不起来。 */
 .module-card:hover {
   background: var(--card-bg-hover);
   border-color: rgba(107, 63, 224, 0.5);
   box-shadow:
+    0 0 10px rgba(240, 226, 255, 0.55),
+    0 0 22px rgba(190, 150, 255, 0.80),
+    0 0 48px rgba(139, 92, 246, 0.46),
+    0 0 104px rgba(109, 40, 217, 0.26),
     0 16px 44px rgba(0, 0, 0, 0.5),
     0 3px 10px rgba(0, 0, 0, 0.34),
     inset 0 -1px 0 rgba(0, 0, 0, 0.55);
@@ -1983,7 +2021,8 @@ button {
   /* 与卡片的 hover 过渡同步,避免卡片在渐亮、展示区却瞬间跳色 */
   transition: background 0.28s ease;
 }
-.module-card__img img {
+.module-card__img img,
+.module-card__img video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1991,13 +2030,19 @@ button {
 }
 /* ★ 2026-10-15:「元宝导流-创新分发」banner 定宽顶部对齐,底部超出部分截断,
    保证图片正顶部(腾讯元宝搜索条/浮层)始终完整展示。只作用于该卡,不影响其它卡片。 */
-.module-card[data-modal="modal-yuanbao-dist"] .module-card__img img {
+.module-card[data-modal="modal-yuanbao-dist"] .module-card__img img,
+.module-card[data-modal="modal-yuanbao-dist"] .module-card__img video {
   object-position: top center;
 }
 /* src 为空时隐藏 img 元素的 alt 文字/裂图,只显示底色 */
 .module-card__img img[src=""],
 .module-card__img img:not([src]) {
   visibility: hidden;
+}
+/* ★ 2026-11-04:「移动PC广告生态建设」banner(S输入法商业化宏观图,16:9)放进 2:1 展示区,
+   cover 会上下各裁 ~5.5%,顶部「商业化全景」胶囊不能被裁 → 顶部对齐,只截底部页脚。 */
+.module-card[data-modal="modal-pc-ad"] .module-card__img img {
+  object-position: center top;
 }
 
 /* --- 卡片螺旋上升 (3D helix, JS 驱动) ---
@@ -2052,219 +2097,143 @@ button {
   .card-item { transition: none; }
 }
 
-/* --- 卡片描述:★ 2026-10-12 第 55 项,展示方式整体改变 ---
-   【改前】默认收起(max-height:0 + 负 margin 抵消 flex gap),hover 时在卡片
-           **内部**向下展开,把卡片撑高(同排其它卡不动,所以是"只当前卡变高")。
-   【改后】hover 时描述浮到卡片**上方**,变成一个带小尖角的气泡。
-   元素仍是 <p class="module-card__desc">:语义不变、13 处文案都不用搬家。
-   ★ 第 65 项:胶囊里的**位置关系整体翻新**(用户:"小人在左上角。气泡朝左指向小人。")
-     【第 57~64 项】小人在卡片顶边**正中**,气泡是**通栏**(left:0/right:0)、
-                   铺在小人正上方,尖角在气泡**底边正中朝下**指着小人头顶。
-     【第 65 项(现在)】小人在卡片**左上角**(--ch-left: 16px),
-                   气泡让开小人、**只占右侧**(左边缘 = 小人右边缘 + --ch-gap),
-                   底边压到接近卡片顶边(留 8px),尖角挪到气泡**左边缘朝左**指着小人。
-     · 为什么气泡不再通栏:小人现在占着左边的位置,气泡若还从 left:0 起,
-       会直接盖住小人。让开它是唯一解,顺带宽度变窄、更像一个"说话气泡"而不是一条横幅。
-     · 为什么底边从「卡片顶边 + 小人高 + 6px」改成「卡片顶边 + 8px」:
-       旧值是为了给站在正中的小人**腾出整条身高的通道**,现在小人挪到左边去了,
-       气泡右下这片区域没有东西,把气泡压下来贴着卡沿,三者更像一坨。 */
+/* 卡片描述气泡:默认收起,hover 时浮到卡片上方、以右侧说话气泡样式呈现。
+   元素仍是 <p class="module-card__desc">,13 处文案无需改动。
+   小人在卡片左上角,气泡让开小人只占右侧、底边贴近卡片顶边(留 8px)。 */
 .module-card .module-card__desc {
-  /* 权重 (0,2,0),压过上面的 `.module-card > *`(0,1,0) 的 position:relative */
-  position: absolute;
-  /* ★ 第 65 项:左边缘让开小人(小人右边缘 + --ch-gap),向右通到卡片右边 */
+  /* 配色令牌:气泡走"安静附属品"路线 —— 描边是低饱和发丝线、辉光几乎压到 0,
+     老老实实当卡片的注解(不照搬卡片 hover 那套亮边)。 */
+  --bub-text:  var(--text-main);
+  --bub-glow:  rgba(124, 110, 220, 0.05);   /* 极淡紫晕,只为从背景里托起,不发光 */
+  --ring:      rgba(194, 184, 232, 0.13);   /* 外描边:极淡发丝线,凑近才看得到 */
+
+  position: absolute;   /* 权重 (0,2,0),压过 `.module-card > *` 的 position:relative */
+  /* 左边缘让开左上角的小人(小人右缘 + 间距),向右通到卡片右边 */
   left: calc(var(--ch-left) + var(--ch-w) + var(--ch-gap));
   right: 0;
-  /* ★ 第 65 项:底边压到接近卡片顶边,只留 8px 呼吸间隙 */
+  /* 底边压到接近卡片顶边,只留 8px 呼吸间隙 */
   bottom: calc(100% + 8px);
   order: 0;
   display: block;
   max-height: none;
   margin: 0;
-  padding: 10px 12px;
-  border-radius: 13px;
-  /* 气泡材质:★ 第 64 项起向卡片靠拢 —— 底色收成与卡片同族的深灰(不再发紫),
-     靠「紫边 + 紫光」去呼应卡片 hover 的紫边,而不是靠底色染紫。
-     ── 为什么改:用户要"气泡和卡片看起来更具整体感,比如带一些微微的边缘紫光"。
-        原来气泡底色是紫调(46,39,60 → 26,22,36)、卡片是纯灰(#161616),
-        两者**材质语言不一致** —— 底色染紫 = 材质本身不同;
-        把底色拉平到深灰、让紫只出现在"边缘光"这一层,才是同一套语言。
-     ★ 第 66 项:连"紫光"这一层也去掉了 —— 紫现在**只留在 border 那 1px 线上**,
-       和 .module-card:hover 完全同一条边线(见下方 border / box-shadow 的注释)。 */
-  background: linear-gradient(180deg, rgba(34, 31, 41, 0.97) 0%, rgba(21, 19, 27, 0.97) 100%);
-  /* ★ 第 66 项:边线效果**完全对齐卡片** ——
-     用户:"两个蓝箭头指向的边线效果,上面的和下面的对齐,用下面卡片的边线效果"
-     (两个蓝箭头:上面那支指向气泡的紫边,下面那支指向卡片的紫边。)
-     【改前】气泡 = 紫边 0.42 + 一圈 0.12 极淡紫环 + 0.20 紫外发光 + 顶部白色内高光;
-             卡片 hover = 紫边 0.5 + **没有任何紫光晕**。
-             → 截图实测:气泡那两层紫光把它的边撑成一条"发光的软边",
-               卡片是一条"干净的硬边",两条边线不是同一种东西。
-     【改后】① 透明度 0.42 → 0.5,与 .module-card:hover 的 border-color 一字不差;
-             ② 紫环、紫外发光、顶部白色内高光**全部去掉**。
-             ③ 只留黑投影(下面那两条 rgba(0,0,0,*))—— 它本来就和卡片 hover 的
-                `0 16px 44px` / `0 3px 10px` 是同一套深度语言,不冲突,保留。
-     ⚠️ 这是对第 64 项「带一些微微的边缘紫光」的**反向操作**:用户看过成品后
-        决定不要那层光,以本次为准,不要再加回去。 */
-  border: 1px solid rgba(107, 63, 224, 0.5);
-  box-shadow:
-    0 14px 34px rgba(0, 0, 0, 0.52),
-    0 2px 8px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  /* ★ 第 57 项:字号/字重按用户要求改 —— 字号跟卡片标题(.module-card__title 的 --fs-title),
-     但**不加粗**(标题是 600,气泡这里是 400,保持正文的"念出来"语气)。 */
+  box-sizing: border-box;
+  /* 内边距收紧(10/14):更小的"说话气泡"。--desc-h 由 JS 实测整盒高写入,
+     缩小 padding 后它同步变小,下方 min-height 高度锁不受影响。 */
+  padding: 10px 14px;
+  /* 四圆角:左上/右上/右下 = 卡片圆角 22px;左下(靠近小人)收成 2px,
+     用"近乎直角"做朝向小人的指向暗示,无需尖角。 */
+  border-radius: var(--card-radius) var(--card-radius) var(--card-radius) 2px;
+  /* 底色:与卡片同族深灰,顶端略亮底端略沉。普通渐变背景(非 border-image),
+     这样 border-radius 才会真正裁剪大圆角(border-image 剪不动圆角,实测顶角收不进)。 */
+  background: linear-gradient(
+    to bottom,
+    rgba(44, 40, 64, 0.95),
+    rgba(29, 24, 40, 0.97) 50%,
+    rgba(21, 18, 31, 0.98)
+  );
+  /* 描边:8 向硬投影叠成 1px 发丝线,紧贴气泡实际轮廓;
+     投影建立浮起关系,极淡紫晕只托不起发光。 */
+  filter:
+    drop-shadow(1px 0 0 var(--ring))
+    drop-shadow(-1px 0 0 var(--ring))
+    drop-shadow(0 1px 0 var(--ring))
+    drop-shadow(0 -1px 0 var(--ring))
+    drop-shadow(1px 1px 0 var(--ring))
+    drop-shadow(-1px 1px 0 var(--ring))
+    drop-shadow(1px -1px 0 var(--ring))
+    drop-shadow(-1px -1px 0 var(--ring))
+    drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 0 16px var(--bub-glow));
+
+  /* 字号跟卡片标题,但不加粗(保持正文的"念出来"语气) */
   font-size: var(--fs-title);
   line-height: 1.5;
-  color: var(--text-main);
+  color: var(--bub-text);
   font-weight: 400;
-  /* 气泡里不做行数截断:内容是完整的描述文案 */
   -webkit-line-clamp: unset;
   line-clamp: unset;
   -webkit-box-orient: unset;
   overflow: visible;
   text-overflow: clip;
   cursor: default;
-  /* 显隐:默认完全藏起来(不占位、不吃鼠标),hover 时淡入 + 从下方弹起 */
+
+  /* 显隐:默认藏起(不占位、不吃鼠标),hover 时淡入 + 从下方弹起 */
   opacity: 0;
   visibility: hidden;
-  transform: translateY(6px) scale(0.94);
-  /* ★ 第 65 项:气泡从**左下角**长出来 —— 左下角正是离小人最近的那一头
-     (第 57~64 项小人在正中,用的是 var(--ch-center) 100%) */
-  transform-origin: 0 100%;
+  transform: translateY(7px) scale(0.965);
+  transform-origin: 0 100%;   /* 从靠近小人的左下角长出 */
   transition:
-    opacity 0.22s ease,
-    transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.25),
-    visibility 0.22s linear;
+    opacity 0.24s ease,
+    transform 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.18),
+    visibility 0.24s linear,
+    filter 0.3s ease;
   pointer-events: none;
   z-index: 3;
+
+  /* 高度锁:JS 先把"完整文案"高度写进 --desc-h,这里用 min-height 吃掉它,
+     气泡从一开始就按最终大小出现,打字过程中不会逐行顶高。 */
+  min-height: var(--desc-h, 0px);
 }
+
 .module-card:hover .module-card__desc {
   opacity: 1;
   visibility: visible;
   transform: translateY(0) scale(1);
+  /* hover 仅让浮起阴影略加深,描边/辉光保持安静,不抢戏 */
+  filter:
+    drop-shadow(1px 0 0 var(--ring))
+    drop-shadow(-1px 0 0 var(--ring))
+    drop-shadow(0 1px 0 var(--ring))
+    drop-shadow(0 -1px 0 var(--ring))
+    drop-shadow(1px 1px 0 var(--ring))
+    drop-shadow(-1px 1px 0 var(--ring))
+    drop-shadow(1px -1px 0 var(--ring))
+    drop-shadow(-1px -1px 0 var(--ring))
+    drop-shadow(0 14px 26px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 0 16px var(--bub-glow));
 }
 
-/* ★ 第 67 项:气泡里的文字「流式加载」(打字机) ——
-   用户:"气泡里的文字 流式加载,加载完之后就保持展示。加载速度要很快 3 秒内展示完。"
-   ── 三条硬约束分别是怎么满足的 ──
-   ① **3 秒内打完**(而且要"很快"):总时长按字数线性分配再 clamp,
-      公式在 js/main.js 的 initDescTypewriter 里:
-        dur = clamp(DUR_MIN=400ms, 字数 × PER_CHAR=46ms, DUR_MAX=1900ms)
-      本站文案实测 5~36 字 → 最长 36 字 = 1656ms、最短 5 字 = 400ms,
-      再加 120ms 出场延迟(等气泡先浮出来一点),**最坏 ≈ 1.78s**,
-      离 3s 上限还留了一大截。
-   ② **打完就保持展示**:rAF 跑到最后一拍就把 span 一次填满、撤掉 .is-typing
-      (光标变回透明),此后不再有任何写入 —— 文字定格,不会循环也不会回退。
-   ③ **气泡不能一边打字一边长高**:JS 先量出"完整文案"的高度写进 --desc-h,
-      这里用 min-height 吃掉它。气泡从一开始就按**最终大小**出现,只是字一个一个流进来。
-      ⚠️ 不锁会怎样:气泡是 bottom 定位的(向上长),每多出一行就把顶边往上顶一截,
-         打字过程中会一跳一跳,而且气泡尺寸一直在变 —— 完全没有"气泡"的稳重感。
-      ⚠️ 用 min-height 而不是 height:万一 JS 量到的值偏小,内容还能正常撑开,不会截断。
-   ── 光标 ──
-   用 .desc-txt 这个 span 的 **border-right** 做:
-     · inline 元素上它自动跟在最后一个字后面;多行时只在**最后一行**的末尾出现,
-       正是打字机该有的样子(不会每行都带一条竖线)。
-     · **始终占 2px**(透明时也一样),再用 margin-right:-2px 抵消它的推进宽度
-       → 光标出现/消失都不改变排版,不会把最后一个字挤到下一行触发一次假换行。
-   ⚠️ 为什么不能用伪元素做光标:气泡的 ::after 已经被小尖角占了(第 65 项),
-      ::before 那块第 66 项刚删掉、也不该再加回来 —— 光标只能挂在这个 span 上。 */
-.module-card .module-card__desc {
-  min-height: var(--desc-h, 0px);
-}
+/* 气泡文字:打字机流式加载,3 秒内打完、打完定格保持展示。
+   · 时长: dur = clamp(400ms, 字数×46ms, 1900ms) + 120ms 出场延迟,最坏 ≈1.78s。
+   · 高度锁:JS 先量"完整文案"高度写进 --desc-h(见上方 min-height),气泡按最终大小出现,
+     逐字流入时不顶高。
+   · 光标:挂 .desc-txt 这个 span 的 border-right(始终占 2px、margin 抵消宽度),
+     只在最后一行末尾出现,且出现/消失都不改变排版。 */
 .module-card .module-card__desc .desc-txt {
   border-right: 2px solid transparent;
   margin-right: -2px;
 }
 .module-card .module-card__desc.is-typing .desc-txt {
-  border-right-color: rgba(186, 130, 255, 0.95);
+  border-right-color: rgba(194, 184, 232, 0.40);
   animation: desc-caret 0.62s steps(1, end) infinite;
 }
 @keyframes desc-caret {
-  0%, 49%   { border-right-color: rgba(186, 130, 255, 0.95); }
+  0%, 49%   { border-right-color: rgba(194, 184, 232, 0.40); }
   50%, 100% { border-right-color: transparent; }
 }
-/* 减弱动效:JS 那边直接不打字(整段显示),这里也把光标闪烁关掉 */
+/* 减弱动效:JS 直接整段显示,这里也关掉光标闪烁 */
 @media (prefers-reduced-motion: reduce) {
   .module-card .module-card__desc.is-typing .desc-txt { animation: none; }
 }
 
-/* ★★★ 第 66 项:这一层「颈部磨砂层」已整块删除 ★★★
-   ── 它的来历 ──
-   第 64 项引入、第 65 项重做几何。原意是把「气泡 ↔ 小人 ↔ 卡片」糊成一坨:
-   补上气泡底边到卡片顶边那 8px 空档、糊掉卡片顶边那条硬线、给小人垫一层磨砂。
-   ── 为什么删 ──
-   用户第 66 项明确要求:「红箭头指向的背景去掉」。截图像素取证(2× DPR):
-     · 红箭头尖端落在截图 (104,170) → CSS (52,85) → 以卡片左上为原点 (43, +7)
-     · 这一层的覆盖范围 = 卡片左侧 x 16~84、卡片顶边上方 8px 到下方 16px
-     · 两者完全命中;且在 x=104 这一列实测到 y=156~168 有一条从 #3f3d45 渐变到
-       #6c6a73 的暗带(把卡片顶边那条紫边压成了灰的)—— 正是它。
-   → 连带那条 rgba(21,19,27,.97) → 全透明的五档渐变一起删掉。
-   ── 删掉后的副作用(已知,接受)──
-   气泡底边与卡片顶边之间那 8px、以及小人脚下那一小条,会重新露出页面底色,
-   三块东西重新"分开"。这正是用户要的效果。
-   ⚠️ 别再把它加回来,更别再往上写 backdrop-filter:第 64 项曾在这里写过
-      blur(14px),实测是彻底的**空操作** —— blur 0/14/40/80 四档,卡片顶边
-      对比度是 42.7 / 42.7 / 42.7 / 42.5,80 倍模糊度毫无变化。
-      原因:气泡自己带 transform、卡片项带 will-change:transform,都会另起
-      backdrop root,这一层背后是空的,取不到底下的卡片。
-      它当年"看起来有效",100% 来自那条半透明渐变,不是模糊。 */
-/* 气泡的小尖角:一个旋转 45° 的小方块,只露出一个角 → 三角形
-   ★ 第 65 项:方向从「朝下」翻成「朝左」,指向左边的小人。
-   方向怎么定的(第 64 项的坑,记下来免得再推一遍):
-     方块四角旋转 45°(CSS 顺时针)后的落点:NW→上、NE→右、SE→下、SW→左。
-     要哪个方向的尖,就留**相邻那个角的两条边**的描边 ——
-       · 朝下(第 57~64 项):留 SE 角 → border-right + border-bottom
-       · 朝左(第 65 项):  留 SW 角 → border-left  + border-bottom
-     圆角跟着落在那个角上:SW 角 = border-bottom-left → `0 0 0 2px`。 */
-.module-card .module-card__desc::after {
-  content: "";
-  position: absolute;
-  /* 探出气泡左边缘 5px:尖端落在小人右边缘附近(--ch-gap 只有 6px) */
-  left: -5px;
-  /* 垂直对准小人的**脸中心**(实测,不是估的):
-     取素材第 0 帧的肤色像素 bbox → y 42~113 = 第 7~19 逻辑格,中心 12.92 格。
-     换算成显示尺寸:12.92 格 × (40px / 22 格) = 23.5px(距素材上边),
-     即**距卡片顶边 16.5px**。气泡底边在卡片顶边上方 8px,
-     尖角中心(10px 方块,旋转后尖端在方块中心高度)要在底边上方 8.5px
-     → bottom = 8.5 - 5 = 3.5 → 取 4px(尖角中心落在卡顶上方 17px)。 */
-  bottom: 4px;
-  width: 10px;
-  height: 10px;
-  background: rgba(21, 19, 27, 0.97);
-  /* ★ 第 64 项:尖角的边也跟气泡一样转成紫,否则会出现"紫气泡 + 白尖角"的割裂
-     ★ 第 66 项:透明度跟着气泡一起 0.42 → 0.5 ——
-       尖角本来就是气泡边线伸出去了的那一段,两边必须同一档,
-       否则尖角会比气泡边线淡一档,看着像"没接上"。 */
-  border-left: 1px solid rgba(107, 63, 224, 0.5);
-  border-bottom: 1px solid rgba(107, 63, 224, 0.5);
-  border-radius: 0 0 0 2px;
-  transform: rotate(45deg);
-  pointer-events: none;
+/* 双角色变体:默认 = AI/注释气泡(紫);加 .is-user 切到"用户气泡"(青),
+   只换配色、逻辑共用,视觉同源。本作品集暂只用 AI 角色,.is-user 留作将来双栏对话。 */
+.module-card .module-card__desc.is-user {
+  --bub-glow: rgba(90, 200, 230, 0.05);
+  --ring: rgba(150, 206, 212, 0.13);
+  background: linear-gradient(
+    to bottom,
+    rgba(38, 50, 60, 0.95),
+    rgba(24, 36, 44, 0.97) 50%,
+    rgba(18, 32, 31, 0.98)
+  );
 }
 
-/* ===== 卡片顶边上的像素小人 =====
-   ── 素材五代换代 ──
-   ① 第 55 项 card-helper-lie.png   37×19(横躺·侧脸)
-   ② 第 57 项 card-helper-sit.png   32×29(正脸·趴坐,摇头由 CSS keyframes 驱动)
-   ③ 第 60 项 card-helper-desk.gif      22×22(趴桌晃头)
-   ④ 第 64 项 card-helper-point.gif     25×22(趴着 + 抬右手打招呼)
-   ⑤ 第 65 项(★ 现在)assets/card-helper-turn.gif  20×22(转头)
-      —— 来自 pixel-girl 项目的 desk-turn.gif(192×186 / 16 帧 / 透明底)。
-      ★ 动画是一段 4.8s 的循环:第 0 帧**正面** 800ms → 1~14 帧**转向右侧**
-        (200ms/帧,首尾各 400ms)→ 第 15 帧回到正面 800ms。
-        **逐帧时长同样不均匀**,重编码时必须把每帧 duration 一起写进去。
-        (角色转向的那一侧正好是气泡所在的一侧 —— 它在"看着气泡说话"。)
-      ★ 处理方式:与前两代同 —— 按**全帧并集包围盒**(x 36~156, y 6~138)裁成
-        120×132,正好是 20×22 逻辑格 × 6 倍;不按并集裁会把转头时变化的轮廓切掉。
-      ★ 尺寸:仍按 .module-card 里 --ch-pix 的注释 —— 22 格 = 40px,对齐走路小人高度。
-      ★★ 一个必须记下来的坑:这个素材的角色**描边是黑色**,和透明像素的 (0,0,0,0)
-         撞色 —— 用 PIL 直接 `save(..., transparency=0)` 会把**透明区和不透明区整个反转**
-         (量化时黑描边和透明黑落进同一个调色板索引)。④ 没踩到纯属运气。
-         正解:**自己建调色板** —— 把全部帧里 alpha>0 的颜色收集成统一索引、
-         透明单独占一格,再逐帧做整数映射(全程不经过量化,所以无损)。
-         生成后逐帧与源裁剪结果比对过:不透明区掩码不一致 0 帧、RGB 最大通道差 0。
-   ★ 位置:第 55 项靠左 30px → 第 57~64 项**卡片水平正中** → 第 65 项**卡片之上的左上角**
-     (--ch-left: 16px,与卡片文字栏左对齐)。
-   底边正好压在卡片顶边上(= 小人"坐在卡沿上");hover 淡入,移开消失。 */
+/* 卡片顶边像素小人(assets/card-helper-turn.webp,20×22,4.8s 转头循环):
+   它"看着气泡说话"。位置在卡片左上角(--ch-left:16px),底边坐在卡片顶边上,hover 淡入。
+   ⚠️ 素材黑描边与透明像素 (0,0,0,0) 撞色,重编码须自建调色板(透明单独一格),
+      否则 PIL 量化会把透明与不透明区反转。 */
 .module-card::after {
   content: "";
   position: absolute;
@@ -2274,7 +2243,7 @@ button {
   bottom: 100%;                     /* 底边 = 卡片顶边(坐在卡沿上) */
   width: var(--ch-w);
   height: var(--ch-h);
-  background: url("../assets/card-helper-turn.gif") no-repeat center bottom;
+  background: url("../assets/card-helper-turn.webp") no-repeat center bottom;
   background-size: 100% 100%;
   image-rendering: pixelated;
   -ms-interpolation-mode: nearest-neighbor;
@@ -2296,7 +2265,7 @@ button {
    注意只换 background-image,不动 opacity —— 淡入淡出保留,hover 依然有反馈。 */
 @media (prefers-reduced-motion: reduce) {
   .module-card::after {
-    background-image: url("../assets/card-helper-turn-still.png");
+    background-image: url("../assets/card-helper-turn-still.webp");
   }
 }
 
@@ -2360,6 +2329,90 @@ button {
   .module-card__glow { transition: none; }
 }
 
+/* ===== 2026-10-21:hover「发光描边」=====
+   用户:「这个卡片边缘的亮度和效果学习一下。当我 hover 到卡片时,请展示这种效果。」
+   (参考图:圆角卡片四周一圈近白的高亮描边,左上最亮 → 右下渐入紫,外侧一大片紫色辉光)
+
+   ── 为什么不能只用 border / box-shadow 做 ──
+   · border-color 是**单色**,做不出参考图那种「左上近白 → 右下深紫」的走光;
+   · box-shadow 的扩散是**模糊**的,画不出那条 1.5px 的锐利亮线(它只会糊成一团光雾)。
+   所以拆成两件事:
+     ① 锐利亮线 → 本元素:用「渐变底 + 双层 mask 相减」做成一个**渐变描边环**
+        (padding 区留下、content 区挖空),这是 CSS 里画渐变描边唯一不失真的做法;
+     ② 辉光     → .module-card:hover 的 box-shadow 三层扩散 + 本元素的 drop-shadow 贴边光。
+   两条都跟着 hover 一起淡入,合起来才是"边在发光"而不是"卡片描了条灰线"。
+
+   ── 尺寸 ──
+   · inset:-1px → 正好盖住卡片原有的 1px 白边线(hover 时它转成紫色,但那圈紫会被这层压住,
+     作为"没渲染出来"的兜底仍在);
+   · padding:1px → 亮线粗细。★ 第 74 项从 2px 收到 1px:与页面内所有边线(卡片 1px 边、
+     分隔线、气泡边)统一,2px 时视觉上比旁边卡片的边明显粗一圈;
+   · border-radius:inherit → 跟着卡片 22px,描边内缘自动 = 22 − 1,不会出现圆角错位。
+
+   ── 渐变角度 ──
+   150deg = 左上 → 右下。参考图的亮部压在左上圆角弧上,所以把纯白放在 0~12%,
+   到 72% 已经落到 #8b5cf6(品牌紫),100% 收在 #6d28d9(最暗的一角)。
+   ⚠️ 别把白放到 50% —— 那样整条边都会发白,紫色就没了,层次也没了。
+
+   ── 兼容 ──
+   mask-composite 不支持时(N 年前的浏览器)整块跳过:亮线消失,但 hover 的紫色边线
+   + 三层辉光仍在,不会退化成"一张渐变糊满卡片"的灾难。 */
+@supports ((-webkit-mask-composite: xor) or (mask-composite: exclude)) {
+  .module-card__edge {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    /* ★ 2026-10-21(第 74 项):2px → **1px**,与页面内所有边线同粗细
+       (用户:"这个卡片的描边的边缘有些粗,和页面内的边线粗细保持一致")。
+       几何:inset:-1px 贴到卡片的 border-box 外沿,padding 就是线的粗细 ——
+       1px 时这条亮线正好**压住卡片自己那 1px 边线**(hover 时它转紫,被这层盖掉),
+       所以整圈视觉厚度 = 1px,不再比旁边的卡片边粗一圈。
+       ⚠️ 别再往 1.5/2px 加:2px 时线会同时占据卡片边线内外各 1px,看着像"双线发胖"。 */
+    padding: 1px;
+    /* 渐变描边本体 */
+    background: linear-gradient(
+      150deg,
+      #ffffff 0%,
+      #ffffff 18%,
+      #f2e6ff 38%,
+      #d9b8ff 58%,
+      #b184ff 78%,
+      #8b5cf6 100%
+    );
+    /* 双层 mask 相减:第一层裁到 content-box(内圈),第二层取全盒,异或 → 只剩 padding 环 */
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    /* 压在卡片内容(z-index:1)之上、气泡(3)与小人(4/5)之下 —— 描边永远不该盖住浮层 */
+    z-index: 2;
+  }
+  /* hover 才点亮;drop-shadow 跟着 mask 的 alpha 走,所以光晕形状 = 描边形状(贴边、不发散) */
+  .module-card:hover .module-card__edge {
+    opacity: 1;
+    filter:
+      drop-shadow(0 0 3px rgba(255, 250, 255, 0.95))
+      drop-shadow(0 0 8px rgba(214, 178, 255, 0.85))
+      drop-shadow(0 0 20px rgba(150, 100, 255, 0.65));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .module-card__edge { transition: none; }
+  }
+
+  /* ===== ★ 第 74 项「气泡边线 = 卡片边线」已于第 75 项**整块撤除** =====
+     撤销原因(用户第 75 项):"不要 1:1 复刻卡片的边界效果,气泡太抢眼了,
+     感受不到是卡片的附属。" 那一版是把卡片 hover 的「渐变亮边 + 多层 drop-shadow」
+     原样搬到气泡上 —— 卡片是大块面,白边只占周长一小段;气泡 90px 高,
+     同一套参数就把大半个左上角糊成白的,亮度直接盖过卡片本体,层级倒挂。
+     现在气泡用自己的语言:一条安静的紫发丝线 + 顶部一道极淡内高光 + 一层散紫晕
+     + 主黑影(见 .module-card__desc 的注释)。卡片的亮边**不再同步给气泡**。
+     ⚠️ 别再把这层 ::before 描边环加回来:它 z-index:1 会压在尾巴(::after)身上,
+        横穿三角底部 —— 那正是"尾巴和气泡没长在一起"的直接原因。 */
+}
+
 /* --- 卡片话题标签(紫色 # 标签,单行展示,超出末尾打点)
    order: 4 → 位于描述下方 */
 .module-card__tags {
@@ -2406,8 +2459,10 @@ button {
   white-space: nowrap;
   overflow: hidden;
 }
+/* ★ 2026-10-20:分隔符颜色改为继承父级(原来写死 --text-main #bdbdbd 纯色,
+   比 0.5 透明度的正文亮一档,视觉上"太跳")。现在与同行文字完全同色同透明度。 */
 .module-card__meta-sep {
-  color: var(--text-main);
+  color: inherit;
   padding: 0 2px;
 }
 /* 长分类信息在窄卡片下列不换行、超出部分以省略号收尾(保持单行) */
@@ -2637,12 +2692,17 @@ button {
   /* ★ 轴线起点那颗节点圆点的圆心正压在第 1 列左缘(= 卡片左缘),半径约 5px
      会伸到容器左外侧;而 overflow:auto 的裁剪边界是 padding box,
      所以第一颗圆点会被裁成半个(实测裁到 6px 宽的一个竖椭圆)。
-     解法:用「负 margin + 等量 padding」在左侧撑出一段不可见缓冲区 ——
-     裁剪边界因此左移到内容区之外 6px,而内容(content box)的
-     位置与宽度分毫不动(轴线左端 / 卡片左缘 / 标记左缘仍在原处)。
-     右侧不加 → 轴线右端位置也不变。 */
-  margin-left: -6px;
-  padding-left: 6px;
+     解法:用「负 margin + 等量 padding」在左侧撑出不可见缓冲区 ——
+     裁剪边界因此左移到内容区之外,而内容(content box)的位置与宽度
+     分毫不动(轴线左端 / 卡片左缘 / 标记左缘仍在原处)。
+     ★ 第 76 项 v3:缓冲从 6px 加到 20px —— 圆点被响应时会放大呼吸
+       (峰值半径 ~7px + 外圈辉光 ~14px),6px 缓冲会把放大后的圆点
+       连同辉光一起裁掉一块(2026-10-21 用户截图实锤;20px 下实测
+       亮度到 -14px 处已衰减到背景值,离边界还有富余)。
+     右侧不加:第 4 颗节点距容器右缘还隔着一整张卡片的宽度,永不贴边,
+       加了反而给横向滚动多出 20px 空白。 */
+  margin-left: -20px;
+  padding-left: 20px;
 }
 .module-scroll::-webkit-scrollbar {
   display: none;
@@ -2657,6 +2717,128 @@ button {
      此处不再重复 —— 第 47 项把原来夹在这里的 .mt-caption 上移后,轴线与卡片组的间距
      就是全站统一的 22px 节奏(改前是 22 + 标题高 + 7 ≈ 48px)。 */
   margin: 0 var(--space-4) 0 0;
+  position: relative; /* 保留:让轴线/节点的绝对定位子元素有定位参考 */
+}
+
+/* ===== 第 75 项:同排卡片「有关联」的整排呼应(2026-10-20 · 第三版「行框」) =====
+   用户(第一版):「hover 三张中的一张时,整个一排要有响应 —— 微微紫色,
+                  弱到不抢前景卡片的 hover;目的是提醒这三张是有关联的。」
+   用户(第三版):「一排的整体感不够明显,换个响应效果,要有一排的感觉,同时符合整体设计。」
+   ── 前两版为什么不行 ──
+   两团「从轴线往上渗的紫雾」再怎么加浓,本质都是**背景晕染** —— 没有边界,
+   眼睛读不出"这是一个整体"。整体感必须靠**边界**建立。
+   ── 这一版:行框(包住「组标题 + 3 张卡 + 时间轴」的圆角容器)──
+   ① 1px 紫色细描边 —— 与卡片 hover 的紫描边同族(那边 0.5,这里 0.30),
+      语言一致但弱一档,前景卡片仍然最响;
+   ② 极淡紫底 + 底部锚定的径向渐变 —— 紫意从轴线一侧渗上来,保留"时间轴呼应";
+   ③ 轴线提亮 + 外发光、节点提亮 —— 落点仍在时间轴;
+   ④ 组标题轻微染紫 —— 把标题也拉进"这一排";
+   ⑤ 出现时 0.992 → 1 的轻微「合拢」动势,不抢戏。
+   ★ 17:25 微调(用户:「你改一下试试吧」):描边 .30 → **.42**、底色 .05 → **.07**、
+     底部紫晕峰值 .14 → **.18**、外发光 .10 → .14 并补一层 inset 内晕。
+   ★ 17:35(用户):撤掉左侧 3px 紫色竖脊 —— 改成「hover 的那张卡,对应的时间轴圆点
+     放大回应」(见本节末尾 .mt-node.is-hot) —— 用一个明确的空间对应关系讲"这一排",
+     比一条装饰竖线更贴合时间轴的语言。其余不变。
+   ── HTML 结构 ──
+   这一排被包进了 .row-unit(卡片组 + 时间轴),行框就是它的 ::before;
+   没有 .row-unit 的排不参与(全站仅「装扮生态建设」这一排)。
+   ── 触发 ──
+   js 给 .row-unit 加 .is-linked(见 js/main.js 的 initRowLink),这里只做纯视觉。
+   ── 几何约束 ──
+   · 左溢出 -10px 不会造成横向滚动(LTR 下左/上方向的溢出不可滚动);
+     右缘仍留在内容宽之内,不会给 .content__scroll 制造多余滚动范围。
+   · 行框左缘 = 卡片左缘外扩 10px、右缘 = 卡片右缘外扩 10px → 两侧描边都露得出来,
+     否则边框会被不透明的卡片压住看不见。 */
+.row-unit {
+  position: relative;
+}
+.row-unit::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  right: calc(var(--space-4) - 10px);
+  top: -12px;
+  bottom: -14px;
+  border-radius: 26px;
+  border: 1px solid rgba(122, 28, 250, 0.42);
+  background-color: rgba(122, 28, 250, 0.07);
+  background-image:
+    /* 底部锚定的紫晕:紫意从轴线一侧渗上来 */
+    radial-gradient(
+      78% 62% at 50% 100%,
+      rgba(122, 28, 250, 0.18) 0%,
+      rgba(122, 28, 250, 0.06) 52%,
+      rgba(122, 28, 250, 0) 78%
+    );
+  box-shadow:
+    0 0 26px rgba(122, 28, 250, 0.14),
+    inset 0 0 34px rgba(122, 28, 250, 0.05);
+  opacity: 0;
+  transform: scale(0.992);
+  transform-origin: 50% 62%;
+  transition: opacity 0.34s ease, transform 0.34s ease;
+  pointer-events: none;
+  z-index: 0; /* 卡片 / 时间轴元素都是 positioned 且在其后 → 永远压在行框之上 */
+}
+.row-unit.is-linked::before {
+  opacity: 1;
+  transform: scale(1);
+}
+/* 组标题轻微染紫:把标题也纳进"这一排" */
+.row-unit .group-caption {
+  transition: color 0.34s ease;
+}
+.row-unit.is-linked .group-caption {
+  color: rgba(198, 162, 255, 0.96);
+}
+/* 轴线(含流光层)与节点:只提亮,不改动画里的任何属性 */
+.module-timeline .mt-divider::before,
+.module-timeline .mt-node::before,
+.module-timeline .mt-node::after {
+  transition: filter 0.34s ease;
+}
+.row-unit.is-linked .module-timeline .mt-divider::before {
+  /* 提亮 + 一层外发光:整条轴线「被点名」,是整排呼应里最强的落点 */
+  filter: brightness(1.24) saturate(1.12)
+    drop-shadow(0 0 7px rgba(140, 50, 252, 0.42));
+}
+.row-unit.is-linked .module-timeline .mt-node::before {
+  filter: brightness(1.3) drop-shadow(0 0 6px rgba(150, 60, 255, 0.35));
+}
+.row-unit.is-linked .module-timeline .mt-node::after {
+  filter: brightness(1.2);
+}
+/* ===== 17:35(第 76 项 v3 重写):hover 卡片 → 对应圆点「放大 + 呼吸」=====
+   卡片列与时间轴列一一对应(都是 3 列、同一套 column-gap),所以第 n 张卡
+   ↔ 第 n 个 .mt-node。js 给对应节点挂 .is-hot。
+   ★ 独立于小人的鼠标交互:尺寸(12px)与呼吸节奏(tl-dot-breath)和
+     .is-live 完全同一套 —— 规范化,不另起炉灶;差异只剩辉光更亮一档
+     (filter 提亮,不在 keyframes 里,与呼吸不打架)。
+     同时命中时 hover 优先(选择器权重更高),移开后回落到小人所在的呼吸态。
+   ⚠ 必须保留 translate(-50%,-50%):它把圆点的几何中心对到 0×0 锚点上,
+     漏掉它圆点会整体偏移半个直径。 */
+.row-unit .mt-node::before {
+  transition:
+    transform 0.3s ease,
+    width 0.3s ease,
+    height 0.3s ease,
+    box-shadow 0.3s ease,
+    filter 0.34s ease;
+}
+.row-unit.is-linked .module-timeline .mt-node.is-hot::before {
+  width: 12px;
+  height: 12px;
+  filter: brightness(1.35) drop-shadow(0 0 12px rgba(150, 60, 255, 0.6));
+  animation: tl-dot-breath 1.15s ease-in-out 0.3s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .row-unit::before,
+  .row-unit .group-caption,
+  .module-timeline .mt-divider::before,
+  .module-timeline .mt-node::before,
+  .module-timeline .mt-node::after {
+    transition: none;
+  }
 }
 
 .mt-grid {
@@ -2853,13 +3035,13 @@ button {
 /* ===== 时间节点:轴上的圆点 + 贯通上下的引导线 =====
    ① ::before 圆点:坐在轴线上,★ 直径随该段年数(--dur)变化
       (4年 10.4px → 1年 6.4px)—— 大小交替 = 节奏感。
-      内芯亮白、外圈品牌紫,与轴线的紫同族;带 .is-now 的节点
-      (= 至今 / 项目进行ing)额外一圈向外扩散的脉冲光环,
-      把"时间轴的终点"钉住 = 指向性的落点。
+      内芯亮白、外圈品牌紫,与轴线的紫同族。
+      ★ 第 76 项 v2:默认态=**静态小点**(无呼吸、无脉冲,错峰呼吸波
+        tl-tick-wave 与「至今」脉冲 tl-now-pulse 已整层下线);
+        唯一动态 = 被响应时放大 + 呼吸(.is-live / .is-hot,见本段末)。
    ② ::after 引导线:一条穿过圆点的竖线,★ 自圆点上缘向上伸出 --tl-up
       指向上方卡片底边,向下渐隐至下方年份标签 ——
-      「卡片 ← 节点 → 标签」三点共线,指向性由这条线承担。
-   ③ 呼吸波:错峰起伏,★ 自左向右依次亮起,与流光同周期(3.5s)。
+      「卡片 ← 节点 → 标签」三点共线,指向性由这条线承担(同样静态)。
    ────────────────────────────────────── */
 .cg-node,
 .mt-node {
@@ -2895,7 +3077,14 @@ button {
   box-shadow:
     0 0 0 1.5px rgba(176, 88, 255, 0.22),
     0 0 7px rgba(122, 28, 250, 0.45);
-  animation: tl-tick-wave 3.5s ease-in-out infinite;
+  /* ★ 第 76 项 v2:默认无动画(静态小点);放大呼吸只在 .is-live / .is-hot 上。
+     v3:width/height 也进 transition —— 被响应时圆点要从各自的 --dur 尺寸
+     平滑长到统一的响应尺寸,离开响应时再平滑缩回去。 */
+  transition:
+    transform 0.3s ease,
+    width 0.3s ease,
+    height 0.3s ease,
+    box-shadow 0.3s ease;
   pointer-events: none;
 }
 /* ② 引导线:两端渐隐、中段最亮,圆点压在中段上 */
@@ -2921,32 +3110,11 @@ button {
     rgba(122, 28, 250, 0.24) 78%,
     rgba(122, 28, 250, 0) 100%
   );
-  animation: tl-tick-wave 3.5s ease-in-out infinite;
   pointer-events: none;
 }
-/* 「至今 / 项目进行ing」节点:一圈向外扩散的脉冲光环 */
-.cg-node.is-now::before,
-.mt-node.is-now::before {
-  animation:
-    tl-tick-wave 3.5s ease-in-out infinite,
-    tl-now-pulse 2.4s ease-out infinite;
-}
-@keyframes tl-now-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(190, 130, 255, 0.55), 0 0 7px rgba(122, 28, 250, 0.45);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(190, 130, 255, 0), 0 0 7px rgba(122, 28, 250, 0.45);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(190, 130, 255, 0), 0 0 7px rgba(122, 28, 250, 0.45);
-  }
-}
-/* 呼吸波:只有不透明度起伏(无发光、无位移),是"光扫过时节点被点亮"的读法 */
-@keyframes tl-tick-wave {
-  0%, 100% { opacity: 0.4; }
-  50%      { opacity: 1; }
-}
+/* 「至今 / 项目进行ing」节点:★ 第 76 项 v2 —— 原「向外扩散的脉冲光环」
+   tl-now-pulse 已下线,默认态与其它圆点一致(静态小点);
+   被小人路过 / 被 hover 时走同一套放大呼吸。 */
 
 /* 节点落在轴线行、逐列定位(与卡片 / 标记左缘对齐);
    career 轴额外向上伸出 --tl-up,让引导线一路送到上方卡片的底边 */
@@ -2964,23 +3132,56 @@ button {
 .mt-grid > .mt-node:nth-of-type(2) { grid-column: 2; }
 .mt-grid > .mt-node:nth-of-type(3) { grid-column: 3; }
 
-/* 亮起顺序:★ 从左向右(与流光同周期 3.5s,四颗/三颗各自等相位分布)
-   圆点(::before)与引导线(::after)用同一组 delay,两者同步起伏 */
-.career-grid > .cg-node:nth-of-type(1)::before,
-.career-grid > .cg-node:nth-of-type(1)::after { animation-delay: 0s; }
-.career-grid > .cg-node:nth-of-type(2)::before,
-.career-grid > .cg-node:nth-of-type(2)::after { animation-delay: 0.88s; }
-.career-grid > .cg-node:nth-of-type(3)::before,
-.career-grid > .cg-node:nth-of-type(3)::after { animation-delay: 1.75s; }
-.career-grid > .cg-node:nth-of-type(4)::before,
-.career-grid > .cg-node:nth-of-type(4)::after { animation-delay: 2.63s; }
-
-.mt-grid > .mt-node:nth-of-type(1)::before,
-.mt-grid > .mt-node:nth-of-type(1)::after { animation-delay: 0s; }
-.mt-grid > .mt-node:nth-of-type(2)::before,
-.mt-grid > .mt-node:nth-of-type(2)::after { animation-delay: 1.15s; }
-.mt-grid > .mt-node:nth-of-type(3)::before,
-.mt-grid > .mt-node:nth-of-type(3)::after { animation-delay: 2.3s; }
+/* ===== 第 76 项 v3:圆点响应规范化(2026-10-21)—— 两条轴 + 七颗点完全一致 =====
+   用户反馈 v2:「大体效果对,但不够精细:①七颗点的呼吸感各不相同,请统一、规范化;
+   ②默认状态效果要统一,小人走出区域后要恢复到统一的默认;③放大响应时圆点被盖住。」
+   ── ① 呼吸为什么原来各不相同 / 怎么统一 ──
+   v2 用 scale 倍乘:圆点基础直径随 --dur 变化(6.35~10.4px),同一倍率下
+   4年那颗呼吸峰值比 1年那颗大出一圈,读起来"七颗七样"。
+   v3 改为**统一的绝对尺寸**:被响应时圆点一律从各自的 --dur 尺寸
+   平滑长到 12px(width/height 走 transition),再以 scale 1 ↔ 1.18 呼吸
+   —— 七颗点的节奏(1.15s)、幅度(±9%)、峰值(14.2px)、辉光完全一致。
+   ── ② 默认 / 恢复 ──
+   默认 = 静态小点(各轴仍保留 --dur 的大小节奏,这是既有设计);
+   .is-live 摘除后 width/height/transform/box-shadow 全部走 transition
+   平滑回到各自默认值,七颗点回到同一个"静态小点"状态,无残留。
+   ── ③ 被盖住 ──
+   根因:.module-scroll 的「负 margin + 6px 缓冲」是按静态圆点半径 5px 设计的,
+   放大 + 辉光后(峰值半径 ~7px + 辉光 15px)左端那颗被裁掉一块。
+   已把缓冲加宽到 20px 且两侧都加(见 .module-scroll 处注释)。
+   ── 触发源(与 v2 相同)──
+   · .is-live:小人当前所处的卡片区域(js 按行走位置切换,两条轴都有);
+   · .is-hot :装扮轴独有,鼠标 hover 第 n 张卡 → 第 n 个圆点(辉光更亮一档,
+               尺寸/节奏与 .is-live 同一套),同时命中时 hover 优先。
+   ⚠ keyframes 必须带 translate(-50%,-50%):它把圆点几何中心对到 0×0 锚点上,
+     漏掉会导致圆点整体偏移半个直径。 */
+.cg-node.is-live::before,
+.mt-node.is-live::before {
+  width: 12px;
+  height: 12px;
+  animation: tl-dot-breath 1.15s ease-in-out 0.3s infinite;
+}
+@keyframes tl-dot-breath {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow:
+      0 0 0 1.5px rgba(176, 88, 255, 0.32),
+      0 0 9px rgba(140, 45, 252, 0.55);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.18);
+    box-shadow:
+      0 0 0 1.5px rgba(176, 88, 255, 0.5),
+      0 0 14px rgba(160, 70, 255, 0.75);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cg-node.is-live::before,
+  .mt-node.is-live::before,
+  .row-unit.is-linked .module-timeline .mt-node.is-hot::before {
+    animation: none;
+  }
+}
 
 /* ========== Career Grid (10年鹅厂经历 - 时间轴 + 卡片) ==========
    CSS Grid 实现:
@@ -3035,7 +3236,7 @@ button {
 }
 
 /* ========== 时间轴像素小人:沿轨道行走,走到节点跳起顶卡片 ==========
-   素材 assets/tl-walker-sprite.png:1:1 的横向 17 帧雪碧图
+   素材 assets/tl-walker-sprite.webp:1:1 的横向 17 帧雪碧图
    (0-3 走路 4 帧 / 4-16 跳跃 13 帧),由 pixel-girl/make_walker_sprite.py 生成。
    ─ 为什么不用原始 GIF:需要在「走路循环」与「跳跃一次性播放」之间切换,
      并把「顶卡片」的时刻精确钉在跳跃的某一帧上 —— 一张雪碧图 + JS 选帧最可控;
@@ -3061,7 +3262,7 @@ button {
   pointer-events: none;
   opacity: 0;              /* JS 量完几何后加 .is-ready 淡入,避免先闪在错误位置 */
   transition: opacity 0.45s ease;
-  background: url("../assets/tl-walker-sprite.png") no-repeat 0 0;
+  background: url("../assets/tl-walker-sprite.webp") no-repeat 0 0;
   background-size: calc(17 * 32 * var(--tl-pix)) calc(40 * var(--tl-pix));
   image-rendering: pixelated;
   -ms-interpolation-mode: nearest-neighbor;
@@ -3574,8 +3775,29 @@ button {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  max-height: 80vh;
-  overflow: visible;
+  max-height: 82vh;
+  /* ★ 2026-10-20:页数多的弹层(会员 29 页 / AI陪伴竞品 25 页)导航会超长,
+     允许导航自身滚动,滚轮/触控板只在导航上生效,不牵动正文 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.detail-modal__pager::-webkit-scrollbar {
+  display: none;
+}
+.detail-modal__pager[hidden] {
+  display: none !important;
+}
+/* 页数 > 10:切紧凑模式(只在 JS 里按当前页签页数切换) */
+.detail-modal__pager.is-compact {
+  gap: 2px;
+  padding: 7px 5px;
+}
+.detail-modal__pager.is-compact .detail-modal__pager-btn {
+  width: 22px;
+  height: 21px;
+  font-size: 10.5px;
 }
 .detail-modal__pager-btn {
   appearance: none;
@@ -3666,6 +3888,131 @@ button {
     width: 40px;
     height: 40px;
   }
+}
+
+/* ===== 元宝导流-皮肤带增:内嵌交互 Demo 模态 =====
+   ★ 2026-10-20 改版:
+     ① 顶部 bar 精简 → 标题/副标题/新窗口入口挤在一行(.embed-head),去掉原来那条
+        占 ~40px 高的灰底提示条;body 底部 padding 32 → 10,纵向空间全给 Demo。
+     ② 内嵌 Demo「整机完整可见」→ iframe 不再按容器尺寸铺满,而是给一个
+        **固定逻辑视口**(--embed-h = 880,见下)再用 transform 等比缩放:
+        手机壳宽 340px、屏比 874:1920,竖向内容总高实测 ≈845,给 880 留 35px 余量;
+        缩放后整块内容都在窗口内,内部不再出现纵向滚动条。
+        换算由 js/main.js 的 fitEmbed() 负责(它同时保证缩放后正好铺满容器宽度)。 */
+.detail-modal--embed .detail-modal__panel {
+  width: min(94vw, 1200px);
+  height: 92vh;
+  max-height: 92vh;
+  --embed-h: 720; /* 内嵌页的逻辑视口高度(px)。2026-10-28 晚改版：Demo 内部支持嵌入模式
+                     (手机壳/流程面板高度撑满 iframe 视口)，压小 designH → 缩放比更大，
+                     手机模型与右侧面板都显著放大；壳下备注文字在嵌入态隐藏 */
+}
+.detail-modal--embed .detail-modal__body {
+  overflow: hidden;
+  background: #000000;
+  padding: 10px 10px 10px 10px; /* 底部 32 → 10:把高度让给 Demo */
+}
+.detail-modal--embed .detail-modal__content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.detail-modal--embed .detail-modal__head {
+  flex: 0 0 auto;
+}
+
+/* 精简后的头部:左(标题+副标题) / 右(新窗口入口),右侧留出关闭按钮的位置 */
+.embed-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 84px 10px 24px;
+  background: #000000;
+}
+.embed-head__text {
+  min-width: 0;
+}
+.embed-head__link {
+  flex: 0 0 auto;
+  font-size: var(--fs-xs, 12px);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 4px 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.embed-head__link:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Demo 容器:外框与主页信息流卡片(.module-card)完全同一套 ——
+   ★ 2026-11-03(用户:"这个外框和主页信息流卡片的外框保持一致"):
+   逐条对齐卡片:底色 --card-bg、边线 rgba(255,255,255,.34)、圆角 --card-radius(22px)、
+   三层投影与卡片参数逐一相同。原底色 #f4f6f9 是浅色 demo 时代的值,
+   现在两个 demo 内部底色都是 #222222,同色可避免加载瞬间闪一块白。 */
+.demo-embed {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 8px;
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: var(--card-radius);
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.42),
+    0 2px 8px rgba(0, 0, 0, 0.30),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+/* 顶边那道"边线亮部"—— 与 .module-card::before 同一个手法(白 .10 → .03 → 0),
+   但停点换成固定 px:卡片高约 330、14% ≈ 46px;demo 框高 760,用百分比会洗掉一大片。
+   pointer-events:none,不挡 iframe 的点击。 */
+.demo-embed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.03) 14px,
+    rgba(255, 255, 255, 0) 40px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+/* 固定逻辑视口 + 左上角缩放:宽高与 scale 都由 fitEmbed() 写入内联样式。
+   这里只给默认值,保证 JS 之前(或禁用 JS)也能看到内容。 */
+.demo-embed__frame {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #222222;
+  transform-origin: 0 0;
+}
+
+/* ★ 2026-10-30:元宝导流-皮肤带增 双端 tab 面板 —— 每个 tabpanel 作为 flex 列
+   撑满 body 竖向空间;用 :not([hidden]) 限定激活态,避免 ID 特异性压过
+   .detail-modal__tabpanel[hidden] 的 display:none,导致两个面板同时可见。
+   注意 body 是 block 容器,这里必须用 height:100%(flex:1 无效),
+   才能把「body 定高 → tabpanel → content → demo-embed」这条高度链接通。 */
+#modal-skin-redeem .detail-modal__tabpanel:not([hidden]) {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#modal-skin-redeem .detail-modal__tabpanel .detail-modal__content {
+  height: 100%;
 }
 
 /* ========== Lightbox(荣誉/专利大图查看) ==========
@@ -3891,5 +4238,42 @@ button {
   }
   .lightbox__caption {
     font-size: var(--fs-xs);
+  }
+}
+
+/* ============================================================
+   ★ 2026-10-16 ·「移动PC广告生态建设」详情弹层 (id="modal-pc-ad")
+   体检报告 11 个板块 → 11 个页签;页签较多,故改为胶囊式并允许自动换行
+   ============================================================ */
+#modal-pc-ad .detail-modal__tabs {
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 16px 16px 12px 16px;
+}
+#modal-pc-ad .detail-modal__tab {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(var(--text-main-rgb), 0.72);
+}
+#modal-pc-ad .detail-modal__tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+#modal-pc-ad .detail-modal__tab.is-active {
+  background: #ffffff;
+  color: #0b0b0f;
+  border-color: #ffffff;
+}
+#modal-pc-ad .detail-modal__tab.is-active::after {
+  display: none;
+}
+@media (max-width: 768px) {
+  #modal-pc-ad .detail-modal__tab {
+    font-size: 0.74rem;
+    padding: 6px 10px;
   }
 }

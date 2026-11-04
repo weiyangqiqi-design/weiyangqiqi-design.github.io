@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搜狗输入法 · 免费领皮肤 Demo</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#222222; }
+  /* ★ 2026-11-03:body 加内边距 + 列间距 —— 让右侧注释面板四周留出呼吸位,
+     面板才能「浮起」(圆角 + 投影可见)。内边距/间距与移动端 demo 同档(12/22 + 20/26)。 */
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; display:flex; padding:14px 22px; gap:20px; }
+
+  /* ===== 舞台：1920×1080 设计稿，等比缩放居中 ===== */
+  #stageWrap { position:relative; flex:1; min-width:0; display:flex; align-items:center; justify-content:center; height:100%; }
+  #stage {
+    width:1920px; height:1080px; position:relative; flex:none;
+    transform-origin:center center;
+    background:url(assets/desktop.webp) 0 0 / 100% 100% no-repeat;
+    overflow:hidden;
+  }
+  /* 跳转状态时冻结过渡 */
+  #stage.noanim, #stage.noanim * { transition:none !important; animation-duration:0s !important; }
+  /* taskBar 入场动画豁免冻结：面板直跳打开元宝时也要播放出现效果（noanim 会把 duration 归零） */
+  #stage.noanim #taskBar { animation-duration:.4s !important; }
+
+  /* ===== 右侧流程注释面板（液态玻璃 · 与作品集同色 #222 + 紫强调 #b27bee） =====
+     ★ 2026-11-03:外框与移动端 demo 的 .flow 逐条对齐(用户:"PC 的和移动的保持一致"):
+     圆角 18px / 四边 1px 发丝边 / 内高光 + 双层投影(贴边短影 + 大范围扩散)。
+     原来是 border-left 单边线 + 直角贴边,看着像"嵌在 demo 里的一条侧栏",
+     现在是"浮在 demo 上的一块玻璃"。 */
+  #panel {
+    width:23vw; max-width:23vw; flex:0 0 auto; height:100%;
+    display:flex; flex-direction:column; gap:10px;
+    padding:16px 14px 12px; overflow:hidden;
+    color:#cbc3d8;
+    background:
+      radial-gradient(130% 70% at 8% 0%, rgba(178,123,238,.20), transparent 62%),
+      linear-gradient(168deg, rgba(46,44,54,.68), rgba(24,23,28,.82));
+    -webkit-backdrop-filter: blur(26px) saturate(160%);
+            backdrop-filter: blur(26px) saturate(160%);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.08),
+      0 2px 6px rgba(0,0,0,.40),
+      0 18px 44px rgba(0,0,0,.56);
+  }
+  .phead { flex:none; display:flex; align-items:baseline; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  #panel h1 { font-size:15px; font-weight:600; color:#f4effb; letter-spacing:.4px; line-height:1.3; }
+  #panel .cnt { font-size:11px; font-weight:600; color:#b9a6d8; letter-spacing:.5px; font-variant-numeric:tabular-nums; }
+  #steps {
+    flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
+    display:flex; flex-direction:column; gap:4px;
+    padding:4px 2px;
+    scrollbar-width:thin; scrollbar-color:rgba(178,123,238,.4) transparent;
+    -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+            mask-image:linear-gradient(180deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+  }
+  #steps::-webkit-scrollbar { width:6px; }
+  #steps::-webkit-scrollbar-thumb { background:rgba(178,123,238,.35); border-radius:6px; }
+  .step {
+    position:relative; flex:none; display:flex; align-items:center; gap:10px;
+    padding:8px 10px; border-radius:12px; cursor:pointer;
+    border:1px solid transparent; background:transparent;
+    transition:background .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .step:hover { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.08); }
+  .step.active {
+    background:linear-gradient(180deg, rgba(178,123,238,.22), rgba(178,123,238,.08));
+    border-color:rgba(255,255,255,.13);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 5px 16px rgba(110,55,200,.20);
+  }
+  .step .num {
+    position:relative; z-index:1; flex:none; width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; line-height:1;
+    color:#d8c6f4; background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    transition:background .18s ease, color .18s ease, box-shadow .18s ease;
+  }
+  /* 竖向连接线：除末项外，每个序号下方接一段渐隐紫线，串起动作先后 */
+  .step:not(:last-child) .num::after {
+    content:""; position:absolute; left:50%; top:100%;
+    transform:translateX(-50%); width:2px; height:14px;
+    background:linear-gradient(180deg, rgba(178,123,238,.5), rgba(178,123,238,.06));
+    z-index:-1;
+  }
+  .step.active .num {
+    background:linear-gradient(135deg,#d1aaff,#9a55f0); color:#1a1024;
+    border-color:transparent;
+    box-shadow:0 0 0 3px rgba(178,123,238,.16), 0 4px 12px rgba(150,80,230,.5);
+  }
+  .step .tt { font-size:12.5px; font-weight:500; color:#cbc3d8; line-height:1.32; }
+  .step.active .tt { color:#fff; font-weight:600; }
+  #panelBtns { flex:none; display:flex; gap:10px; }
+  #panelBtns button {
+    flex:1; height:38px; border-radius:11px;
+    border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06);
+    color:#e9e3f3; font-size:12.5px; cursor:pointer;
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  #panelBtns button:hover { background:rgba(255,255,255,.12); }
+  #panelBtns button.on {
+    background:linear-gradient(180deg, rgba(178,123,238,.30), rgba(178,123,238,.14));
+    border-color:rgba(178,123,238,.62); color:#fff;
+  }
+
+  /* 热区高亮 */
+  .hs { box-shadow:0 0 0 2px #ff6a00, 0 0 0 6px rgba(255,106,0,.22) !important; border-radius:6px; }
+
+  /* ===== 弹窗 ===== */
+  #popup {
+    position:absolute; right:32px; bottom:61px; width:212px;
+    opacity:0; pointer-events:none;
+    transform:translateX(calc(100% + 60px));
+    filter:drop-shadow(0 10px 30px rgba(20,40,80,.35));
+    cursor:pointer;
+  }
+  #popup.show {
+    opacity:1; pointer-events:auto;
+    transform:translateX(0);
+    transition:transform .55s cubic-bezier(.22,1,.36,1), opacity .3s ease;
+  }
+  #popup.hide { opacity:0; transform:translateX(calc(100% + 60px)); pointer-events:none;
+    transition:transform .4s cubic-bezier(.55,0,.55,.2), opacity .35s ease; }
+  #popup img { width:100%; display:block; }
+  #popupClose { position:absolute; left:80%; top:2.6%; width:15%; height:7.2%; cursor:pointer; }
+
+  /* ===== 窗口 ===== */
+  #windowWrap {
+    position:absolute; left:468px; top:212px; width:984px; height:656px;
+    opacity:0; pointer-events:none; transform:scale(.5);
+  }
+  #windowWrap.open {
+    opacity:1; pointer-events:auto; transform:scale(1);
+    transition:transform .5s cubic-bezier(.22,1.2,.36,1), opacity .3s ease;
+  }
+  #windowWrap.closeAnim {
+    opacity:0; transform:scale(.5); pointer-events:none;
+    transition:transform .35s cubic-bezier(.55,0,.55,.2), opacity .3s ease;
+  }
+  #window {
+    width:1200px; height:800px; position:absolute; left:0; top:0;
+    transform:scale(.82); transform-origin:0 0;
+    background:url(assets/window.webp) 0 0 / 100% 100% no-repeat;
+    box-shadow:0 24px 70px rgba(15,30,60,.38), 0 6px 18px rgba(15,30,60,.22);
+    border-radius:12px;
+  }
+  /* 窗口控制按钮：X 图标实测位于 CSS (1169.5-1180, 19.5-30)，热区取 36×36 居中 */
+  #winClose { position:absolute; left:1157px; top:7px; width:36px; height:36px; cursor:pointer; }
+
+  /* 内容区（窗口坐标：x 234-1200, y 60-800；不裁剪——banner 需向左上扩展贴 sidebar 边线） */
+  #content { position:absolute; left:234px; top:60px; width:966px; height:740px; }
+
+  /* 第一层：返回 + loading */
+  #layer1 { position:absolute; inset:0; opacity:0; transition:opacity .4s ease; }
+  #layer1.on { opacity:1; }
+  #backFloat { position:absolute; left:20px; top:25px; width:48px; height:48px; cursor:pointer; }
+  #spinner { position:absolute; left:439px; top:314px; width:52px; height:52px; }
+  #spinner .spBase { width:100%; height:100%; opacity:.32; }
+  /* 色彩流光顺时针环转：外层转遮罩，内层反转保持 icon 正向 */
+  .spGlow {
+    position:absolute; inset:0;
+    animation:spinCW 1.15s linear infinite;
+    -webkit-mask:conic-gradient(from 0deg, #000 0deg, rgba(0,0,0,0) 85deg, rgba(0,0,0,0) 360deg);
+            mask:conic-gradient(from 0deg, #000 0deg, rgba(0,0,0,0) 85deg, rgba(0,0,0,0) 360deg);
+  }
+  .spGlow img { width:100%; height:100%; animation:spinCCW 1.15s linear infinite; }
+  @keyframes spinCW  { to { transform:rotate(360deg); } }
+  @keyframes spinCCW { to { transform:rotate(-360deg); } }
+
+  /* 第二层：banner + 占位卡 + 页脚 */
+  #layer2 { position:absolute; inset:0; opacity:0; transition:opacity .45s ease; }
+  #layer2.on { opacity:1; }
+  /* banner：切图条带 2000×480（比例 .24）。窗口设计坐标 x200(sidebar 边线)→1200、y45→285（红框实测），
+     换算到 content 内 = left:-34 / top:-15，宽 1000 高 240 */
+  #banner {
+    position:absolute; left:-34px; top:-15px; width:1000px; height:240px;
+    background:url(assets/banner.webp) 0 0 / 100% 100% no-repeat;
+    opacity:0; transform:translateY(-12px); transition:opacity .45s ease, transform .45s ease;
+  }
+  #layer2.bannerIn #banner { opacity:1; transform:translateY(0); }
+  /* 返回钮：白圆 + 深色左箭头（旧 banner 烘焙样式 1:1 重建，窗口 (234,70) 40px 圆） */
+  #backOnBanner { position:absolute; left:34px; top:25px; width:40px; height:40px; cursor:pointer;
+    background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(20,80,30,.12); }
+  #backOnBanner svg { width:15px; height:15px; display:block; }
+
+  /* 活动倒计时：新 banner 无烘焙文字，对中到「免费领皮肤」标题（条带 49.5%）正下方 */
+  .cd { position:absolute; left:49.5%; top:71%; transform:translate(-50%,-50%);
+    font-size:15px; font-weight:600; color:#333; letter-spacing:.4px;
+    white-space:nowrap; pointer-events:none; }
+
+  /* 卡片信息流：banner / footer 固定，中间区域上下滚动（隐藏滚动条）
+     顶部按用户红线提到窗口 y240（banner 下部淡出区之上不遮挡倒计时） */
+  #gridScroll { position:absolute; left:0; top:180px; bottom:80px; width:100%;
+    overflow-y:auto; scrollbar-width:none; overscroll-behavior:contain; }
+  #gridScroll::-webkit-scrollbar { display:none; }
+  /* 信息流左缘对齐返回钮（content x0 = 窗口 x234，距 sidebar 34px）；
+     右缘同样留 34px（与左侧间距对称，不再贴窗口右缘） */
+  #grid { position:relative; margin:10px 34px 26px 0; display:grid;
+    grid-template-columns:repeat(4,1fr); gap:36px 19px; }
+
+  /* 活动说明：官方切图（1760×258 @2x），随信息流滚动到底部展示 */
+  #rules { display:block; width:calc(100% - 34px); margin:26px 0 44px 0; }
+  .card {
+    position:relative; width:100%; aspect-ratio:410/408;
+    border-radius:10px; cursor:pointer;
+    opacity:0; transform:translateY(14px);
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  .card.in { opacity:1; transform:translateY(0); }
+  .card .ph, .card .real { position:absolute; inset:0; border-radius:10px;
+    background-size:100% 100%; background-repeat:no-repeat; }
+  .card .real { opacity:0; transition:opacity .45s ease; }
+  .card.loaded .real { opacity:1; }
+
+  /* S loading 徽标：静态白 S + 缎面流光（遮罩=S 徽标切图，位置按成品卡实测） */
+  .sBase {
+    position:absolute; left:28.29%; top:18.63%; width:31.22%; height:33.33%;
+    opacity:.62; pointer-events:none;
+    filter:drop-shadow(0 1px 1.5px rgba(20,30,50,.10));
+  }
+  .sShimmer {
+    position:absolute; left:28.29%; top:18.63%; width:31.22%; height:33.33%;
+    background:
+      linear-gradient(112deg,
+        rgba(255,255,255,0)   30%,
+        rgba(188,204,228,.42) 45%,
+        rgba(244,248,255,.86) 50%,
+        rgba(188,204,228,.42) 55%,
+        rgba(255,255,255,0)   70%),
+      linear-gradient(112deg,
+        rgba(255,255,255,0)   38%,
+        rgba(255,255,255,.94) 50%,
+        rgba(255,255,255,0)   62%);
+    background-size:300% 100%, 300% 100%;
+    background-repeat:no-repeat;
+    -webkit-mask:url('data:image/png;base64,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') center / 100% 100% no-repeat;
+            mask:url('data:image/png;base64,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') center / 100% 100% no-repeat;
+    filter:blur(.4px);
+    animation:shimmer 2.1s cubic-bezier(.4,0,.35,1) infinite;
+    pointer-events:none;
+  }
+  @keyframes shimmer {
+    0%   { background-position:135% 0, 135% 0; }
+    100% { background-position:-135% 0, -135% 0; }
+  }
+  .card.loaded .sShimmer { display:none; }
+
+  /* 单选圈：占位态用底图烘焙的灰圈；加载后统一用 CSS 圈覆盖 */
+  .selCheck {
+    position:absolute; left:82.7%; top:79.8%; width:11%; height:11%;
+    border-radius:50%; background:#fff; border:2px solid #e2e2e2;
+    display:none; align-items:center; justify-content:center;
+  }
+  .card.loaded .selCheck { display:flex; }
+  .selCheck::after {
+    content:""; width:78%; height:78%; border-radius:50%; background:#111; display:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size:62% 62%; background-position:center; background-repeat:no-repeat;
+  }
+  .card.selected .selCheck { border-color:transparent;
+    background:url(assets/check.webp) 0 0 / 100% 100% no-repeat; }
+  .card.selected .selCheck::after { content:none; }
+
+  /* 页脚 */
+  #footer {
+    position:absolute; left:0; right:34px; bottom:0; height:80px;
+    display:flex; align-items:center; padding:0;
+    opacity:0; transition:opacity .4s ease;
+  }
+  #layer2.footerIn #footer { opacity:1; }
+  #footHint { font-size:15px; color:#666; }
+  #footBtn {
+    margin-left:auto; position:relative; width:260px; height:48px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; color:#fff; transition:background .3s ease;
+  }
+  #layer2.loading #footBtn { background:#d9d9d9; }
+  #layer2.ready  #footBtn { background:#111; cursor:pointer; }
+  #footTag {
+    position:absolute; right:0; top:-14px; height:18px; line-height:18px; padding:0 7px;
+    background:#35e065; color:#fff; font-size:10px; border-radius:4px 4px 4px 0;
+    display:none; white-space:nowrap;
+  }
+  #layer2.ready #footTag { display:block; }
+
+  /* ===== 浏览器：元宝下载页（覆盖在搜狗窗口之上） ===== */
+  #browserWrap {
+    position:absolute; left:190px; top:75px; width:1540px; height:930px;
+    opacity:0; pointer-events:none; transform:scale(.92); z-index:40;
+    border-radius:12px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(10,25,55,.45), 0 8px 24px rgba(10,25,55,.25);
+  }
+  #browserWrap.open {
+    opacity:1; pointer-events:auto; transform:scale(1);
+    transition:transform .45s cubic-bezier(.22,1.15,.36,1), opacity .3s ease;
+  }
+  #browserWrap.closing {
+    opacity:0; transform:scale(.94); pointer-events:none;
+    transition:all .3s ease;
+  }
+  #browserWrap .bw { position:absolute; inset:0; width:100%; height:100%;
+    opacity:0; transition:opacity .4s ease; }
+  #browserWrap[data-st="page"]  #bwPage,
+  #browserWrap[data-st="dling"] #bwDling,
+  #browserWrap[data-st="done"]  #bwDone { opacity:1; }
+
+  /* 平台卡片热区 */
+  .platSpot { position:absolute; top:28.88%; width:8.33%; height:11.64%;
+    cursor:pointer; border-radius:10px; transition:box-shadow .15s ease; }
+  .platSpot:hover { box-shadow:0 4px 18px rgba(0,0,0,.14); }
+
+  /* 下载进度填充：叠在烘焙细进度条上（实测轨道 x1261-1633 / y244-247 @1920×1160），
+     从 34.9% 处起步长到轨道末端 85.05% */
+  #dlFill { position:absolute; left:65.68%; top:21.02%; width:6.77%; height:0.36%;
+    border-radius:99px; background:#0c53c7; opacity:0; pointer-events:none; }
+  #browserWrap[data-st="dling"] #dlFill { opacity:1; }
+
+  #dlCloseHot { position:absolute; left:84.8%; top:11.1%; width:2.4%; height:2.9%; cursor:pointer; }
+  #dlRowHot { position:absolute; left:64.5%; top:14.6%; width:22.2%; height:5.3%;
+    cursor:pointer; border-radius:8px; display:none; }
+  #browserWrap[data-st="done"] #dlRowHot { display:block; }
+
+  /* ===== 元宝窗口（叠加在搜狗窗口之上） ===== */
+  #ybWrap {
+    position:absolute; left:460px; top:206px; width:1000px; height:667px;
+    opacity:0; pointer-events:none; transform:scale(.5); z-index:50;
+    border-radius:12px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(10,25,55,.45), 0 8px 24px rgba(10,25,55,.25);
+  }
+  #ybWrap.open {
+    opacity:1; pointer-events:auto; transform:scale(1);
+    transition:transform .5s cubic-bezier(.22,1.2,.36,1), opacity .3s ease;
+  }
+  #ybWrap .yw { position:absolute; inset:0; width:100%; height:100%;
+    opacity:0; transition:opacity .5s ease; }
+  #ybWrap:not(.logged) #ywBase   { opacity:1; }
+  #ybWrap.logged       #ywLogged { opacity:1; }
+
+  /* 顶部任务提醒栏（规范样式：黑底白字 + 白 icon + 主副标题 + 白底黑字按钮；与 expBar 同宽高同位置）
+     入场与 expBar 同节奏：元宝窗口弹入落定后（延迟 450ms）再淡入 + 下落 16px，
+     避免和窗口 scale 弹入同时发生而被掩盖 */
+  #taskBar {
+    position:absolute; left:50%; top:12px; width:560px; height:68px;
+    display:flex; align-items:center; gap:12px; padding:0 14px 0 16px;
+    background:#1b1d23; border-radius:14px;
+    box-shadow:0 8px 24px rgba(10,20,40,.35);
+    white-space:nowrap; z-index:10; cursor:pointer;
+    opacity:0; pointer-events:none;
+    transform:translateX(-50%) translateY(-16px);
+  }
+  #ybWrap.open:not(.logged) #taskBar {
+    opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0);
+    animation:barIn .4s ease .45s both;
+  }
+  @keyframes barIn {
+    from { opacity:0; transform:translateX(-50%) translateY(-16px); }
+    to   { opacity:1; transform:translateX(-50%) translateY(0); }
+  }
+  #taskBar .ticon { font-style:normal; flex:none; width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff; color:#141414; font-size:20px; font-weight:800;
+    animation:pulse 1.6s ease-in-out infinite; }
+  #taskBar .tx { flex:1; min-width:0; }
+  #taskBar .tx b { display:block; font-size:15px; line-height:1.3; color:#fff; font-weight:700; }
+  #taskBar .tx span { display:block; font-size:12px; line-height:1.3; color:rgba(255,255,255,.62); margin-top:2px; }
+  #taskBar .tbtn { flex:none; margin-left:auto; border:none; background:#fff; color:#141414;
+    font-size:13.5px; font-weight:700; padding:10px 20px; border-radius:99px; cursor:pointer; }
+  #taskBar .tbtn:hover { background:#e9ebee; }
+  /* 登录成功后任务栏隐藏，由体验计时条接管 */
+  #ybWrap.logged #taskBar { display:none; }
+  @keyframes pulse { 0%,100% { box-shadow:0 0 0 0 rgba(255,255,255,.4); }
+                     50%     { box-shadow:0 0 0 4px rgba(255,255,255,0); } }
+  @keyframes pulseG { 0%,100% { box-shadow:0 0 0 0 rgba(52,199,89,.5); }
+                      50%     { box-shadow:0 0 0 5px rgba(52,199,89,0); } }
+
+  /* ===== 体验计时条（黑底白字规范；达成态保持绿色进度效果；与 taskBar 同宽高同位置） ===== */
+  #expBar {
+    position:absolute; left:50%; top:12px; width:560px; height:68px;
+    transform:translateX(-50%) translateY(-16px);
+    display:flex; align-items:center; gap:12px; padding:0 14px 0 16px;
+    background:#1b1d23; color:#fff; border-radius:14px;
+    box-shadow:0 8px 24px rgba(10,20,40,.35);
+    opacity:0; pointer-events:none; z-index:11;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  #expBar.active { opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
+  #expBar .expRing { position:relative; width:44px; height:44px; flex:none; }
+  #expBar .expRing svg { transform:rotate(-90deg); width:44px; height:44px; display:block; }
+  #expBar .expRing .n { position:absolute; inset:0; display:flex; align-items:center;
+    justify-content:center; font-size:13px; font-weight:800; }
+  #expBar .tx { flex:1; min-width:0; }
+  #expBar .tx b { display:block; font-size:15px; line-height:1.3; }
+  #expBar .tx span { display:block; font-size:12px; color:rgba(255,255,255,.65); margin-top:2px; }
+  #expBar .expBack { display:none; margin-left:auto; flex:none; background:#4ade80; color:#fff;
+    border:none; border-radius:99px; padding:10px 20px; font-size:13.5px; font-weight:700;
+    cursor:pointer; white-space:nowrap; }
+  #expBar.done { background:linear-gradient(135deg,#1f9d4e,#34c759); }
+  #expBar.done .expBack { display:block; animation:pulseG 1.4s infinite; }
+
+  /* ===== 搜狗窗口：已完成页 / 皮肤详情页（整窗替换层） ===== */
+  #sgDone, #sgDetail {
+    position:absolute; inset:0; border-radius:12px; overflow:hidden;
+    background:#fff; opacity:0; pointer-events:none; transition:opacity .35s ease;
+  }
+  #windowWrap[data-pg="done"]   #sgDone,
+  #windowWrap[data-pg="detail"] #sgDetail { opacity:1; pointer-events:auto; }
+  #sgDone > img { position:absolute; inset:0; width:100%; height:100%; }
+  /* 详情页：切图 1920×1674 铺内容展示区（红框：x200-1200 / y60-800），按 1000 宽（×0.5208）缩放后纵向滚动 */
+  #sgDetail { left:200px; top:60px; width:1000px; overflow-y:auto; scrollbar-width:none; overscroll-behavior:contain; }
+  /* 详情页激活时隐藏下层活动页（banner 上缘 y45-60 会露边） */
+  #windowWrap[data-pg="detail"] #content { visibility:hidden; }
+  #sgDetail::-webkit-scrollbar { display:none; }
+  #sgDetail > img { position:relative; display:block; width:100%; height:auto; }
+  /* 已完成页热区（sg-done.webp 1200×800 实测：返回白圆 x263-297/y96-126，立即启用 x937-1039/y233-269） */
+  #sgBackDone  { position:absolute; left:250px; top:84px; width:62px; height:54px; cursor:pointer; }
+  #sgEnableBtn { position:absolute; left:926px; top:222px; width:124px; height:58px; cursor:pointer; }
+  /* 详情页热区（切图坐标 ×0.5208：首页|返回 墨迹 x118-290/y71-97；立即启用按钮实测 x1018-1304/y553-648） */
+  #sgBackDetail { position:absolute; left:52px; top:24px; width:110px; height:44px; cursor:pointer; }
+  /* 详情页启用按钮：外扩盖住烘焙按钮（×0.5208 → 530-679 / 288-337.5），防漏边 */
+  #sgDetailEnable { position:absolute; left:528px; top:286px; width:153px; height:54px; cursor:pointer;
+    border:none; border-radius:99px; background:#ff6100; color:#fff;
+    font-size:19px; font-weight:700; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; }
+  #sgDetailEnable.on { background:#f2f3f5; color:#9aa0a8; box-shadow:inset 0 0 0 1px #e3e5e9; }
+  /* 已完成页倒计时（烘焙文字已抹除，与未完成页共用同一计时器） */
+  #sgDone .cd { left:352px; top:253px; font-size:14.5px; }
+  /* 精选推荐信息流：展示区域内上下滑动（隐藏滚动条） */
+  #feedScroll { position:absolute; left:198px; top:300px; width:1002px; bottom:0;
+    background:#fff; overflow-y:auto; scrollbar-width:none; overscroll-behavior:contain; }
+  #feedScroll::-webkit-scrollbar { display:none; }
+  #feedTrack { position:relative; margin-left:60px; padding:20px 0 60px; width:879px; }
+  #feedTrack .fimg { display:block; width:879px; }
+  .fhot { position:absolute; cursor:pointer; border-radius:10px; transition:box-shadow .15s ease; }
+  .fhot:hover { box-shadow:0 6px 20px rgba(0,0,0,.18); }
+
+  /* ===== 获得皮肤弹窗（灰色蒙层 + 弹窗切图） ===== */
+  #sgDim { position:absolute; inset:0; background:rgba(0,0,0,.5); border-radius:12px;
+    opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:30; }
+  #windowWrap.redeem #sgDim { opacity:1; pointer-events:auto; }
+  #sgRedeem { position:absolute; left:400px; top:190px; width:400px; z-index:31;
+    opacity:0; transform:scale(.9) translateY(12px); pointer-events:none;
+    transition:opacity .3s ease, transform .38s cubic-bezier(.22,1.2,.36,1);
+    filter:drop-shadow(0 18px 50px rgba(0,0,0,.35)); }
+  #windowWrap.redeem #sgRedeem { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
+  #sgRedeem .rdBg { display:block; width:100%; }
+  #sgRedeem .rdSkin { position:absolute; left:8%; top:22.2%; width:83.9%; height:56.3%;
+    border-radius:14px; object-fit:cover; object-position:center 55%; }
+  /* 动态皮肤名：与烘焙标题「恭喜你免费获得皮肤」（墨迹显示区 x33-210.5 / y49.5-67.5）同基线同字号 */
+  #sgRedeem .rdName { position:absolute; left:53.9%; top:11.7%; font-size:19px; line-height:1;
+    font-weight:700; color:#1a1a1a; white-space:nowrap; }
+  #rdGo   { position:absolute; left:40%;   top:84.2%; width:25%; height:8.5%; cursor:pointer; border-radius:99px; }
+  #rdSkip { position:absolute; left:67.5%; top:84.2%; width:25%; height:8.5%; cursor:pointer; border-radius:99px; }
+  #rdClose{ position:absolute; left:92%;   top:1.2%;  width:6%;  height:5.8%; cursor:pointer; }
+
+  /* 登录弹窗（遮罩 + 弹窗切图） */
+  #ybDim { position:absolute; inset:0; background:rgba(0,0,0,.5);
+    opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:20; }
+  #ybWrap.modal #ybDim { opacity:1; pointer-events:auto; }
+  #ybModal { position:absolute; left:33.33%; top:21.38%; width:33.33%; height:57.25%;
+    opacity:0; transform:scale(.92) translateY(14px); pointer-events:none;
+    transition:opacity .3s ease, transform .35s cubic-bezier(.22,1.2,.36,1); z-index:21;
+    filter:drop-shadow(0 18px 50px rgba(0,0,0,.3)); }
+  #ybWrap.modal #ybModal { opacity:1; transform:scale(1) translateY(0); pointer-events:auto; }
+
+  /* 元宝热区 */
+  #ybLoginBtn, #ybNotloginZone { display:none; cursor:pointer; }
+  #ybWrap:not(.logged) #ybLoginBtn { display:block; position:absolute;
+    left:91.04%; top:2.25%; width:7.08%; height:3.44%; }
+  #ybWrap:not(.logged) #ybNotloginZone { display:block; position:absolute;
+    left:0; top:95.3%; width:8%; height:4.7%; }
+  #wxQuickBtn { position:absolute; left:33.75%; top:50.55%; width:32.5%; height:5.79%; cursor:pointer; z-index:22; }
+  #modalClose { position:absolute; left:89.1%; top:5.24%; width:5%; height:4.37%; cursor:pointer; z-index:22; }
+  /* 登录弹窗未出现时，弹窗内按钮不可点、也不参与热区高亮 */
+  #ybWrap:not(.modal) #wxQuickBtn, #ybWrap:not(.modal) #modalClose { visibility:hidden; }
+
+  /* Toast */
+  #toast { position:absolute; left:717px; top:87px; transform:translate(-50%,10px);
+    background:rgba(17,20,26,.9); color:#fff; font-size:15px; padding:11px 24px;
+    border-radius:10px; opacity:0; pointer-events:none; z-index:70;
+    transition:opacity .25s ease, transform .25s ease; }
+  #toast.show { opacity:1; transform:translate(-50%,0); }
+
+  /* 消失动画（弹窗被点击后） */
+  .fadeOutFast { opacity:0 !important; transform:translateX(calc(100% + 60px)) scale(.9) !important;
+    transition:all .28s ease !important; }
+</style>
+</head>
+<body>
+<div id="stageWrap">
+  <div id="stage">
+
+    <!-- 桌面弹窗 -->
+    <div id="popup">
+      <img src="assets/popup.webp" alt="免费领皮肤弹窗">
+      <div id="popupClose" title="关闭"></div>
+    </div>
+
+    <!-- 主窗口 -->
+    <div id="windowWrap" data-pg="todo">
+      <div id="window">
+        <div id="winClose" title="关闭"></div>
+
+        <div id="content">
+          <!-- 第一层：返回按钮 + loading -->
+          <div id="layer1">
+            <img id="backFloat" src="assets/back.webp" alt="返回">
+            <div id="spinner">
+              <img class="spBase" src="assets/spinner.webp" alt="loading">
+              <div class="spGlow"><img src="assets/spinner.webp" alt=""></div>
+            </div>
+          </div>
+
+          <!-- 第二层：banner + 卡片 + 页脚 -->
+          <div id="layer2" class="loading">
+            <div id="banner">
+              <div id="backOnBanner" title="返回"><svg viewBox="0 0 24 24" fill="none" stroke="#3a3f47" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 5 7.5 12 14.5 19"/></svg></div>
+              <div class="cd">｛活动还剩 <span id="cdD">3</span> 天 <span id="cdT">20:56:31</span>｝</div>
+            </div>
+            <div id="gridScroll">
+              <div id="grid"></div>
+              <img id="rules" src="assets/rules.webp" alt="活动说明">
+            </div>
+            <div id="footer">
+              <div id="footHint">请选择你将要解锁的皮肤吧</div>
+              <div id="footBtn">
+                <span id="footTag">仅限元宝电脑版新用户</span>
+                下载并打开元宝解锁皮肤 →
+              </div>
+            </div>
+             </div>
+          </div>
+
+        <!-- 活动页已完成（banner 已完成态 + 精选推荐可滚动信息流） -->
+        <div id="sgDone">
+          <img src="assets/sg-done.webp" alt="活动页已完成">
+          <div class="cd">｛活动还剩 <span id="cdD2">3</span> 天 <span id="cdT2">20:56:31</span>｝</div>
+          <div id="feedScroll">
+            <div id="feedTrack">
+              <img class="fimg" src="assets/sg-feed.webp" alt="精选推荐">
+              <img class="fimg" src="assets/sg-feed.webp" alt="">
+            </div>
+          </div>
+          <div id="sgBackDone" title="返回"></div>
+          <div id="sgEnableBtn" title="立即启用"></div>
+        </div>
+
+        <!-- 皮肤详情页 -->
+        <div id="sgDetail">
+          <img src="assets/sg-detail.webp" alt="皮肤详情">
+          <div id="sgBackDetail" title="返回"></div>
+          <button id="sgDetailEnable">立即启用</button>
+        </div>
+
+        <!-- 获得皮肤弹窗（灰色蒙层 + 弹窗切图） -->
+        <div id="sgDim"></div>
+
+        <!-- Toast（窗口画布内：与 banner 返回按钮纵向居中，内容区横向居中） -->
+        <div id="toast"></div>
+        <div id="sgRedeem">
+          <img class="rdBg" src="assets/redeem-modal.webp" alt="恭喜你免费获得皮肤">
+          <img class="rdSkin" id="rdSkinImg" src="assets/skin1.webp" alt="">
+          <div class="rdName" id="rdName">“梦幻森林”</div>
+          <div id="rdGo" title="去启用"></div>
+          <div id="rdSkip" title="暂不启用"></div>
+          <div id="rdClose" title="关闭"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 浏览器：元宝下载页（覆盖搜狗窗口） -->
+    <div id="browserWrap" data-st="page">
+      <img class="bw" id="bwPage"  src="assets/browser-page.webp"  alt="元宝下载页">
+      <img class="bw" id="bwDling" src="assets/browser-dling.webp" alt="下载中">
+      <img class="bw" id="bwDone"  src="assets/browser-done.webp"  alt="下载完成">
+      <div id="dlFill"></div>
+      <div class="platSpot" style="left:23.18%" title="Mac"></div>
+      <div class="platSpot" style="left:32.15%" title="Windows"></div>
+      <div class="platSpot" style="left:41.12%" title="iOS"></div>
+      <div class="platSpot" style="left:50.10%" title="Android"></div>
+      <div class="platSpot" style="left:59.06%" title="网页版"></div>
+      <div class="platSpot" style="left:68.04%" title="浏览器插件"></div>
+      <div id="dlCloseHot" title="关闭下载弹窗"></div>
+      <div id="dlRowHot" title="启动元宝"></div>
+    </div>
+
+    <!-- 元宝窗口（叠加在搜狗窗口之上） -->
+    <div id="ybWrap">
+      <img class="yw" id="ywBase"   src="assets/yb-notlogin.webp" alt="元宝未登录">
+      <img class="yw" id="ywLogged" src="assets/yb-logged.webp"   alt="元宝已登录">
+      <div id="taskBar" title="登录元宝即获得皮肤">
+        <i class="ticon">!</i>
+        <div class="tx">
+          <b>登录元宝即获得皮肤</b>
+          <span>登录后即可免费领取皮肤</span>
+        </div>
+        <button class="tbtn">立即登录</button>
+      </div>
+      <!-- 体验计时条（登录成功后浮出，达成后变绿出「返回领皮肤」） -->
+      <div id="expBar">
+        <div class="expRing">
+          <svg viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,.2)" stroke-width="4.5" fill="none"/>
+            <circle id="expRingFg" cx="22" cy="22" r="18" stroke="#34c759" stroke-width="4.5" fill="none"
+              stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="0"/>
+          </svg>
+          <div class="n" id="expNum">30</div>
+        </div>
+        <div class="tx" id="expTx">
+          <b>正在体验元宝 AI…</b>
+          <span>停留满 30 秒即可返回领皮肤</span>
+        </div>
+        <button class="expBack" id="expBackBtn">返回领皮肤</button>
+      </div>
+      <div id="ybDim"></div>
+      <img id="ybModal" src="assets/yb-modal.webp" alt="登录元宝">
+      <div id="ybLoginBtn" title="登录"></div>
+      <div id="ybNotloginZone" title="未登录"></div>
+      <div id="wxQuickBtn" title="微信快捷登录"></div>
+      <div id="modalClose" title="关闭"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 右侧流程注释面板 -->
+<aside id="panel">
+  <div class="phead">
+    <h1>下载元宝 · 免费领皮肤</h1>
+    <span class="cnt" id="stepCnt">01 / 19</span>
+  </div>
+  <div id="steps"></div>
+  <div id="panelBtns">
+    <button id="btnReset">↺ 重置流程</button>
+    <button id="btnHot">显示热区</button>
+  </div>
+</aside>
+
+<script>
+const SKIN_NAMES = ["梦幻森林多肉","守月","绿意喵语","水豚噜噜","青天","可爱长颈鹿","LOOPY爱你","WONDERTOWN",
+  "梦幻森林 Ⅱ","水豚噜噜 Ⅱ","WONDERTOWN Ⅱ","可爱长颈鹿 Ⅱ","守月 Ⅱ","绿意喵语 Ⅱ","水豚噜噜 Ⅲ","LOOPY爱你 Ⅱ"];
+
+const $ = s => document.querySelector(s);
+let hotOn = false;   /* 声明置顶：setStep 初始调用早于底部按钮区块，避免 TDZ */
+const stage = $("#stage"), popup = $("#popup"), wrap = $("#windowWrap");
+const layer1 = $("#layer1"), layer2 = $("#layer2");
+const grid = $("#grid"), gridScroll = $("#gridScroll"), footHint = $("#footHint");
+
+/* ---- 自适应缩放（面板占 1/5，舞台吃剩余 80%） ---- */
+function fit() {
+  /* ★ 2026-11-03:改用 stageWrap 的实际可用宽高(而不是 innerWidth*0.77)。
+     body 加了内边距 + 列间距之后,用比例估算会算大几十 px,
+     舞台会顶到面板底下。直接量容器最准,也自动适配任意面板宽度。 */
+  const wrap = document.getElementById("stageWrap");
+  const avail = wrap.clientWidth;
+  const availH = wrap.clientHeight;
+  const s = Math.min(avail/1920, availH/1080);
+  stage.style.transform = `scale(${s})`;
+}
+addEventListener("resize", fit); fit();
+
+/* ---- 流程注释面板 ---- */
+const STEP_DEFS = [
+  { n:0,  title:"弹窗推出" },
+  { n:1,  title:"关闭弹窗", action:true },
+  { n:2,  title:"打开主窗口", action:true },
+  { n:3,  title:"加载 · 第一层" },
+  { n:4,  title:"加载 · 第二层" },
+  { n:5,  title:"加载完成" },
+  { n:6,  title:"选择皮肤", action:true },
+  { n:7,  title:"返回桌面", action:true },
+  { n:8,  title:"打开下载页" },
+  { n:9,  title:"下载元宝" },
+  { n:10, title:"下载完成" },
+  { n:11, title:"启动元宝" },
+  { n:12, title:"登录元宝", action:true },
+  { n:13, title:"登录成功" },
+  { n:14, title:"体验 30 秒" },
+  { n:15, title:"体验达成", action:true },
+  { n:16, title:"领取皮肤" },
+  { n:17, title:"活动页已完成" },
+  { n:18, title:"皮肤详情" },
+];
+const stepsEl = $("#steps");
+STEP_DEFS.forEach((s, i) => {
+  const d = document.createElement("div");
+  d.className = "step" + (s.action ? " action" : "");
+  d.dataset.n = s.n;
+  d.innerHTML = `<div class="num">${s.action ? (s.n===1?"✕":s.n===2?"▶":"⏎") : String(i+1).padStart(2,"0")}</div>
+    <div class="tt">${s.title}</div>`;
+  d.addEventListener("click", () => gotoStep(s.n));
+  stepsEl.appendChild(d);
+});
+
+/* 当前步滚入步骤列表并居中：保证前后相邻项可见；首/末项贴边时留呼吸位，末项不被裁切 */
+function revealStep(el) {
+  if (!el) return;
+  const lRect = stepsEl.getBoundingClientRect();
+  const eRect = el.getBoundingClientRect();
+  const elTop = eRect.top - lRect.top + stepsEl.scrollTop;
+  let target = elTop - (stepsEl.clientHeight - eRect.height) / 2;
+  if (el === stepsEl.firstElementChild) target = 0;
+  if (el === stepsEl.lastElementChild) target = stepsEl.scrollHeight - stepsEl.clientHeight;
+  target = Math.max(0, Math.min(target, stepsEl.scrollHeight - stepsEl.clientHeight));
+  stepsEl.scrollTo({ top: target, behavior: "smooth" });
+}
+
+function setStep(n) {
+  stepsEl.querySelectorAll(".step").forEach(el =>
+    el.classList.toggle("active", +el.dataset.n === n));
+  revealStep(stepsEl.querySelector(".step.active"));
+  const cnt = document.getElementById("stepCnt");
+  if (cnt) {
+    const idx = STEP_DEFS.findIndex(s => s.n === n);
+    cnt.textContent = (idx >= 0 ? String(idx + 1).padStart(2, "0") : "--") + " / " + STEP_DEFS.length;
+  }
+  /* 热区开启时：等过渡/浮现完成再重算，任何状态变化（含直接交互）后只保留有效热区 */
+  if (hotOn) setTimeout(refreshHotspots, 650);
+}
+setStep(0);
+
+/* ---- 状态跳转（冻结过渡，直接落到目标状态） ---- */
+function freezeApply(fn) {
+  stage.classList.add("noanim");
+  fn();
+  requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove("noanim")));
+}
+function applyDesktop() {
+  clearTimers(); resetLoading();
+  wrap.classList.remove("open","closeAnim","redeem");
+  wrap.dataset.pg = "todo";
+  $("#feedScroll").scrollTop = 0;
+  popup.classList.remove("hide","fadeOutFast");
+  popup.classList.add("show");
+  resetBrowser(); resetYuanbao();
+  setStep(0);
+}
+function applyLoadingLayer(depth) { /* depth: 1=第一层 2=第二层占位 3=加载完成 */
+  clearTimers(); resetLoading();
+  wrap.classList.remove("closeAnim"); wrap.classList.add("open");
+  popup.classList.remove("show"); popup.classList.add("fadeOutFast");
+  if (depth === 1) {
+    layer1.classList.add("on"); setStep(3);
+  } else {
+    layer2.classList.add("on");
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      layer2.classList.add("bannerIn","footerIn");
+      cards.forEach(c => c.classList.add("in"));
+    }));
+    if (depth === 2) setStep(4);
+    else {
+      layer2.classList.remove("loading"); layer2.classList.add("ready");
+      cards.forEach(c => c.classList.add("loaded")); setStep(5);
+    }
+  }
+}
+function gotoStep(n) {
+  /* 8-13 公共前置：搜狗窗口就绪 + 已选皮肤（示例用最后一张卡） */
+  const sogouReadySelected = () => {
+    applyLoadingLayer(3);
+    const c = cards[cards.length-1];
+    c.classList.add("selected");
+    c.scrollIntoView({ block:"nearest" });
+    footHint.textContent = `已选择“${SKIN_NAMES[c.dataset.i]}”，快去完成任务吧`;
+  };
+  switch (n) {
+    case 0: freezeApply(applyDesktop); break;
+    case 1: /* 执行关闭动作：仅在弹窗展示时有效 */
+      if (popup.classList.contains("show")) { clearTimers(); hidePopup(false); showPopup(1200); setStep(1); }
+      break;
+    case 2: /* 执行打开动作 */
+      if (popup.classList.contains("show")) { clearTimers(); openWindow(); setStep(2); }
+      break;
+    case 3: freezeApply(() => applyLoadingLayer(1)); break;
+    case 4: freezeApply(() => applyLoadingLayer(2)); break;
+    case 5: freezeApply(() => applyLoadingLayer(3)); break;
+    case 6:
+      freezeApply(() => {
+        applyLoadingLayer(3);
+        const c = cards[cards.length-1]; /* 示例：选「可爱长颈鹿」 */
+        c.classList.add("selected");
+        c.scrollIntoView({ block:"nearest" });
+        footHint.textContent = `已选择“${SKIN_NAMES[c.dataset.i]}”，快去完成任务吧`;
+        setStep(6);
+      });
+      break;
+    case 7: if (wrap.classList.contains("open")) { closeWindow(); setStep(7); } break;
+    case 8: freezeApply(() => { sogouReadySelected(); resetYuanbao(); openBrowser(); }); break;
+    case 9: freezeApply(() => {
+        sogouReadySelected(); resetYuanbao(); resetBrowser();
+        browserWrap.classList.add("open");
+        browserWrap.dataset.st = "dling";
+        dlFill.style.transition = "none"; dlFill.style.width = "12%"; /* 中段进度 */
+        setStep(9);
+      }); break;
+    case 10: freezeApply(() => {
+        sogouReadySelected(); resetYuanbao(); resetBrowser();
+        browserWrap.classList.add("open");
+        browserWrap.dataset.st = "done";
+        dlFill.style.transition = "none"; dlFill.style.width = "19.38%";
+        setStep(10);
+      }); break;
+    case 11: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        ybWrap.classList.add("open");
+        setStep(11);
+      }); break;
+    case 12: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        ybWrap.classList.add("open","modal");
+        setStep(12);
+      }); break;
+    case 13: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        ybWrap.classList.add("open","logged");
+        setStep(13);
+      }); break;
+    case 14: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        ybWrap.classList.add("open","logged");
+        startExp();
+      }); break;
+    case 15: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        ybWrap.classList.add("open","logged");
+        expBar.classList.add("active");
+        finishExp();
+      }); break;
+    case 16: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        fillRedeem();
+        wrap.classList.add("redeem");
+        setStep(16);
+      }); break;
+    case 17: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        wrap.classList.remove("redeem");
+        wrap.dataset.pg = "done";
+        setStep(17);
+      }); break;
+    case 18: freezeApply(() => {
+        sogouReadySelected(); resetBrowser(); resetYuanbao();
+        wrap.classList.remove("redeem");
+        wrap.dataset.pg = "detail";
+        setStep(18);
+      }); break;
+  }
+}
+
+/* ---- 底部按钮 ---- */
+$("#btnReset").addEventListener("click", () => freezeApply(applyDesktop));
+const HOTSPOTS = ["#popup","#popupClose","#backFloat","#backOnBanner","#winClose",".card","#footBtn",
+  ".platSpot","#dlCloseHot","#dlRowHot","#taskBar","#ybLoginBtn","#ybNotloginZone","#wxQuickBtn","#modalClose",
+  "#expBackBtn","#sgBackDone","#sgEnableBtn",".fhot","#sgBackDetail","#sgDetailEnable",
+  "#rdGo","#rdSkip","#rdClose","#sgDim"];
+/* 仅高亮「当前可见且可交互」的元素，避免隐藏窗口里的热区漂在桌面上变成无效提醒 */
+function isHotVisible(el) {
+  if (el.checkVisibility)
+    { if (!el.checkVisibility({ visibilityProperty:true, opacityProperty:true, contentVisibilityAuto:true })) return false; }
+  else if (el.getClientRects().length === 0) return false;
+  let n = el;
+  while (n && n !== document.documentElement) {
+    const s = getComputedStyle(n);
+    if (s.display === "none" || s.visibility === "hidden" || parseFloat(s.opacity) === 0) return false;
+    n = n.parentElement;
+  }
+  return true;
+}
+function refreshHotspots() {
+  HOTSPOTS.forEach(sel => document.querySelectorAll(sel).forEach(el => el.classList.remove("hs")));
+  if (!hotOn) return;
+  HOTSPOTS.forEach(sel => document.querySelectorAll(sel).forEach(el => {
+    if (!isHotVisible(el)) return;
+    const r = el.getBoundingClientRect();
+    if (r.width < 4 || r.height < 4) return;
+    /* 被上层窗口/蒙层盖住的元素不算有效热区 */
+    const hit = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
+    if (hit && (hit === el || el.contains(hit))) el.classList.add("hs");
+  }));
+}
+$("#btnHot").addEventListener("click", function () {
+  hotOn = !hotOn;
+  this.classList.toggle("on", hotOn);
+  this.textContent = hotOn ? "隐藏热区" : "显示热区";
+  refreshHotspots();
+});
+
+/* ---- 生成卡片（素材 4 排 × 4 列 = 16 张，超出视口部分滚动查看） ---- */
+for (let i = 0; i < 16; i++) {
+  const c = document.createElement("div");
+  c.className = "card"; c.dataset.i = i;
+  c.innerHTML =
+    `<div class="ph"  style="background-image:url(assets/card-bg.webp)">` +
+      `<img class="sBase" src="assets/s-badge.webp" alt=""><div class="sShimmer"></div></div>` +
+    `<div class="real" style="background-image:url(assets/card${i+1}.webp)"></div>` +
+    `<div class="selCheck"></div>`;
+  grid.appendChild(c);
+}
+const cards = [...grid.children];
+
+/* ---- 状态机 ---- */
+let timers = [];
+const later = (fn, t) => timers.push(setTimeout(fn, t));
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+function showPopup(delay = 600) {
+  later(() => {
+    popup.classList.remove("hide", "fadeOutFast");
+    popup.classList.add("show");
+    setStep(0);
+  }, delay);
+}
+function hidePopup(instant) {
+  if (instant) { popup.classList.add("fadeOutFast"); popup.classList.remove("show"); }
+  else { popup.classList.remove("show"); popup.classList.add("hide"); }
+}
+
+function resetLoading() {
+  wrap.dataset.pg = "todo";
+  layer1.classList.remove("on");
+  layer2.classList.remove("on","bannerIn","footerIn","ready");
+  layer2.classList.add("loading");
+  cards.forEach(c => c.classList.remove("in","loaded","selected"));
+  gridScroll.scrollTop = 0;
+  footHint.textContent = "请选择你将要解锁的皮肤吧";
+}
+
+function openWindow() {
+  hidePopup(true);
+  resetLoading();
+  wrap.classList.remove("closeAnim");
+  wrap.classList.add("open");
+  /* 第一层：返回 + spinner（展示约 1s） */
+  later(() => { layer1.classList.add("on"); setStep(3); }, 350);
+  /* 第二层：banner + 占位卡整组浮现 + 页脚（展示约 1s） */
+  later(() => {
+    layer1.classList.remove("on");
+    layer2.classList.add("on");
+    setStep(4);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      layer2.classList.add("bannerIn");
+      cards.forEach(c => c.classList.add("in"));
+      later(() => layer2.classList.add("footerIn"), 200);
+    }));
+  }, 1400);
+  /* 加载完成：真实卡片逐张替换 */
+  later(() => {
+    layer2.classList.remove("loading");
+    layer2.classList.add("ready");
+    setStep(5);
+    cards.forEach((c, i) => later(() => c.classList.add("loaded"), i * 50));
+  }, 2400);
+}
+
+function closeWindow(repopDelay = 800) {
+  clearTimers();
+  wrap.classList.remove("open");
+  wrap.classList.add("closeAnim");
+  setStep(7);
+  showPopup(repopDelay);
+}
+
+/* ---- 交互 ---- */
+/* 弹窗：点关闭 → 消失后重新推出；点弹窗主体 → 打开窗口 */
+$("#popupClose").addEventListener("click", e => {
+  e.stopPropagation();
+  clearTimers();
+  hidePopup(false);
+  showPopup(1200);
+  setStep(1);
+});
+popup.addEventListener("click", () => { clearTimers(); openWindow(); setStep(2); });
+
+/* 窗口：返回 / 关闭 → 回桌面并重新推出弹窗 */
+$("#backFloat").addEventListener("click", e => { e.stopPropagation(); closeWindow(); });
+$("#backOnBanner").addEventListener("click", e => { e.stopPropagation(); closeWindow(); });
+$("#winClose").addEventListener("click", e => { e.stopPropagation(); closeWindow(); });
+
+/* 卡片选择（加载完成后可点） */
+cards.forEach(c => c.addEventListener("click", () => {
+  if (!c.classList.contains("loaded")) return;
+  const was = c.classList.contains("selected");
+  cards.forEach(x => x.classList.remove("selected"));
+  if (!was) {
+    c.classList.add("selected");
+    footHint.textContent = `已选择“${SKIN_NAMES[c.dataset.i]}”，快去完成任务吧`;
+    setStep(6);
+  } else {
+    footHint.textContent = "请选择你将要解锁的皮肤吧";
+  }
+}));
+
+/* ===== 下载链路：页脚按钮 → 浏览器下载页 → 元宝登录 ===== */
+const browserWrap = $("#browserWrap"), ybWrap = $("#ybWrap"),
+      dlFill = $("#dlFill"), taskBar = $("#taskBar"), toast = $("#toast");
+
+let dlTimers = [];
+const dlLater = (fn, t) => dlTimers.push(setTimeout(fn, t));
+function clearDlTimers() { dlTimers.forEach(clearTimeout); dlTimers = []; }
+
+function selectedSkinIdx() {
+  const i = cards.findIndex(c => c.classList.contains("selected"));
+  return i >= 0 ? i : null;
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+function resetBrowser() {
+  clearDlTimers();
+  browserWrap.classList.remove("open", "closing");
+  browserWrap.dataset.st = "page";
+  dlFill.style.transition = "none";
+  dlFill.style.width = "6.77%";
+}
+function resetYuanbao() {
+  clearDlTimers();
+  ybWrap.classList.remove("open", "modal", "logged");
+  stopExp();
+}
+
+function openBrowser() {
+  resetBrowser();
+  browserWrap.classList.add("open");
+  setStep(8);
+}
+
+function startDownload() {
+  if (browserWrap.dataset.st === "dling") return;
+  browserWrap.dataset.st = "dling";
+  dlFill.style.transition = "none";
+  dlFill.style.width = "6.77%";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    dlFill.style.transition = "width 2.4s cubic-bezier(.25,.5,.4,1)";
+    dlFill.style.width = "19.38%";
+  }));
+  setStep(9);
+  dlLater(() => { browserWrap.dataset.st = "done"; setStep(10); }, 2500);
+}
+
+function openYuanbao() {
+  clearDlTimers();
+  browserWrap.classList.remove("open");
+  browserWrap.classList.add("closing");
+  ybWrap.classList.remove("modal", "logged");
+  ybWrap.classList.add("open");
+  setStep(11);
+}
+
+/* 页脚按钮：未选皮肤 → toast；已选 → 打开下载页 */
+$("#footBtn").addEventListener("click", () => {
+  if (!layer2.classList.contains("ready")) return;
+  if (selectedSkinIdx() === null) { showToast("请选择心仪的皮肤～"); return; }
+  openBrowser();
+});
+
+/* 下载页交互 */
+document.querySelectorAll(".platSpot").forEach(s => s.addEventListener("click", startDownload));
+$("#dlCloseHot").addEventListener("click", () => { browserWrap.dataset.st = "page"; });
+$("#dlRowHot").addEventListener("click", openYuanbao);
+
+/* 元宝登录链路 */
+function openLoginModal() {
+  if (ybWrap.classList.contains("logged")) return;
+  ybWrap.classList.add("modal");
+  setStep(12);
+}
+$("#taskBar").addEventListener("click", openLoginModal);
+$("#ybLoginBtn").addEventListener("click", openLoginModal);
+$("#ybNotloginZone").addEventListener("click", openLoginModal);
+$("#modalClose").addEventListener("click", () => { ybWrap.classList.remove("modal"); setStep(11); });
+$("#wxQuickBtn").addEventListener("click", () => {
+  ybWrap.classList.remove("modal");
+  ybWrap.classList.add("logged");
+  setStep(13);
+  dlLater(() => startExp(), 500);   /* 登录成功 → 浮出体验计时条 */
+});
+
+/* ===== 领皮肤闭环：体验计时 → 返回领皮肤 → 获得皮肤弹窗 → 已完成页 / 详情页 ===== */
+const expBar = $("#expBar"), expNum = $("#expNum"),
+      expRingFg = $("#expRingFg"), expTx = $("#expTx");
+const ECIRC = 113.1;
+let expTimer = null, expLeft = 30;
+
+function stopExp() {
+  clearInterval(expTimer); expTimer = null; expLeft = 30;
+  expBar.classList.remove("active", "done");
+  expNum.textContent = "30";
+  expRingFg.style.strokeDashoffset = 0;
+  expTx.innerHTML = "<b>正在体验元宝 AI…</b><span>停留满 30 秒即可返回领皮肤</span>";
+}
+function startExp() {
+  stopExp();
+  expBar.classList.add("active");
+  setStep(14);
+  expTimer = setInterval(() => {           /* 演示加速：30 档 ≈1.8s，同参考 demo */
+    expLeft--;
+    if (expLeft <= 0) { finishExp(); return; }
+    expNum.textContent = expLeft;
+    expRingFg.style.strokeDashoffset = ECIRC * (1 - expLeft / 30);
+  }, 60);
+}
+function finishExp() {
+  clearInterval(expTimer); expTimer = null;
+  expBar.classList.add("done");
+  expNum.textContent = "✓";
+  expRingFg.style.strokeDashoffset = 0;
+  expTx.innerHTML = "<b>已体验 30 秒，达成！</b><span>返回领皮肤</span>";
+  setStep(15);
+}
+
+/* 返回领皮肤：关元宝窗 → 活动页蒙层 + 获得皮肤弹窗 */
+function fillRedeem() {
+  const i = selectedSkinIdx() ?? 0;
+  $("#rdSkinImg").src = `assets/skin${i + 1}.png`;
+  $("#rdName").textContent = `“${SKIN_NAMES[i]}”`;
+}
+$("#expBackBtn").addEventListener("click", () => {
+  stopExp();
+  ybWrap.classList.remove("open");
+  ybWrap.classList.add("closing");
+  fillRedeem();
+  dlLater(() => { wrap.classList.add("redeem"); setStep(16); }, 420);
+});
+
+/* 弹窗：蒙层 / 暂不启用 / X → 已完成页；去启用 → 详情页 */
+function closeRedeem(toDetail) {
+  wrap.classList.remove("redeem");
+  wrap.dataset.pg = toDetail ? "detail" : "done";
+  setStep(toDetail ? 18 : 17);
+}
+$("#sgDim").addEventListener("click", () => closeRedeem(false));
+$("#rdSkip").addEventListener("click", () => closeRedeem(false));
+$("#rdClose").addEventListener("click", () => closeRedeem(false));
+$("#rdGo").addEventListener("click", () => closeRedeem(true));
+
+/* 已完成页：返回同未完成（关窗回桌面）；立即启用 / 图卡 → 详情页 */
+$("#sgBackDone").addEventListener("click", e => { e.stopPropagation(); closeWindow(); });
+const goDetail = () => { wrap.dataset.pg = "detail"; setStep(18); };
+$("#sgEnableBtn").addEventListener("click", goDetail);
+
+/* 精选推荐图卡热区：按素材网格几何生成（卡 410 / 列距 450 / 行距 448 @1760 宽，双份拼接） */
+const FEED_S = 879 / 1760;
+const feedTrack = $("#feedTrack");
+for (let copy = 0; copy < 2; copy++) {
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      const h = document.createElement("div");
+      h.className = "fhot";
+      h.style.left = (c * 450 * FEED_S) + "px";
+      h.style.top = (copy * 1752 * FEED_S + r * 448 * FEED_S) + "px";
+      h.style.width = (410 * FEED_S) + "px";
+      h.style.height = (440 * FEED_S) + "px";
+      h.title = "进入皮肤详情";
+      h.addEventListener("click", goDetail);
+      feedTrack.appendChild(h);
+    }
+  }
+}
+
+/* 详情页：返回 → 已完成页；启用按钮二态切换（立即启用 ⇄ 已启用） */
+$("#sgBackDetail").addEventListener("click", () => { wrap.dataset.pg = "done"; setStep(17); });
+$("#sgDetailEnable").addEventListener("click", function () {
+  const on = this.classList.toggle("on");
+  this.textContent = on ? "已启用" : "立即启用";
+  showToast(on ? "皮肤已启用" : "皮肤已取消");
+});
+
+/* 启动：先推出弹窗 */
+showPopup(600);
+
+/* ---- banner 活动倒计时（同 demo-skin-redeem：进入页面从 3天20:56:31 起每秒递减，无完成处理） ---- */
+const CD_INIT = 3*86400 + 20*3600 + 56*60 + 31;
+let cdLeft = CD_INIT;
+const fmt2 = n => (n < 10 ? "0" : "") + n;
+function renderCD() {
+  const d = Math.floor(cdLeft / 86400), r = cdLeft % 86400;
+  const h = Math.floor(r / 3600), m = Math.floor(r % 3600 / 60), s = r % 60;
+  $("#cdD").textContent = d;
+  $("#cdT").textContent = `${fmt2(h)}:${fmt2(m)}:${fmt2(s)}`;
+  $("#cdD2").textContent = d;
+  $("#cdT2").textContent = `${fmt2(h)}:${fmt2(m)}:${fmt2(s)}`;
+}
+setInterval(() => { if (cdLeft > 0) { cdLeft--; renderCD(); } }, 1000);
+renderCD();
+</script>
+</body>
+</html>

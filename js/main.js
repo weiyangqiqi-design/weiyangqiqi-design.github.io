@@ -8,37 +8,39 @@
 (function () {
   "use strict";
 
-  /* ============ 人像视频:自动播放 + 循环兜底 ============ */
+  /* ============ 人像视频 + 卡片 banner 视频:自动播放 + 循环兜底 ============ */
   // loop 属性理论上足够,但部分浏览器/内嵌预览会忽略,这里加 JS 双保险:
   // 1) ended 时强制重头播放  2) 自动播放被拦截时,首次交互后补播
   (function initAvatarVideo() {
-    const v = document.querySelector(".sidebar__avatar video");
-    if (!v) return;
-    v.muted = true;          // 自动播放硬性前提
-    v.loop = true;           // 再次确保 loop 打开
-    v.setAttribute("playsinline", "");
+    const videos = document.querySelectorAll(".sidebar__avatar video, .module-card__img video");
+    if (!videos.length) return;
+    videos.forEach((v) => {
+      v.muted = true;          // 自动播放硬性前提
+      v.loop = true;           // 再次确保 loop 打开
+      v.setAttribute("playsinline", "");
 
-    const tryPlay = () => {
-      const p = v.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    };
+      const tryPlay = () => {
+        const p = v.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      };
 
-    // 播放结束兜底:即便 loop 被忽略也强制回到起点重播
-    v.addEventListener("ended", () => {
-      v.currentTime = 0;
+      // 播放结束兜底:即便 loop 被忽略也强制回到起点重播
+      v.addEventListener("ended", () => {
+        v.currentTime = 0;
+        tryPlay();
+      });
+
+      // 自动播放被策略拦截时,监听首次用户交互补播
+      const resume = () => {
+        tryPlay();
+        window.removeEventListener("pointerdown", resume);
+        window.removeEventListener("keydown", resume);
+      };
+      window.addEventListener("pointerdown", resume, { once: true });
+      window.addEventListener("keydown", resume, { once: true });
+
       tryPlay();
     });
-
-    // 自动播放被策略拦截时,监听首次用户交互补播
-    const resume = () => {
-      tryPlay();
-      window.removeEventListener("pointerdown", resume);
-      window.removeEventListener("keydown", resume);
-    };
-    window.addEventListener("pointerdown", resume, { once: true });
-    window.addEventListener("keydown", resume, { once: true });
-
-    tryPlay();
   })();
 
   /* ============ Tab 锚点定位 ============ */
@@ -529,6 +531,14 @@
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
 
+      // 内嵌 Demo:首次打开时才写入 src
+      // (避免 iframe 处于 display:none 的弹层内时被浏览器跳过加载而白屏)
+      modal.querySelectorAll("iframe[data-embed-src]").forEach(function (frame) {
+        if (!frame.getAttribute("src")) {
+          frame.setAttribute("src", frame.getAttribute("data-embed-src"));
+        }
+      });
+
       // 双 rAF:先 display:flex 渲染,再加 is-visible 触发过渡
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
@@ -676,6 +686,14 @@
         });
         // 切换后回到顶部 + 刷新该面板视频播放状态
         if (body) body.scrollTop = 0;
+        // ★ 2026-10-20:通知跳页索引按新页签重建(见 initSlidePager 的 dm:tab 监听)
+        try {
+          modal.dispatchEvent(new CustomEvent("dm:tab", { detail: { tab: tabId } }));
+        } catch (err) {
+          var ev = document.createEvent("CustomEvent");
+          ev.initCustomEvent("dm:tab", false, false, { tab: tabId });
+          modal.dispatchEvent(ev);
+        }
         modal.querySelectorAll("video").forEach(function (v) {
           if (v.closest(".detail-modal__tabpanel.is-active")) {
             v.muted = true;
@@ -1025,6 +1043,7 @@
     let curCard = -1;
     let lastJumpX = -1e4; // 上一次起跳的位置
     let turn = 0;         // 转身站定剩余时间
+    let liveIdx = -1;     // 小人当前所处卡片区域的圆点下标(-1 = 未定)
     let raf = 0;
     let lastNow = 0;
     let visible = true;
@@ -1037,6 +1056,7 @@
       if (gr.width < MIN_W) {
         geo = null;
         walker.classList.remove("is-ready");
+        setLiveDot(-1);   // 窄屏小人停用,呼吸圆点一并撤掉
         stop();
         return;
       }
@@ -1046,13 +1066,18 @@
       const max = Math.max(0, gr.width - W);
 
       // 节点是零尺寸锚点(x = 列左缘 = 卡片左缘)→ 让角色中心对准它
-      const stops = nodes.map(function (n) {
+      const centers = nodes.map(function (n) {
         const r = n.getBoundingClientRect();
-        const cx = r.left - gr.left + r.width / 2;
+        return r.left - gr.left + r.width / 2;
+      });
+      const stops = centers.map(function (cx) {
         return Math.min(Math.max(cx - W / 2, 0), max);
       });
 
-      geo = { ground: ground, max: max, stops: stops };
+      /* ⚠ 区域判定必须用**未夹取**的 centers:stops 为了"小人能站住"被夹到
+         [0, max],最右那个节点的停靠点会内收几个像素,拿它划区域会让
+         末段区域的边界提前 —— 圆点会比小人先一步切换。 */
+      geo = { ground: ground, max: max, stops: stops, centers: centers };
       if (x > max) x = max;
       if (route) rebuild();
       walker.classList.add("is-ready");
@@ -1075,6 +1100,26 @@
       let i = 0;
       while (i < route.length - 1 && (dir > 0 ? route[i].x < x - 0.5 : route[i].x > x + 0.5)) i++;
       idx = i;
+    }
+
+    /* ---- 圆点跟随小人位置(第 76 项) ----
+       小人中心落在哪个卡片区域,对应圆点就挂 .is-live 做缩放呼吸。
+       区域按「节点中心」划分:中心 >= 第 i 个节点中心 → 至少在第 i 区域,
+       取满足条件的最大 i(第一颗节点之前的窄条并入区域 0)。
+       只有下标变化才碰 DOM,行走帧内零开销。 */
+    function setLiveDot(i) {
+      if (i === liveIdx) return;
+      liveIdx = i;
+      nodes.forEach(function (n, k) {
+        n.classList.toggle("is-live", k === i);
+      });
+    }
+    function updateLiveDot() {
+      if (!geo) return;
+      const c = x + W / 2; // 小人水平中心
+      let i = geo.centers.length - 1;
+      while (i > 0 && c < geo.centers[i]) i--;
+      setLiveDot(i);
     }
 
     /* ---- 卡片被顶的反馈 ---- */
@@ -1144,12 +1189,18 @@
         }
       } else {
         x += (dx > 0 ? 1 : -1) * stepPx;
+        /* 走离上次起跳点超过 MOVE_EPS 就重新武装起跳资格。
+           否则:去程在 s3 起跳后走到右端点再折返,回程第一站又是 s3,
+           位移差为 0 会被 MOVE_EPS 误判成"原地连跳"而跳过顶卡
+           (左端点 s0 对称地同样中招)。 */
+        if (Math.abs(x - lastJumpX) > MOVE_EPS) lastJumpX = -1e4;
         walkPhase += dt;
       }
     }
 
     function render() {
       if (!geo) return;
+      updateLiveDot(); // 圆点呼吸跟随小人所在卡片区域
       let f;
       if (jumping) {
         let acc = 0;
@@ -1230,7 +1281,7 @@
   /* ============================================================
      模块像素小人:「3 亿营收」三张卡片轮廓路线动画
      爬升(左缘) → 顶边行走 → 跳过间隙(×2) → 右缘失重掉落 → 底部返回 → 循环
-     雪碧图 assets/mg-walker-sprite.png 帧序:
+     雪碧图 assets/mg-walker-sprite.webp 帧序:
        0-3 走路 / 4-16 跳跃 / 17-18 攀爬(手举高·手落肩) / 19-20 下落(滞空·够地)
      ============================================================ */
   (function initModuleWalker() {
@@ -1309,6 +1360,35 @@
       setTimeout(function () { g.classList.remove("is-quaked"); }, 700);
     }
 
+    /* ---- 圆点跟随小人位置(第 76 项 v2,与 career 轴同一套逻辑) ----
+       小人中心落在哪张卡片(的横向跨度)上 → 第 n 个 .mt-node 挂 .is-live,
+       放大 + 呼吸;落在卡片间隙里就近归属,所以跳过缝隙时呼吸点在缝中央交接。
+       与 hover 的 .is-hot 完全独立:两条路各自挂 class,同时命中时 CSS 让
+       hover 优先显示。 */
+    var mtNodes = Array.prototype.slice.call(
+      document.querySelectorAll("#tl-revenue .mt-node")
+    );
+    var liveBounds = [];  // 三张卡片的横向跨度 [left, right](相对 host 左缘)
+    var mtLive = -1;
+    function setMtLive(i) {
+      if (i === mtLive) return;
+      mtLive = i;
+      for (var k = 0; k < mtNodes.length; k++) {
+        mtNodes[k].classList.toggle("is-live", k === i);
+      }
+    }
+    function updateMtLive(x) {
+      if (!mtNodes.length || !liveBounds.length) return;
+      var c = x + W / 2;                 // 小人水平中心
+      var pick = 0, best = Infinity;
+      for (var k = 0; k < liveBounds.length; k++) {
+        var l = liveBounds[k][0], r = liveBounds[k][1];
+        var d = c < l ? l - c : c > r ? c - r : 0;   // 到该卡片跨度的距离(跨度内 = 0)
+        if (d < best) { best = d; pick = k; }
+      }
+      setMtLive(pick);
+    }
+
     function build() {
       var hr = host.getBoundingClientRect();
       var cards = Array.prototype.slice.call(cardsWrap.querySelectorAll(".module-card"));
@@ -1319,6 +1399,7 @@
       // 卡片换行 / 窄屏单列时路线不成立 → 不跑
       if (Math.abs(rs[1].top - rs[0].top) > 6 || Math.abs(rs[2].top - rs[0].top) > 6) {
         sig = "";
+        setMtLive(-1);   // 路线不成立 → 圆点统一回静态
         return false;
       }
 
@@ -1332,6 +1413,7 @@
       var cardBottom = rs[0].bottom - oy;
       var L = rs.map(function (r) { return r.left - ox; });
       var R = rs.map(function (r) { return r.right - ox; });
+      liveBounds = L.map(function (l, i) { return [l, R[i]]; }); // 圆点区域判定用
 
       /* ★ 底部线 = 下方时间线(.mt-divider 紫带)的中心线:
          小人返回 / 起爬 / 落地都踩在这条线上(与时间轴小人同一取法:线中心) */
@@ -1374,6 +1456,7 @@
     }
 
     function render(x, y, frame, flip) {
+      updateMtLive(x);   // 圆点呼吸跟随小人所在卡片区域
       walker.style.backgroundPosition = (-frame * CELL_W * px) + "px 0";
       walker.style.transform =
         "translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px,0)" +
@@ -1541,8 +1624,7 @@
    *   ⚠️ 改这几个常数前先算一遍:DELAY + DUR_MAX 必须 < 3000。
    *
    * ── 三个必须这么写的地方 ──
-   * ① 先把文本搬进 span(.desc-txt):气泡的 ::after 是尖角、::before 已删,
-   *    光标只能挂在一个真实元素上(用它的 border-right,见 CSS 注释)。
+   * ① 先把文本搬进 span(.desc-txt):光标挂在这个真实元素上(用它的 border-right,见 CSS)。
    *    JS 不跑/报错时文本原样留在 <p> 里,整段完整显示 —— 不会白屏。
    * ② 打字前先把气泡高度锁成"完整文案"的高度(--desc-h + CSS 的 min-height),
    *    否则气泡会随字数一行一行往上顶。测的时候要**先 removeProperty** 再测,
@@ -1697,90 +1779,289 @@
     });
   })();
 
+  /* ===== 2026-10-21:hover「发光描边」层 =====
+     用户:「这个卡片边缘的亮度和效果学习一下。当我 hover 到卡片时,请展示这种效果。」
+     同样只在 JS 里挂一个 aria-hidden 的空 span(理由同上一项:纯装饰、13 张卡、
+     写进 HTML 就是 13 处重复)。样式全部在 css/style.css 的 .module-card__edge。
+     ── 为什么挂在卡片最后(append)──
+     描边的 z-index:2 由 CSS 决定,DOM 顺序无关;append 出去的节点天然在所有内容之后,
+     语义上也不打断"展示图 → 标题 → 描述"的阅读顺序。 */
+  (function initCardEdge() {
+    var cards = document.querySelectorAll(".module-card");
+    if (!cards.length) return;
+    Array.prototype.forEach.call(cards, function (card) {
+      if (card.querySelector(".module-card__edge")) return;
+      var edge = document.createElement("span");
+      edge.className = "module-card__edge";
+      edge.setAttribute("aria-hidden", "true");
+      card.appendChild(edge);
+    });
+  })();
+
   /* ============ 多页弹层:页码角标 + 快速跳页索引 ============
-   * ★ 2026-10-15。只对 `.detail-modal__slides[data-pager]` 生效,其它弹层不受影响。
-   * 做三件事:
+   * ★ 2026-10-15 初版,仅 2 个弹层启用。
+   * ★ 2026-10-20 用户:「这个二级页面的页签和筛选定位效果很好,应用到所有二级页面吧」
+   *   → 改为**按弹层**(而不是按单个容器)初始化,只要弹层里存在任何一个
+   *     `.detail-modal__slides[data-pager]` 就启用,全站多页弹层均已挂 data-pager。
+   * 做四件事:
    *   1) 给每个 .slide-item 右下角插页码角标「NN / 总数」;
-   *   2) 在面板右侧生成竖排可点数字导航(点一下平滑滚到对应页);
-   *   3) 随滚动用 IntersectionObserver 高亮「当前页」,打开时回到第 1 页。 */
+   *   2) 在面板右侧生成**一套**竖排可点数字导航(点一下平滑滚到对应页);
+   *   3) 随滚动用 IntersectionObserver 高亮「当前页」,打开时回到第 1 页;
+   *   4) 带页签的弹层(AI陪伴 / 会员体系):导航跟随当前页签重建,
+   *      始终只显示一套 —— 否则每个 tabpanel 各建一套会全部堆在面板右侧。
+   * 页数多时(>10)自动切紧凑模式,并允许导航内部滚动,避免超出面板高度。 */
   (function initSlidePager() {
     var pad = function (n) { return (n < 10 ? "0" : "") + n; };
 
-    document.querySelectorAll(".detail-modal__slides[data-pager]").forEach(function (slidesWrap) {
-      var modal = slidesWrap.closest(".detail-modal");
-      var panel = modal && modal.querySelector(".detail-modal__panel");
-      var body = modal && modal.querySelector(".detail-modal__body");
-      var items = Array.prototype.slice.call(slidesWrap.querySelectorAll(".slide-item"));
-      if (!panel || !body || !items.length) return;
-      var total = items.length;
+    document.querySelectorAll(".detail-modal").forEach(function (modal) {
+      var wraps = Array.prototype.slice.call(
+        modal.querySelectorAll(".detail-modal__slides[data-pager]")
+      );
+      if (!wraps.length) return;
+      var panel = modal.querySelector(".detail-modal__panel");
+      var body = modal.querySelector(".detail-modal__body");
+      if (!panel || !body) return;
 
-      // 1) 每页页码角标
-      items.forEach(function (item, i) {
-        if (item.querySelector(".slide-pageno")) return;
-        var badge = document.createElement("span");
-        badge.className = "slide-pageno";
-        badge.setAttribute("aria-hidden", "true");
-        badge.innerHTML = "<b>" + pad(i + 1) + "</b> <i>/ " + pad(total) + "</i>";
-        item.appendChild(badge);
+      // 1) 页码角标:所有启用容器都补齐(与当前页签无关)
+      wraps.forEach(function (wrap) {
+        var items = Array.prototype.slice.call(wrap.querySelectorAll(".slide-item"));
+        if (items.length < 2) return;
+        items.forEach(function (item, i) {
+          if (item.querySelector(".slide-pageno")) return;
+          var badge = document.createElement("span");
+          badge.className = "slide-pageno";
+          badge.setAttribute("aria-hidden", "true");
+          badge.innerHTML = "<b>" + pad(i + 1) + "</b> <i>/ " + pad(items.length) + "</i>";
+          item.appendChild(badge);
+        });
       });
 
-      // 2) 竖排跳页索引
+      // 2) 跳页索引:整个弹层只有一套
       var pager = panel.querySelector(".detail-modal__pager");
       if (!pager) {
         pager = document.createElement("div");
         pager.className = "detail-modal__pager";
         pager.setAttribute("role", "tablist");
         pager.setAttribute("aria-label", "快速跳页");
+        panel.appendChild(pager);
+      }
+
+      var state = { items: [], btns: [], io: null };
+
+      function pickWrap() {
+        // 有页签 → 取当前激活页签里的容器;没有页签 → 取第一个多页容器
+        var tp = modal.querySelector(".detail-modal__tabpanel.is-active");
+        var scope = tp || modal;
+        var w = scope.querySelector(".detail-modal__slides[data-pager]");
+        if (w && w.querySelectorAll(".slide-item").length > 1) return w;
+        for (var i = 0; i < wraps.length; i++) {
+          if (wraps[i].querySelectorAll(".slide-item").length > 1) return wraps[i];
+        }
+        return null;
+      }
+
+      function setActive(idx) {
+        state.btns.forEach(function (b, i) {
+          var on = i === idx;
+          b.classList.toggle("is-active", on);
+          b.setAttribute("aria-selected", on ? "true" : "false");
+          if (on) {
+            // 导航自身可滚动时把当前项带进视野。
+            // 不用 scrollIntoView —— 它会连带滚动祖先/页面,这里只调 pager 自己的 scrollTop。
+            var bt = b.offsetTop;
+            var bb = bt + b.offsetHeight;
+            var pt = pager.scrollTop;
+            var pb = pt + pager.clientHeight;
+            if (bt < pt) {
+              pager.scrollTo({ top: bt - 6, behavior: "smooth" });
+            } else if (bb > pb) {
+              pager.scrollTo({ top: bb - pager.clientHeight + 6, behavior: "smooth" });
+            }
+          }
+        });
+      }
+
+      function clearPager() {
+        if (state.io) { state.io.disconnect(); state.io = null; }
+        state.items = [];
+        state.btns = [];
+        while (pager.firstChild) pager.removeChild(pager.firstChild);
+      }
+
+      function rebuild() {
+        var wrap = pickWrap();
+        clearPager();
+        if (!wrap) { pager.hidden = true; return; }
+        var items = Array.prototype.slice.call(wrap.querySelectorAll(".slide-item"));
+        if (items.length < 2) { pager.hidden = true; return; }
+
+        pager.hidden = false;
+        pager.classList.toggle("is-compact", items.length > 10);
+        state.items = items;
+
         items.forEach(function (item, i) {
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "detail-modal__pager-btn";
           btn.textContent = String(i + 1);
-          btn.setAttribute("aria-label", "第 " + (i + 1) + " 页 / 共 " + total + " 页");
+          btn.setAttribute("aria-label", "第 " + (i + 1) + " 页 / 共 " + items.length + " 页");
           btn.addEventListener("click", function () {
-            // 平滑滚动到该页顶部(相对 body 的滚动容器)
-            var top = item.offsetTop - body.offsetTop;
+            // 用 rect 差值算滚动目标:页签嵌套 / 不同 offsetParent 下都准
+            var top = body.scrollTop
+              + item.getBoundingClientRect().top
+              - body.getBoundingClientRect().top;
             body.scrollTo({ top: top, behavior: "smooth" });
             setActive(i);
           });
           pager.appendChild(btn);
+          state.btns.push(btn);
         });
-        panel.appendChild(pager);
-      }
-      var btns = Array.prototype.slice.call(pager.querySelectorAll(".detail-modal__pager-btn"));
+        setActive(0);
 
-      function setActive(idx) {
-        btns.forEach(function (b, i) {
-          b.classList.toggle("is-active", i === idx);
-          b.setAttribute("aria-selected", i === idx ? "true" : "false");
-        });
-      }
-      setActive(0);
-
-      // 3) 滚动时高亮当前页(取可见面积最大的一页)
-      if ("IntersectionObserver" in window) {
-        var ratios = new Array(total).fill(0);
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) {
-            var i = items.indexOf(e.target);
-            if (i >= 0) ratios[i] = e.isIntersecting ? e.intersectionRatio : 0;
-          });
-          var best = 0, bestVal = -1;
-          for (var i = 0; i < total; i++) {
-            if (ratios[i] > bestVal) { bestVal = ratios[i]; best = i; }
-          }
-          setActive(best);
-        }, { root: body, threshold: [0.1, 0.25, 0.5, 0.75, 0.95] });
-        items.forEach(function (it) { io.observe(it); });
+        // 3) 滚动高亮(取可见面积最大的一页)
+        if ("IntersectionObserver" in window) {
+          var ratios = new Array(items.length).fill(0);
+          state.io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              var i = items.indexOf(e.target);
+              if (i >= 0) ratios[i] = e.isIntersecting ? e.intersectionRatio : 0;
+            });
+            var best = 0, bestVal = -1;
+            for (var i = 0; i < items.length; i++) {
+              if (ratios[i] > bestVal) { bestVal = ratios[i]; best = i; }
+            }
+            setActive(best);
+          }, { root: body, threshold: [0.1, 0.25, 0.5, 0.75, 0.95] });
+          items.forEach(function (it) { state.io.observe(it); });
+        }
       }
 
-      // 打开弹层时回到第 1 页(监听 is-visible 的加入)
+      rebuild();
+
+      // 4) 页签切换:页签逻辑在 activate() 里派发 dm:tab,这里重建索引
+      modal.addEventListener("dm:tab", function () {
+        body.scrollTop = 0;
+        rebuild();
+      });
+
+      // 打开弹层时回到第 1 页
       new MutationObserver(function () {
         if (modal.classList.contains("is-visible")) {
           body.scrollTop = 0;
-          setActive(0);
+          rebuild();
         }
       }).observe(modal, { attributes: true, attributeFilter: ["class"] });
+    });
+  })();
+
+  /* ===== 第 75 项:同排卡片的「整排呼应」(2026-10-20 · 第三版「行框」) =====
+     用户(第一版):「hover 三张中的一张时,整个一排要基于时间轴背景有响应 —— 微微紫色,
+                    弱到不抢前景卡片的 hover;目的是提醒这三张是有关联的,点击仍只作用于当前卡。」
+     用户(第三版):「一排的整体感不够明显,换个响应效果,要有一排的感觉,同时符合整体设计。」
+     ── 为什么改结构 ──
+     前两版是两团"紫雾"(卡片排一层 + 轴线一层),再怎么加浓也只是背景晕染、没有边界,
+     读不出"这是一整排"。所以这一版把「组标��� + 卡片组 + 时间轴」包进 .row-unit,
+     由 CSS 画一条真正的**行框**(圆角 + 1px 紫描边 + 极淡紫底),整体感靠边界建立。
+     ── 这里做什么 ──
+     只负责给 .row-unit 挂 / 摘 .is-linked 这一个 class,视觉全在 css/style.css
+     的同名注释块里(.row-unit::before / .group-caption 染紫 / 轴线提亮)。
+     ── 适用范围 ──
+     只有被 .row-unit 包起来的排参与(全站仅「装扮生态建设」这一排),其它排不受影响。
+     ── 为什么用 JS 而不是 :has() ──
+     必须"父级感知子卡片 hover",:has() 在旧内核 / 部分内嵌 webview 不生效;
+     一个 class 切换成本几乎为零,兼容性更稳。
+     ── 为什么离场要延迟 70ms ──
+     卡片之间隔着 22px 间隙:从 A 划到 B 会先 leave 再 enter,
+     不合并就会让行框在缝隙里闪一下。 */
+  (function initRowLink() {
+    var rows = document.querySelectorAll(".row-unit");
+    Array.prototype.forEach.call(rows, function (row) {
+      var cards = row.querySelectorAll(".module-card");
+      if (!cards.length) return;
+      /* 卡片列 ↔ 时间轴列一一对应(同为 3 列、同一套 column-gap),
+         所以第 n 张卡 ↔ 第 n 个 .mt-node;hover 时只把对应的那一个圆点放大。 */
+      var nodes = row.querySelectorAll(".mt-node");
+
+      var offTimer = 0;
+      function link(idx) {
+        if (offTimer) { clearTimeout(offTimer); offTimer = 0; }
+        row.classList.add("is-linked");
+        Array.prototype.forEach.call(nodes, function (node, i) {
+          node.classList.toggle("is-hot", i === idx);
+        });
+      }
+      function unlink() {
+        if (offTimer) clearTimeout(offTimer);
+        offTimer = setTimeout(function () {
+          offTimer = 0;
+          row.classList.remove("is-linked");
+          Array.prototype.forEach.call(nodes, function (node) {
+            node.classList.remove("is-hot");
+          });
+        }, 70);
+      }
+
+      Array.prototype.forEach.call(cards, function (card, i) {
+        card.addEventListener("mouseenter", function () { link(i); });
+        card.addEventListener("mouseleave", unlink);
+        // 键盘 Tab 聚焦卡片时,给同样的呼应(卡片本身 tabindex=0)
+        card.addEventListener("focus", function () { link(i); });
+        card.addEventListener("blur", unlink);
+      });
+    });
+  })();
+
+  /* ===== 第 76 项:内嵌 Demo「整机等比缩放」(2026-10-20) =====
+     用户:「内嵌的 demo 中手机界面要在窗口内完整展示,不要上下滑动,可以等比例缩一下。」
+     ── 问题根源 ──
+     内嵌页(.demo-embed 里的 iframe)是固定尺寸布局:手机壳 340px 宽,
+     屏比 874:1920 → 竖向内容自然高约 844px;而弹层里留给 iframe 的高度只有 ~700px,
+     于是 iframe 内部出现纵向滚动条,手机被切掉一截。
+     ── 做法 ──
+     ① 给 iframe 一个**固定逻辑视口高度** --embed-h(880,够装下实测 ≈845 的自然内容);
+     ② 缩放比 = 容器高 / 860,等比缩到"高度刚好装下整块内容";
+     ③ 逻辑宽度 = 容器宽 / 缩放比 —— 缩放后横向也正好铺满容器,四周不会露白边
+        (内嵌页自己的浅色渐变底直接铺到底);
+     ④ 缩放用 transform: scale()(左上角原点),不改内嵌页内部布局,热区坐标不受影响。
+     ── 什么时候算 ──
+     弹层 display:none 时容器尺寸为 0,不能提前算:用 ResizeObserver 监听容器,
+     从 0 → 有尺寸那一刻会自动触发;窗口缩放 / 面板尺寸变化也会自动跟上。
+     另外监听弹层 class 变化(打开时)再补算一次,兜住个别浏览器 RO 首帧不回调的情况。 */
+  (function initEmbedFit() {
+    // ★ 2026-10-30:支持多个 .demo-embed__frame(如双端 tab 各自一个 Demo)——
+    // 每个 frame 独立计算缩放、各自监听容器尺寸与弹层打开。
+    var frames = document.querySelectorAll(".demo-embed__frame");
+    if (!frames.length) return;
+
+    frames.forEach(function (frame) {
+      var wrap = frame.closest(".demo-embed");
+      var panel = frame.closest(".detail-modal__panel");
+      var modal = frame.closest(".detail-modal");
+      if (!wrap || !panel) return;
+
+      function fit() {
+        var w = wrap.clientWidth;
+        var h = wrap.clientHeight;
+        if (!w || !h) return; // 弹层/ tab 未展开
+        var designH =
+          parseFloat(getComputedStyle(panel).getPropertyValue("--embed-h")) || 880;
+        var scale = h / designH;
+        frame.style.width = w / scale + "px";
+        frame.style.height = designH + "px";
+        frame.style.transform = "scale(" + scale + ")";
+      }
+
+      if ("ResizeObserver" in window) {
+        new ResizeObserver(fit).observe(wrap);
+      } else {
+        window.addEventListener("resize", fit);
+      }
+      if (modal && "MutationObserver" in window) {
+        new MutationObserver(function () {
+          if (modal.classList.contains("is-open")) requestAnimationFrame(fit);
+        }).observe(modal, { attributes: true, attributeFilter: ["class"] });
+      }
+      fit();
     });
   })();
 
