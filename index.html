@@ -25,8 +25,17 @@
         ></video>
       </div>
 
+      <!-- 竖屏紧凑 Header(仅 ≤560px 显示):头像 + 姓名 + 简介开关 -->
+      <div class="sidebar__bar">
+        <span class="sidebar__bar-name">刘佶松</span>
+        <span class="sidebar__bar-role">腾讯 D9 · AI 商业化交互设计</span>
+      </div>
+      <button class="sidebar__toggle" type="button" aria-expanded="false" aria-controls="side-detail">
+        <span class="lbl">简介</span><span class="chev" aria-hidden="true">▾</span>
+      </button>
+
       <!-- 竖排信息切图区(从上至下:ABOUT ME → 简介 → 工作/荣誉/教育经历) -->
-      <div class="side-blocks">
+      <div class="side-blocks" id="side-detail">
         <img class="side-about-title" src="assets/side-about-title.webp" alt="ABOUT ME" />
         <!-- 名字块仍是切图(从 side-about-text-v2.webp 裁出上半段);下半段简介改为实时文本 -->
         <img class="side-name" src="assets/side-name.webp" alt="刘佶松 / 腾讯D9交互设计 · Ai商业化交互设计" />

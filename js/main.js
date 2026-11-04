@@ -2065,4 +2065,31 @@
     });
   })();
 
+  /* ===== 竖屏(≤560px)紧凑 Header:简介抽屉开关 =====
+     只负责切 class 与 aria,不触碰 .content__scroll 的滚动模型,
+     因此 tab 定位 / IntersectionObserver 懒加载 / 视频懒播等逻辑保持原样。 */
+  (function () {
+    var side = document.getElementById("sidebar");
+    var btn = side && side.querySelector(".sidebar__toggle");
+    if (!side || !btn) return;
+    var lbl = btn.querySelector(".lbl");
+    function setOpen(open) {
+      side.classList.toggle("is-open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (lbl) lbl.textContent = open ? "收起" : "简介";
+    }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setOpen(!side.classList.contains("is-open"));
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && side.classList.contains("is-open")) setOpen(false);
+    });
+    /* 旋屏 / 放大到桌面宽度时自动收起,避免抽屉残留在错误布局里 */
+    var mq = window.matchMedia("(max-width: 560px)");
+    function onChange(e) { if (!e.matches) setOpen(false); }
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  })();
+
 })();
