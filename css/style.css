@@ -4420,3 +4420,75 @@ button {
     overflow-y: auto;
   }
 }
+
+/* ==================================================================
+   竖屏专属:① 两个走路小人 ② 滚动时"视口最上卡片"展示 hover 辅助信息
+   原 JS 在窄屏会主动停用小人(tl: MIN_W=480;mg: 三卡不同行路线不成立),
+   这里不改动那套桌面动画,只在 ≤560px 用 CSS 让小人原地走帧可见。
+   ================================================================== */
+@media (max-width: 560px) {
+  /* --- ① 两个像素小人:不跑位移路线,停在容器右下角原地循环走路帧 --- */
+  .tl-walker,
+  .mg-walker {
+    opacity: 1;
+    left: auto;
+    top: auto;
+    right: 6px;
+    bottom: 2px;
+    z-index: 6;
+  }
+  .tl-walker {
+    transform: scale(0.8) !important;
+    transform-origin: bottom right;
+    animation: tl-pace 0.44s steps(1, end) infinite;
+  }
+  .mg-walker {
+    transform: scale(0.55) !important;
+    transform-origin: bottom right;
+    animation: mg-pace 0.44s steps(1, end) infinite;
+  }
+  @keyframes tl-pace {
+    0%, 100% { background-position: 0 0; }
+    25% { background-position: calc(-1 * 32 * var(--tl-pix, 1px)) 0; }
+    50% { background-position: calc(-2 * 32 * var(--tl-pix, 1px)) 0; }
+    75% { background-position: calc(-3 * 32 * var(--tl-pix, 1px)) 0; }
+  }
+  @keyframes mg-pace {
+    0%, 100% { background-position: 0 0; }
+    25% { background-position: calc(-1 * 32 * var(--mg-pix, 2px)) 0; }
+    50% { background-position: calc(-2 * 32 * var(--mg-pix, 2px)) 0; }
+    75% { background-position: calc(-3 * 32 * var(--mg-pix, 2px)) 0; }
+  }
+
+  /* --- ② 活跃卡片:复刻 hover 的小人 + 气泡 + 辉光 ---
+     桌面版小人坐卡片「顶边上方」、气泡在其右侧上方;但活跃卡片就是视口最上面
+     那张,顶边上方的东西会被 .content__scroll 上沿裁掉。所以整组翻到卡片下方:
+     小人在左下、气泡在其右侧,保持原本"小人看着气泡说话"的左右关系。 */
+  .module-card.is-mobile-active { z-index: 5; }
+  .module-card.is-mobile-active::after {
+    opacity: 1;
+    top: calc(100% + 6px);
+    bottom: auto;
+    left: var(--ch-left);
+  }
+  .module-card.is-mobile-active .module-card__glow,
+  .module-card.is-mobile-active .module-card__edge { opacity: 1; }
+  .module-card.is-mobile-active .module-card__desc {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    top: calc(100% + 6px);
+    bottom: auto;
+    left: calc(var(--ch-left) + var(--ch-w) + var(--ch-gap));
+    right: 0;
+    transform-origin: 0 0;
+    /* 左上角收尖,朝向左边的小人 */
+    border-radius: 2px var(--card-radius) var(--card-radius) var(--card-radius);
+  }
+}
+
+/* 减少动态效果:小人保留静态站姿,不播放走路帧 */
+@media (max-width: 560px) and (prefers-reduced-motion: reduce) {
+  .tl-walker,
+  .mg-walker { animation: none; }
+}

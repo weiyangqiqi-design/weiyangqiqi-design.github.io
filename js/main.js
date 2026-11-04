@@ -2092,4 +2092,53 @@
     else if (mq.addListener) mq.addListener(onChange);
   })();
 
+  /* ===== 竖屏(≤560px):滚动时让"视口内最上面的卡片"展示 hover 辅助信息 =====
+     触屏没有 hover,原气泡/小人永远 opacity:0。这里只切一个 class,
+     由 CSS 复刻 hover 效果;桌面(>560px)完全不执行,hover 交互不受影响。 */
+  (function () {
+    var mq = window.matchMedia("(max-width: 560px)");
+    var sc = document.querySelector(".content__scroll");
+    if (!sc) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll(".module-card"));
+    if (!cards.length) return;
+    var current = null, ticking = false;
+
+    function pick() {
+      ticking = false;
+      if (!mq.matches) {
+        if (current) { current.classList.remove("is-mobile-active"); current = null; }
+        return;
+      }
+      var box = sc.getBoundingClientRect();
+      var anchor = box.top + 16;
+      var best = null, bestScore = Infinity;
+      for (var i = 0; i < cards.length; i++) {
+        var r = cards[i].getBoundingClientRect();
+        if (r.height < 10) continue;
+        if (r.bottom <= anchor || r.top >= box.bottom - 24) continue;
+        /* 优先取顶部已越过视口上沿的卡片中最靠上的一张;
+           若都还没到(刚进页面),退而取最靠近上沿的那张 */
+        var score = (r.top >= anchor - 20)
+          ? (r.top - anchor)
+          : 10000 + (anchor - r.top);
+        if (score < bestScore) { bestScore = score; best = cards[i]; }
+      }
+      if (best === current) return;
+      if (current) current.classList.remove("is-mobile-active");
+      current = best;
+      if (current) current.classList.add("is-mobile-active");
+    }
+    function schedule() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(pick);
+    }
+    sc.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    window.addEventListener("load", schedule);
+    if (mq.addEventListener) mq.addEventListener("change", schedule);
+    else if (mq.addListener) mq.addListener(schedule);
+    schedule();
+  })();
+
 })();
